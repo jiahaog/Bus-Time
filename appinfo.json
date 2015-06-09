@@ -1,0 +1,19 @@
+{
+  "uuid": "49d9dcee-a403-489b-8138-e043bffa97ea",
+  "shortName": "Pebble Bus SG",
+  "longName": "Pebble Bus SG",
+  "companyName": "MakeAwesomeHappen",
+  "versionLabel": "1.0",
+  "sdkVersion": "3",
+  "targetPlatforms": ["aplite", "basalt"],
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "KEY_BUS_SERVICE_LIST": 0,
+    "KEY_BUS_SERVICE_DETAILS": 1
+  },
+  "resources": {
+    "media": []
+  }
+}
