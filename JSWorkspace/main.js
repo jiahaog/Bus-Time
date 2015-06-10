@@ -52,41 +52,39 @@ var store = [];
 
 /**
  * Queries the store for a valid record that falls within the threshold and has the same stopId
- * @param {string} stopId
- * @param [serviceNo] if this argument is provided, it will perform another check to see if the service already arrived
+ * @param {number} stopId
+ * @param {number} [serviceNo] if this argument is provided, it will perform another check to see if the service already arrived
  * @returns {*} null if not found
  */
 function getValidRecordFromStore(stopId, serviceNo) {
 
-    // iterate through records
+    // iterate through records from newest to oldest
     for (var i = store.length - 1; i >= 0; i--) {
         var storeRecord = store[i];
 
         var sameStopId = storeRecord[RESPONSE_KEYS.stopId] === stopId.toString();
-
-
         var recordWithinUpdateThreshold = (Date.now() - storeRecord[RESPONSE_KEYS.time]) < REFRESH_THRESHOLD;
         var serviceNeedsRefresh = false;
 
+        // if serviceNo is provided as an argument
         if (serviceNo) {
 
             var services = storeRecord[RESPONSE_KEYS.services];
 
+            // searches through services for the desired service
             for (var j = 0; j < services.length; j++) {
                 var currentServiceRecord = services[j];
 
                 if (currentServiceRecord[RESPONSE_KEYS.serviceNo] === serviceNo.toString()) {
-                    console.log(JSON.stringify(currentServiceRecord));
+
+                    // checks if the time to arrival is still valid
                     var nextBusArrivalTime = currentServiceRecord[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival];
                     serviceNeedsRefresh = getTimeToArrival(nextBusArrivalTime) ===  null;
-
                 }
             }
         }
-        //
-        //console.log('same stop id ' + sameStopId );
-        //console.log('record within update threshold' + recordWithinUpdateThreshold);
-        //console.log('service needs refresh' + serviceNeedsRefresh);
+
+        // break if the same bus stop is found, as the entry will be the newest
         if (sameStopId) {
             break;
         }
@@ -95,15 +93,15 @@ function getValidRecordFromStore(stopId, serviceNo) {
     if (sameStopId && recordWithinUpdateThreshold && !serviceNeedsRefresh) {
         return storeRecord;
     }
-    // clear array if not found
-    // todo make it only clear the expired stopIds
+
+    // todo cleanup expired records
     //store = [];
     return null;
 }
 /**
  * @callback responseCallback
  * @param error SHOULD NOT BE CALLED
- * @param {obj} record object appended with the current time
+ * @param {object} record object appended with the current time
  */
 
 /**
@@ -144,6 +142,13 @@ function getBusTimings(stopId, serviceNo, callback) {
     }
 }
 
+/**
+ * Quick and easy way to deep copy an object
+ *
+ * This should not be used for objects with functions (I think)
+ * @param obj
+ * @returns {*}
+ */
 function cloneObject(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
@@ -159,7 +164,6 @@ function parseForServiceDetails(record, desiredServiceNo) {
     // iterate through and find the correct service
     for (var i = 0; i < services.length; i++) {
         var currentService = services[i];
-        
 
         // convert desiredServiceNo to string, as currentService is a string
         if (currentService[RESPONSE_KEYS.serviceNo] === desiredServiceNo.toString()) {
