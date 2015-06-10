@@ -72,7 +72,7 @@ static void draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_ind
 static void select_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
 
     // push the service details window in
-    char *currentService = s_services_list[s_current_service];
+    char *currentService = s_services_list[cell_index->row];
 
     sendAppMessage(KEY_BUS_SERVICE_DETAILS_START, currentService);
     window_stack_push(s_service_detail_window, true);
