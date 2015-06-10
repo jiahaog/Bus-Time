@@ -35,11 +35,16 @@ const RESPONSE_KEYS = {
     operator: 'Operator',
     nextBus: 'NextBus',
     estimatedArrival: 'EstimatedArrival',
+    subsequentBus: 'SubsequentBus',
     load: 'Load',
     feature: 'Feature',
     inOperation: 'In Operation',
 
     time: 'Time' // added key
+};
+
+const PEBBLE_KEYS = {
+    payload: 'payload'
 };
 
 
@@ -122,9 +127,10 @@ function parseForServiceDetails(record, desiredServiceNo) {
     // iterate through and find the correct service
     for (var i = 0; i < services.length; i++) {
         var currentService = services[i];
+        
 
-        if (currentService[RESPONSE_KEYS.serviceNo] === desiredServiceNo) {
-
+        // convert desiredServiceNo to string, as currentService is a string
+        if (currentService[RESPONSE_KEYS.serviceNo] === desiredServiceNo.toString()) {
             // mutate the arrival timing to time from now
             var nextBus = currentService[RESPONSE_KEYS.nextBus];
             nextBus[RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(nextBus[RESPONSE_KEYS.estimatedArrival]);
@@ -132,11 +138,10 @@ function parseForServiceDetails(record, desiredServiceNo) {
             var subsequentBus = currentService[RESPONSE_KEYS.subsequentBus];
             subsequentBus[RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(subsequentBus[RESPONSE_KEYS.estimatedArrival]);
 
-            const serviceObject = {
-                serviceNo: currentService[RESPONSE_KEYS.serviceNo],
-                nextBus: nextBus,
-                subsequentBus: subsequentBus
-            };
+            const serviceObject = {};
+            serviceObject[RESPONSE_KEYS.serviceNo] = currentService[RESPONSE_KEYS.serviceNo];
+            serviceObject[RESPONSE_KEYS.nextBus] = nextBus;
+            serviceObject[RESPONSE_KEYS.subsequentBus] = subsequentBus;
 
             return serviceObject;
         }
@@ -185,9 +190,7 @@ function getTimeToArrival(arrivalString) {
     const utcNow = Date.now();
     //const utcNow = 1433859075852;
 
-    // find difference and convert milliseconds to minutes
-    const differenceMs = (utcArrival - utcNow);
-
+    const differenceMs = utcArrival - utcNow;
 
     const min = Math.floor(differenceMs/1000/60);
 
@@ -197,7 +200,6 @@ function getTimeToArrival(arrivalString) {
     //return min + ':' + sec;
     return min + 'm ' + sec + 's';
 }
-
 
 
 var busTimings = {
@@ -232,12 +234,10 @@ var busTimings = {
             } else {
 
                 const serviceDetails = parseForServiceDetails(record, service);
-
                 const messageString = 'Bus ' + serviceDetails[RESPONSE_KEYS.serviceNo] + ': ' + serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival] + ' ' +  serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.load];
 
-                const dictionaryMessage = {
-                    KEY_BUS_SERVICE_DETAILS: messageString
-                };
+                var dictionaryMessage = {};
+                dictionaryMessage[APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_VALUE] = messageString;
 
                 pebbleHelpers.sendMessage(dictionaryMessage, function (error) {
                     if (error) {
@@ -255,7 +255,23 @@ pebbleHelpers.addEventListener.onReady(function (event) {
     busTimings.sendServicesList(83139);
 });
 
+function processReceivedMessage(event) {
+
+    const payload = event[PEBBLE_KEYS.payload];
+    for (var key in payload) {
+        if (payload.hasOwnProperty(key)) {
+            var value = payload[key];
+
+            if (key === APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
+                console.log('Received request for service: ' + value);
+                busTimings.sendServiceDetails(83139, value);
+            }
+        }
+    }
+}
 pebbleHelpers.addEventListener.onAppMessage(function (event) {
-    busTimings.sendServicesList(83139);
+    
+    processReceivedMessage(event);
+
 });
 //

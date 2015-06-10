@@ -40,6 +40,20 @@ static int numberOfServices() {
     return counter;
 }
 
+// helper method to parse string into an int and send it as an appmessage
+static void sendAppMessage(int key, char *message) {
+    // Begin dictionary
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+
+    // Add a key-value pair
+    // parse the message to a int at the same time
+    dict_write_uint8(iter, key, atoi(message));
+
+    // Send the message!
+    app_message_outbox_send();
+}
+
 // s_services_menu_window callbacks
 
 static uint16_t get_num_rows(struct MenuLayer* menu_layer, uint16_t section_index, void *callback_context) {
@@ -59,6 +73,8 @@ static void select_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, vo
 
     // push the service details window in
     char *currentService = s_services_list[s_current_service];
+
+    sendAppMessage(KEY_BUS_SERVICE_DETAILS_START, currentService);
     window_stack_push(s_service_detail_window, true);
 }
 
@@ -86,6 +102,10 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
             case KEY_BUS_SERVICE_LIST_END:
                 menu_layer_reload_data(s_services_menu_layer);
                 break;
+
+            case KEY_BUS_SERVICE_DETAILS_VALUE:
+                text_layer_set_text(s_service_detail_text_layer, t->value->cstring);
+                break;
             default:
                 APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
                 break;
@@ -93,11 +113,9 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
         t = dict_read_next(iterator);
     }
-
     // this concatenates strings
     // snprintf(verse_layer_buffer, sizeof(verse_layer_buffer), "%s", verse_content_buffer, verse_reference_buffer);
     // text_layer_set_text(text_layer, bus_message_buffer);
-
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -146,7 +164,7 @@ static void window_load_service_details(Window *window) {
         text_layer_set_background_color(s_service_detail_text_layer, GColorMayGreen);
     #endif
 
-    text_layer_set_text(s_service_detail_text_layer, "This is TextLayer");
+    text_layer_set_text(s_service_detail_text_layer, "Loading...");
     layer_add_child(window_layer, text_layer_get_layer(s_service_detail_text_layer));
 }
 
