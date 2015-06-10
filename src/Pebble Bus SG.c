@@ -11,19 +11,19 @@ enum {
 
 static char s_services_list[20][12];
 
+static Window *s_services_menu_window;
+static Window *s_service_detail_window;
 
-static Window *s_main_window;
 static MenuLayer *s_services_menu_layer;
-static int s_current_service;
+static TextLayer *s_service_detail_text_layer;
 
-static int s_service_list_message_counter = 0;
+static int s_current_service; 
+static int s_service_list_message_counter = 0; // for use with app message as a counter
 
+// service list store
 
 static void setUpServicesList() {
     strcpy(s_services_list[0], "Loading...");
-    // strcpy(s_services_list[1], "888");
-    // strcpy(s_services_list[2], "777");
-    // strcpy(s_services_list[2], "666");
 }
 
 static int numberOfServices() {
@@ -40,38 +40,7 @@ static int numberOfServices() {
     return counter;
 }
 
-static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-    // text_layer_set_text(text_layer, "Select");
-}
-
-static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-    s_current_service--;
-    if (s_current_service < 0) {
-        s_current_service = numberOfServices() - 1;
-    }
-
-    MenuIndex idx = menu_layer_get_selected_index(s_services_menu_layer);
-    idx.row = s_current_service;
-    menu_layer_set_selected_index(s_services_menu_layer, idx, MenuRowAlignCenter, true);
-}
-
-static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-    s_current_service++;
-
-    if (s_current_service >= numberOfServices()) {
-        s_current_service = 0;
-    }
-
-    MenuIndex idx = menu_layer_get_selected_index(s_services_menu_layer);
-    idx.row = s_current_service;
-    menu_layer_set_selected_index(s_services_menu_layer, idx, MenuRowAlignCenter, true);
-}
-
-static void click_config_provider(void *context) {
-    window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
-    window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
-    window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
-}
+// s_services_menu_window callbacks
 
 static uint16_t get_num_rows(struct MenuLayer* menu_layer, uint16_t section_index, void *callback_context) {
     return numberOfServices();
@@ -89,12 +58,11 @@ static void draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_ind
 static void select_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
 
     // push the service details window in
-
+    char *currentService = s_services_list[s_current_service];
+    window_stack_push(s_service_detail_window, true);
 }
 
-
-
-// AppMessage api
+// AppMessage 
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Message received!");
@@ -144,7 +112,9 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
     APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
 
-static void window_load(Window *window) {
+// window load
+
+static void window_load_services_menu(Window *window) {
     Layer *window_layer = window_get_root_layer(window);
     s_services_menu_layer = menu_layer_create(layer_get_bounds(window_layer));
 
@@ -154,28 +124,53 @@ static void window_load(Window *window) {
         .select_click = select_click
     });
 
-    // menu_layer_set_click_config_onto_window(s_services_menu_layer, window);
-
-    window_set_click_config_provider(window, (ClickConfigProvider) click_config_provider);
+    menu_layer_set_click_config_onto_window(s_services_menu_layer, window);
 
     layer_add_child(window_layer, menu_layer_get_layer(s_services_menu_layer));
 }
 
-static void window_unload(Window *window) {
+static void window_unload_services_menu(Window *window) {
     menu_layer_destroy(s_services_menu_layer);
 }
+
+static void window_load_service_details(Window *window) {
+    Layer *window_layer = window_get_root_layer(window);
+
+
+    GRect bounds = layer_get_bounds(window_layer);
+
+    // Create and Add to layer hierarchy:
+    s_service_detail_text_layer = text_layer_create(bounds);
+
+    #ifdef PBL_COLOR
+        text_layer_set_background_color(s_service_detail_text_layer, GColorMayGreen);
+    #endif
+
+    text_layer_set_text(s_service_detail_text_layer, "This is TextLayer");
+    layer_add_child(window_layer, text_layer_get_layer(s_service_detail_text_layer));
+}
+
+static void window_unload_service_details(Window *window) {
+    text_layer_destroy(s_service_detail_text_layer);
+}
+
+// init and deinit
 
 static void init(void) {
     setUpServicesList();
 
-    s_main_window = window_create();
-    window_set_click_config_provider(s_main_window, click_config_provider);
-    window_set_window_handlers(s_main_window, (WindowHandlers) {
-        .load = window_load,
-        .unload = window_unload,
+    s_services_menu_window = window_create();
+    window_set_window_handlers(s_services_menu_window, (WindowHandlers) {
+        .load = window_load_services_menu,
+        .unload = window_unload_services_menu,
     });
-    const bool animated = true;
-    window_stack_push(s_main_window, animated);
+    
+
+    s_service_detail_window = window_create();
+    window_set_window_handlers(s_service_detail_window, (WindowHandlers) {
+        .load = window_load_service_details,
+        .unload = window_unload_service_details
+    });
 
     // AppMessage
     app_message_register_inbox_received(inbox_received_callback);
@@ -184,18 +179,18 @@ static void init(void) {
     app_message_register_outbox_sent(outbox_sent_callback);
     app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 
-
-
+    window_stack_push(s_services_menu_window, true);
 }
 
 static void deinit(void) {
-    window_destroy(s_main_window);
+    window_destroy(s_services_menu_window);
+    window_destroy(s_service_detail_window);
 }
 
 int main(void) {
     init();
 
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Done initializing, pushed window: %p", s_main_window);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Done initializing, pushed window: %p", s_services_menu_window);
 
     app_event_loop();
     deinit();
