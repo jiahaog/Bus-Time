@@ -9,7 +9,7 @@ enum {
     KEY_BUS_SERVICE_DETAILS_END = 5,
 };
 
-static char s_services_list[20][6];
+static char s_services_list[20][12];
 
 
 static Window *s_main_window;
@@ -20,7 +20,7 @@ static int s_service_list_message_counter = 0;
 
 
 static void setUpServicesList() {
-    // strcpy(s_services_list[0], "999");
+    strcpy(s_services_list[0], "Loading...");
     // strcpy(s_services_list[1], "888");
     // strcpy(s_services_list[2], "777");
     // strcpy(s_services_list[2], "666");
