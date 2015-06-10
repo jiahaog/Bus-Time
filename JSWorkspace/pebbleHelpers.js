@@ -39,6 +39,7 @@ function appendParamsToUrl(url, params) {
  * @param {sendMessageCallback} callback
  */
 function sendMessage(dictionaryMessage, callback) {
+    //console.log('Sending message to pebble: ' + JSON.stringify(dictionaryMessage));
     Pebble.sendAppMessage(dictionaryMessage, function () {
         callback(undefined);
     }, function (error) {
@@ -61,7 +62,7 @@ function sendMessage(dictionaryMessage, callback) {
  * @param messages
  */
 function sendMessageStream(startKey, valueKey, endKey, messages) {
-    console.log('Sending messages stream');
+    //console.log('Sending messages stream');
     const ARBITRARY_MESSAGE = 'm';
 
     // sets up
@@ -106,7 +107,7 @@ function sendMessageStream(startKey, valueKey, endKey, messages) {
             });
 
         } else {
-            console.log('Message stream sent to Pebble successfully!');
+            //console.log('Message stream sent to Pebble successfully!');
         }
     })();
 }

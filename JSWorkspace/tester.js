@@ -1,3 +1,3 @@
-var a = 2;
+var a = null || 2;
 
-console.log(a.toString());
+console.log(a);

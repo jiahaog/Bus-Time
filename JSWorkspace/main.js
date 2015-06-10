@@ -52,44 +52,52 @@ var store = [];
 
 /**
  * Queries the store for a valid record that falls within the threshold and has the same stopId
- * @param stopId
+ * @param {string} stopId
  * @param [serviceNo] if this argument is provided, it will perform another check to see if the service already arrived
  * @returns {*} null if not found
  */
 function getValidRecordFromStore(stopId, serviceNo) {
-    for (var i = 0; i < store.length; i++) {
+
+    // iterate through records
+    for (var i = store.length - 1; i >= 0; i--) {
         var storeRecord = store[i];
 
-        var recordWithinUpdateThreshold = (Date.now() - storeRecord[RESPONSE_KEYS.time]) > REFRESH_THRESHOLD;
+        var sameStopId = storeRecord[RESPONSE_KEYS.stopId] === stopId.toString();
 
-        var sameStopId = storeRecord[RESPONSE_KEYS.stopId] === stopId;
 
+        var recordWithinUpdateThreshold = (Date.now() - storeRecord[RESPONSE_KEYS.time]) < REFRESH_THRESHOLD;
         var serviceNeedsRefresh = false;
 
-        if (sameStopId && serviceNo) {
+        if (serviceNo) {
 
             var services = storeRecord[RESPONSE_KEYS.services];
 
             for (var j = 0; j < services.length; j++) {
                 var currentServiceRecord = services[j];
 
-                var nextBusArrivalTime = currentServiceRecord[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival];
+                if (currentServiceRecord[RESPONSE_KEYS.serviceNo] === serviceNo.toString()) {
+                    console.log(JSON.stringify(currentServiceRecord));
+                    var nextBusArrivalTime = currentServiceRecord[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival];
+                    serviceNeedsRefresh = getTimeToArrival(nextBusArrivalTime) ===  null;
 
-                serviceNeedsRefresh = getTimeToArrival(nextBusArrivalTime) ===  null;
-
+                }
             }
-
         }
-
-        if (sameStopId && recordWithinUpdateThreshold && !serviceNeedsRefresh) {
-            return storeRecord;
+        //
+        //console.log('same stop id ' + sameStopId );
+        //console.log('record within update threshold' + recordWithinUpdateThreshold);
+        //console.log('service needs refresh' + serviceNeedsRefresh);
+        if (sameStopId) {
+            break;
         }
     }
 
+    if (sameStopId && recordWithinUpdateThreshold && !serviceNeedsRefresh) {
+        return storeRecord;
+    }
     // clear array if not found
     // todo make it only clear the expired stopIds
-    store = [];
-
+    //store = [];
     return null;
 }
 /**
@@ -114,7 +122,7 @@ function getBusTimings(stopId, serviceNo, callback) {
         callback(undefined, record);
 
     } else {
-
+        console.log('Cached record not valid, making query...');
         // make a query
 
         const params = {
@@ -122,7 +130,7 @@ function getBusTimings(stopId, serviceNo, callback) {
         };
 
         pebbleHelpers.xhrRequest(API_URL, 'GET', REQUEST_HEADERS, params, function(responseText) {
-            console.log('StopId ' + stopId + ' request completed');
+            //console.log('StopId ' + stopId + ' request completed');
 
             record = JSON.parse(responseText);
             // add the time of the query in
@@ -134,6 +142,10 @@ function getBusTimings(stopId, serviceNo, callback) {
             callback(undefined, record);
         });
     }
+}
+
+function cloneObject(obj) {
+    return JSON.parse(JSON.stringify(obj));
 }
 
 /**
@@ -151,12 +163,14 @@ function parseForServiceDetails(record, desiredServiceNo) {
 
         // convert desiredServiceNo to string, as currentService is a string
         if (currentService[RESPONSE_KEYS.serviceNo] === desiredServiceNo.toString()) {
-            // mutate the arrival timing to time from now
-            var nextBus = currentService[RESPONSE_KEYS.nextBus];
-            nextBus[RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(nextBus[RESPONSE_KEYS.estimatedArrival]);
 
-            var subsequentBus = currentService[RESPONSE_KEYS.subsequentBus];
-            subsequentBus[RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(subsequentBus[RESPONSE_KEYS.estimatedArrival]);
+            // copies the next buses
+            var nextBus = cloneObject(currentService[RESPONSE_KEYS.nextBus]);
+            var subsequentBus = cloneObject(currentService[RESPONSE_KEYS.subsequentBus]);
+
+            // short circuit evaluation in case the tta is negative
+            nextBus[RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(nextBus[RESPONSE_KEYS.estimatedArrival]) || 'arriving';
+            subsequentBus[RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(subsequentBus[RESPONSE_KEYS.estimatedArrival]) || 'arriving';
 
             const serviceObject = {};
             serviceObject[RESPONSE_KEYS.serviceNo] = currentService[RESPONSE_KEYS.serviceNo];
@@ -197,10 +211,19 @@ function parseForServicesList(record) {
  *
  * Assumes mobile device time is set to the Singapore Standard Time
  *
+ * This function is used in two situations:
+ *  to check if the record is valid,
+ *  and to format a string to be sent to the watch
+ *
+ *  Therefore, it is possible for the time to be negative and the result to be null, in the second case where the records are not updated
+ *  on the server side
+ *
+ *
  * @param arrivalString utc date string
  * @returns {string} e.g. '1m 20s', null if negative
  */
 function getTimeToArrival(arrivalString) {
+    console.log('ARrivalstring: ' + arrivalString);
     if (arrivalString === 'null') {
         console.log('Unable to get parse arrival time');
         return arrivalString;
@@ -267,7 +290,7 @@ var busTimings = {
                     if (error) {
                         console.log('Error sending message!' + error);
                     } else {
-                        console.log('Message sent!');
+                        // callback
                     }
                 });
             }
@@ -276,7 +299,7 @@ var busTimings = {
 };
 
 pebbleHelpers.addEventListener.onReady(function (event) {
-    busTimings.sendServicesList(83139);
+    busTimings.sendServicesList(96041);
 });
 
 function processReceivedMessage(event) {
@@ -284,11 +307,11 @@ function processReceivedMessage(event) {
     const payload = event[PEBBLE_KEYS.payload];
     for (var key in payload) {
         if (payload.hasOwnProperty(key)) {
+            // value is an int
             var value = payload[key];
-
             if (key === APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
                 console.log('Received request for service: ' + value);
-                busTimings.sendServiceDetails(83139, value);
+                busTimings.sendServiceDetails(96041, value);
             }
         }
     }
