@@ -219,17 +219,8 @@ var busTimings = {
                 console.log(error);
             } else {
 
-                //const serviceListString = parseForServicesList(record).toString();
-
-                //const dictionaryMessage = {
-                //    KEY_BUS_SERVICE_LIST: serviceListString
-                //};
-                //
-                //pebbleHelpers.pebbleSendMessage(dictionaryMessage);
-                //
-
                 const serviceList = parseForServicesList(record);
-                pebbleHelpers.pebbleSendMessageSequentially(
+                pebbleHelpers.sendMessageStream(
                     APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START,
                     APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_VALUE,
                     APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_END,
@@ -257,7 +248,13 @@ var busTimings = {
                     KEY_BUS_SERVICE_DETAILS: messageString
                 };
 
-                pebbleHelpers.pebbleSendMessage(dictionaryMessage);
+                pebbleHelpers.sendMessage(dictionaryMessage, function (error) {
+                    if (error) {
+                        console.log('Error sending message!' + error);
+                    } else {
+                        console.log('Message sent!');
+                    }
+                });
             }
         })
     }
@@ -295,75 +292,94 @@ function appendParamsToUrl(url, params) {
     return result;
 }
 
-function pebbleSendMessage(dictionaryMessage) {
-    console.log('Sending message...');
-    Pebble.sendAppMessage(dictionaryMessage, function (error) {
-        console.log('Message sent to Pebble successfully!');
+/**
+ * @typedef {Object} appMessage
+ * @property {string} key
+ * @property {string} message
+ */
+
+/**
+ * @callback sendMessageCallback
+ * @param error
+ */
+
+/**
+ * Sends a message to the client
+ * @param {appMessage} dictionaryMessage
+ * @param {sendMessageCallback} callback
+ */
+function sendMessage(dictionaryMessage, callback) {
+    Pebble.sendAppMessage(dictionaryMessage, function () {
+        callback(undefined);
     }, function (error) {
-        console.log('Error sending message to Pebble!');
-        console.log(error);
+        callback(error);
     })
+
+
 }
 
-function pebbleSendMessageSequentially(startKey, valueKey, endKey, messages) {
-    console.log('Sending messages sequentially');
+/**
+ * Helper method to send a list of messages over sequentially
+ *
+ * Messages will start with the startKey provided of an arbitrary value,
+ * followed by the messages in the array keyed to the valueKey, and
+ * a last arbitrary message keyed to the endKey.
+ *
+ * @param startKey
+ * @param valueKey
+ * @param endKey
+ * @param messages
+ */
+function sendMessageStream(startKey, valueKey, endKey, messages) {
+    console.log('Sending messages stream');
+    const ARBITRARY_MESSAGE = 'm';
 
-    const MESSAGE_TOKEN = 'm';
+    // sets up
+    const startMessage = {};
+    startMessage[startKey] = ARBITRARY_MESSAGE;
 
-    var firstMessageSent = false;
-    var lastMessageSent = false;
+    const endMessage = {};
+    endMessage[endKey] = ARBITRARY_MESSAGE;
+
+    // push start message
+    var messagesToSend = [startMessage];
 
 
-    (function sendMessage() {
-        //todo refactor this nonsence into a single array of key value objects
-        var dictionaryMessage = {};
-        var keyToSend;
-        var messageToSend;
+    // pushes messages
+    for (var i = 0; i < messages.length; i++) {
 
-        // first message
-        if (!firstMessageSent) {
-            keyToSend = startKey;
-            messageToSend = MESSAGE_TOKEN;
-            firstMessageSent = true;
-        } else {
+        var currentMessage = messages[i];
+        var currentMessageObj = {};
+        currentMessageObj[valueKey] = currentMessage.toString();
+        messagesToSend.push(currentMessageObj);
 
-            keyToSend = valueKey;
-            messageToSend = messages.shift();
+    }
 
-            // checks if any more messages are still pending
-            if (!messageToSend) {
+    // push end message
+    messagesToSend.push(endMessage);
 
-                // if no more messages pending and last message still not sent,
-                // we make messageToSend a valid message
-                if (!lastMessageSent) {
-                    keyToSend = endKey;
-                    messageToSend = MESSAGE_TOKEN;
-                    lastMessageSent = true;
-                }
-            }
+    /**
+     * Recursively sends the message sequentially
+     */
+    (function sendMessageRecursively() {
 
-        }
+        var messageToSend = messagesToSend.shift();
 
-        // if there are messages pending, send it
         if (messageToSend) {
-            dictionaryMessage[keyToSend] = messageToSend.toString();
 
-            Pebble.sendAppMessage(dictionaryMessage, function (error) {
-                sendMessage();
-            }, function (error) {
-                console.log('Error sending messages to Pebble!');
-                console.log(error);
-            })
+            sendMessage(messageToSend, function (error) {
+                if (error) {
+                    console.log('Error sending messages to pebble!');
+                    console.log(error);
+                } else {
+                    sendMessageRecursively();
+                }
+            });
+
         } else {
-            console.log('All messages sent to Pebble successfully!');
+            console.log('Message stream sent to Pebble successfully!');
         }
-
-
-
     })();
-
-
-
 }
 
 
@@ -418,8 +434,8 @@ var addEventListener = {
 
 module.exports = {
     xhrRequest: xhrRequest,
-    pebbleSendMessage: pebbleSendMessage,
-    pebbleSendMessageSequentially: pebbleSendMessageSequentially,
+    sendMessage: sendMessage,
+    sendMessageStream: sendMessageStream,
     addEventListener: addEventListener
 };
 

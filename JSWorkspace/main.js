@@ -210,17 +210,8 @@ var busTimings = {
                 console.log(error);
             } else {
 
-                //const serviceListString = parseForServicesList(record).toString();
-
-                //const dictionaryMessage = {
-                //    KEY_BUS_SERVICE_LIST: serviceListString
-                //};
-                //
-                //pebbleHelpers.pebbleSendMessage(dictionaryMessage);
-                //
-
                 const serviceList = parseForServicesList(record);
-                pebbleHelpers.pebbleSendMessageSequentially(
+                pebbleHelpers.sendMessageStream(
                     APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START,
                     APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_VALUE,
                     APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_END,
@@ -248,7 +239,13 @@ var busTimings = {
                     KEY_BUS_SERVICE_DETAILS: messageString
                 };
 
-                pebbleHelpers.pebbleSendMessage(dictionaryMessage);
+                pebbleHelpers.sendMessage(dictionaryMessage, function (error) {
+                    if (error) {
+                        console.log('Error sending message!' + error);
+                    } else {
+                        console.log('Message sent!');
+                    }
+                });
             }
         })
     }
