@@ -62,16 +62,35 @@ var store = [];
 /**
  * Queries the store for a valid record that falls within the threshold and has the same stopId
  * @param stopId
+ * @param [serviceNo] if this argument is provided, it will perform another check to see if the service already arrived
  * @returns {*} null if not found
  */
-function getValidRecordFromStore(stopId) {
+function getValidRecordFromStore(stopId, serviceNo) {
     for (var i = 0; i < store.length; i++) {
         var storeRecord = store[i];
 
-        var recordInLastMinute = (Date.now() - storeRecord[RESPONSE_KEYS.time]) > REFRESH_THRESHOLD;
+        var recordWithinUpdateThreshold = (Date.now() - storeRecord[RESPONSE_KEYS.time]) > REFRESH_THRESHOLD;
+
         var sameStopId = storeRecord[RESPONSE_KEYS.stopId] === stopId;
 
-        if (sameStopId && recordInLastMinute) {
+        var serviceNeedsRefresh = false;
+
+        if (sameStopId && serviceNo) {
+
+            var services = storeRecord[RESPONSE_KEYS.services];
+
+            for (var j = 0; j < services.length; j++) {
+                var currentServiceRecord = services[j];
+
+                var nextBusArrivalTime = currentServiceRecord[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival];
+
+                serviceNeedsRefresh = getTimeToArrival(nextBusArrivalTime) ===  null;
+
+            }
+
+        }
+
+        if (sameStopId && recordWithinUpdateThreshold && !serviceNeedsRefresh) {
             return storeRecord;
         }
     }
@@ -91,11 +110,12 @@ function getValidRecordFromStore(stopId) {
 /**
  * Checks the cache for a record, and if not found makes a request to get the record
  * @param stopId
+ * @param [serviceNo]
  * @param {responseCallback} callback
  */
-function getBusTimings(stopId, callback) {
+function getBusTimings(stopId, serviceNo, callback) {
 
-    var record = getValidRecordFromStore(stopId);
+    var record = getValidRecordFromStore(stopId, serviceNo);
 
     if (record) {
         // if a valid record is found,
@@ -187,7 +207,7 @@ function parseForServicesList(record) {
  * Assumes mobile device time is set to the Singapore Standard Time
  *
  * @param arrivalString utc date string
- * @returns {string} e.g. '1m 20s'
+ * @returns {string} e.g. '1m 20s', null if negative
  */
 function getTimeToArrival(arrivalString) {
     if (arrivalString === 'null') {
@@ -206,6 +226,10 @@ function getTimeToArrival(arrivalString) {
     // todo round down seconds to nearest minute
     const sec = Math.floor((differenceMs/1000) % 60);
 
+    if ((min < 0) || (sec < 0)) {
+        return null;
+    }
+
     //return min + ':' + sec;
     return min + 'm ' + sec + 's';
 }
@@ -215,7 +239,7 @@ var busTimings = {
 
     // gets a list of services at the bus stop
     sendServicesList: function (stopId) {
-        getBusTimings(stopId, function (error, record) {
+        getBusTimings(stopId, undefined, function (error, record) {
             if (error) {
                 console.log('Error getting bus timings');
                 console.log(error);
@@ -235,14 +259,14 @@ var busTimings = {
     },
 
     // gets the details for the service
-    sendServiceDetails: function (stopId, service) {
-        getBusTimings(stopId, function(error, record) {
+    sendServiceDetails: function (stopId, serviceNo) {
+        getBusTimings(stopId, serviceNo, function(error, record) {
             if (error) {
                 console.log('Error getting bus timings');
                 console.log(error);
             } else {
 
-                const serviceDetails = parseForServiceDetails(record, service);
+                const serviceDetails = parseForServiceDetails(record, serviceNo);
                 const messageString = 'Bus ' + serviceDetails[RESPONSE_KEYS.serviceNo] + ': ' + serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival] + ' ' +  serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.load];
 
                 var dictionaryMessage = {};
