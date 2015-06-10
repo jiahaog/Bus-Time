@@ -31,12 +31,11 @@ static int numberOfServices() {
     int counter = 0;
     for (int index = 0; index < arraySize; index++) {
         char *currentElement = s_services_list[index];
-        // APP_LOG(APP_LOG_LEVEL_DEBUG, "Service: |%s|", currentElement);
-        if (strlen(currentElement) > 1) {
+        // APP_LOG(APP_LOG_LEVEL_DEBUG, "Service: |%s|, len: %i", currentElement, (int)strlen(currentElement));
+        if ((int)strlen(currentElement) > 0) {
             counter++;
         }
     }
-
     return counter;
 }
 
@@ -81,7 +80,6 @@ static void select_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, vo
 // AppMessage 
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Message received!");
 
     // read first item    
     Tuple *t = dict_read_first(iterator);
@@ -94,10 +92,9 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
             case KEY_BUS_SERVICE_LIST_VALUE:
                 // assigns the string to the buffer
                 snprintf(s_services_list[s_service_list_message_counter], sizeof(s_services_list[s_service_list_message_counter]), "%s", t->value->cstring);
+
+                // APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Service list: %s", s_services_list[s_service_list_message_counter]);
                 s_service_list_message_counter++;
-
-
-                APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Service list: %s", s_services_list[s_service_list_message_counter]);
                 break;
             case KEY_BUS_SERVICE_LIST_END:
                 menu_layer_reload_data(s_services_menu_layer);
