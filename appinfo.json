@@ -10,8 +10,12 @@
     "watchface": false
   },
   "appKeys": {
-    "KEY_BUS_SERVICE_LIST": 0,
-    "KEY_BUS_SERVICE_DETAILS": 1
+    "KEY_BUS_SERVICE_LIST_START": 0,
+    "KEY_BUS_SERVICE_LIST_VALUE": 1,
+    "KEY_BUS_SERVICE_LIST_END": 2,
+    "KEY_BUS_SERVICE_DETAILS_START": 3,
+    "KEY_BUS_SERVICE_DETAILS_VALUE": 4,
+    "KEY_BUS_SERVICE_DETAILS_END": 5
   },
   "resources": {
     "media": []

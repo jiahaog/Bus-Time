@@ -11,8 +11,20 @@ const REQUEST_HEADERS = {
     accept: 'application/json'
 };
 
+
 const TEST_RESPONSE = '{"odata.metadata":"http://datamall2.mytransport.sg/ltaodataservice/$metadata#BusArrival/@Element","BusStopID":"83139","Services":[{"ServiceNo":"15","Status":"In Operation","Operator":"SBST","NextBus":{"EstimatedArrival":"2015-06-09T14:25:49+00:00","Load":"Standing Available","Feature":"WAB"},"SubsequentBus":{"EstimatedArrival":"2015-06-09T13:56:32+00:00","Load":"Seats Available","Feature":"WAB"}},{"ServiceNo":"155","Status":"In Operation","Operator":"SBST","NextBus":{"EstimatedArrival":"2015-06-09T13:47:03+00:00","Load":"Seats Available","Feature":"WAB"},"SubsequentBus":{"EstimatedArrival":"2015-06-09T14:01:57+00:00","Load":"Seats Available","Feature":"WAB"}}]}';
 const REFRESH_THRESHOLD = 60*60*1000; // in ms (temporarily set to 60 mins)
+
+const APP_MESSAGE_KEYS = {
+
+    KEY_BUS_SERVICE_LIST_START: 'KEY_BUS_SERVICE_LIST_START',
+    KEY_BUS_SERVICE_LIST_VALUE: 'KEY_BUS_SERVICE_LIST_VALUE',
+    KEY_BUS_SERVICE_LIST_END: 'KEY_BUS_SERVICE_LIST_END',
+
+    KEY_BUS_SERVICE_DETAILS_START: 'KEY_BUS_SERVICE_DETAILS_START',
+    KEY_BUS_SERVICE_DETAILS_VALUE: 'KEY_BUS_SERVICE_DETAILS_VALUE',
+    KEY_BUS_SERVICE_DETAILS_END: 'KEY_BUS_SERVICE_DETAILS_END'
+};
 
 const RESPONSE_KEYS = {
     metadata: 'odata.metadata',
@@ -138,7 +150,6 @@ function parseForServiceDetails(record, desiredServiceNo) {
  * @returns {Array}
  */
 function parseForServicesList(record) {
-    console.log(record[RESPONSE_KEYS.stopId]);
     const services = record[RESPONSE_KEYS.services];
 
     const result = [];
@@ -199,13 +210,23 @@ var busTimings = {
                 console.log(error);
             } else {
 
-                const serviceListString = parseForServicesList(record).toString();
+                //const serviceListString = parseForServicesList(record).toString();
 
-                const dictionaryMessage = {
-                    KEY_BUS_SERVICE_LIST: serviceListString
-                };
+                //const dictionaryMessage = {
+                //    KEY_BUS_SERVICE_LIST: serviceListString
+                //};
+                //
+                //pebbleHelpers.pebbleSendMessage(dictionaryMessage);
+                //
 
-                pebbleHelpers.pebbleSendMessage(dictionaryMessage);
+                const serviceList = parseForServicesList(record);
+                pebbleHelpers.pebbleSendMessageSequentially(
+                    APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START,
+                    APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_VALUE,
+                    APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_END,
+                    serviceList
+                );
+
 
             }
         });
@@ -240,4 +261,4 @@ pebbleHelpers.addEventListener.onReady(function (event) {
 pebbleHelpers.addEventListener.onAppMessage(function (event) {
     busTimings.sendServicesList(83139);
 });
-
+//

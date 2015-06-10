@@ -1,8 +1,12 @@
 #include <pebble.h>
 
 enum {
-    KEY_BUS_SERVICE_LIST = 0,
-    KEY_BUS_SERVICE_DETAILS = 1
+    KEY_BUS_SERVICE_LIST_START = 0,
+    KEY_BUS_SERVICE_LIST_VALUE = 1,
+    KEY_BUS_SERVICE_LIST_END = 2,
+    KEY_BUS_SERVICE_DETAILS_START = 3,
+    KEY_BUS_SERVICE_DETAILS_VALUE = 4,
+    KEY_BUS_SERVICE_DETAILS_END = 5,
 };
 
 static char s_services_list[20][6];
@@ -12,12 +16,14 @@ static Window *s_main_window;
 static MenuLayer *s_services_menu_layer;
 static int s_current_service;
 
+static int s_service_list_message_counter = 0;
+
 
 static void setUpServicesList() {
-    strcpy(s_services_list[0], "15");
-    strcpy(s_services_list[1], "20");
-    strcpy(s_services_list[2], "213");
-    strcpy(s_services_list[2], "240");
+    // strcpy(s_services_list[0], "999");
+    // strcpy(s_services_list[1], "888");
+    // strcpy(s_services_list[2], "777");
+    // strcpy(s_services_list[2], "666");
 }
 
 static int numberOfServices() {
@@ -75,7 +81,7 @@ static uint16_t get_num_rows(struct MenuLayer* menu_layer, uint16_t section_inde
 static void draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
     uint16_t row_index = cell_index->row;
     char* title = s_services_list[row_index];
-    
+
     menu_cell_basic_draw(ctx, cell_layer, title, NULL, NULL);
 }
 
@@ -91,18 +97,26 @@ static void select_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, vo
 // AppMessage api
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
-
-    static char bus_message_buffer[18];
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Message received!");
 
     // read first item    
     Tuple *t = dict_read_first(iterator);
 
     while(t != NULL) {
         switch (t->key) {
-            case KEY_BUS_SERVICE_LIST:
+            case KEY_BUS_SERVICE_LIST_START:
+                s_service_list_message_counter = 0;
+                break;
+            case KEY_BUS_SERVICE_LIST_VALUE:
                 // assigns the string to the buffer
-                snprintf(bus_message_buffer, sizeof(bus_message_buffer), "%s", t->value->cstring);
-                APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Service list: %s", bus_message_buffer);
+                snprintf(s_services_list[s_service_list_message_counter], sizeof(s_services_list[s_service_list_message_counter]), "%s", t->value->cstring);
+                s_service_list_message_counter++;
+
+
+                APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Service list: %s", s_services_list[s_service_list_message_counter]);
+                break;
+            case KEY_BUS_SERVICE_LIST_END:
+                menu_layer_reload_data(s_services_menu_layer);
                 break;
             default:
                 APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);

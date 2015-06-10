@@ -21,12 +21,74 @@ function appendParamsToUrl(url, params) {
 }
 
 function pebbleSendMessage(dictionaryMessage) {
+    console.log('Sending message...');
     Pebble.sendAppMessage(dictionaryMessage, function (error) {
         console.log('Message sent to Pebble successfully!');
     }, function (error) {
         console.log('Error sending message to Pebble!');
         console.log(error);
     })
+}
+
+function pebbleSendMessageSequentially(startKey, valueKey, endKey, messages) {
+    console.log('Sending messages sequentially');
+
+    const MESSAGE_TOKEN = 'm';
+
+    var firstMessageSent = false;
+    var lastMessageSent = false;
+
+
+    (function sendMessage() {
+        //todo refactor this nonsence into a single array of key value objects
+        var dictionaryMessage = {};
+        var keyToSend;
+        var messageToSend;
+
+        // first message
+        if (!firstMessageSent) {
+            keyToSend = startKey;
+            messageToSend = MESSAGE_TOKEN;
+            firstMessageSent = true;
+        } else {
+
+            keyToSend = valueKey;
+            messageToSend = messages.shift();
+
+            // checks if any more messages are still pending
+            if (!messageToSend) {
+
+                // if no more messages pending and last message still not sent,
+                // we make messageToSend a valid message
+                if (!lastMessageSent) {
+                    keyToSend = endKey;
+                    messageToSend = MESSAGE_TOKEN;
+                    lastMessageSent = true;
+                }
+            }
+
+        }
+
+        // if there are messages pending, send it
+        if (messageToSend) {
+            dictionaryMessage[keyToSend] = messageToSend.toString();
+
+            Pebble.sendAppMessage(dictionaryMessage, function (error) {
+                sendMessage();
+            }, function (error) {
+                console.log('Error sending messages to Pebble!');
+                console.log(error);
+            })
+        } else {
+            console.log('All messages sent to Pebble successfully!');
+        }
+
+
+
+    })();
+
+
+
 }
 
 
@@ -82,6 +144,7 @@ var addEventListener = {
 module.exports = {
     xhrRequest: xhrRequest,
     pebbleSendMessage: pebbleSendMessage,
+    pebbleSendMessageSequentially: pebbleSendMessageSequentially,
     addEventListener: addEventListener
 };
 
