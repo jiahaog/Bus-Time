@@ -161,11 +161,23 @@ var addEventListener = {
     }
 };
 
+/**
+ * Quick and easy way to deep copy an object
+ *
+ * This should not be used for objects with functions (I think)
+ * @param obj
+ * @returns {*}
+ */
+function cloneObject(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
 module.exports = {
     xhrRequest: xhrRequest,
     sendMessage: sendMessage,
     sendMessageStream: sendMessageStream,
-    addEventListener: addEventListener
+    addEventListener: addEventListener,
+    cloneObject: cloneObject
 };
 
 if (require.main === module) {

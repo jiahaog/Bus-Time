@@ -169,8 +169,8 @@ function parseForServiceDetails(record, desiredServiceNo) {
         if (currentService[RESPONSE_KEYS.serviceNo] === desiredServiceNo.toString()) {
 
             // copies the next buses
-            var nextBus = cloneObject(currentService[RESPONSE_KEYS.nextBus]);
-            var subsequentBus = cloneObject(currentService[RESPONSE_KEYS.subsequentBus]);
+            var nextBus = pebbleHelpers.cloneObject(currentService[RESPONSE_KEYS.nextBus]);
+            var subsequentBus = pebbleHelpers.cloneObject(currentService[RESPONSE_KEYS.subsequentBus]);
 
             // short circuit evaluation in case the tta is negative
             nextBus[RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(nextBus[RESPONSE_KEYS.estimatedArrival]) || 'arriving';
