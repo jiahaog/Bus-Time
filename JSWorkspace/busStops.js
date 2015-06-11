@@ -11,45 +11,76 @@ DATA_SET_KEYS = {
     data: 'data',
     stopId: 'n',
     location: 'l',
-    description: 'd'
+    description: 'd',
+    road: 'r'
 };
 
 CLOSEST_BUS_STOP_KEYS = {
     description: 'description',
     distance: 'distance',
-    stopId: 'stopId'
+    stopId: 'stopId',
+    road: 'road'
 };
 
+NEARBY_THRESHOLD = 500; // 500m
+
 /**
- * Iterates through the data store and finds the closest bus stop
- * @param {array} location [latitude, longitude]
+ * Iterates through the data store and finds the nearby bus stops that fall within the threshold
+ * @param {Array} currentLocation [latitude, longitude]
+ * @returns {Array} array of bus stops that is ordered from closest (index 0) to furthest (index array.length)
  */
-function getClosest(currentLocation) {
+function getNearbyBusStops(currentLocation) {
 
-
-    var closestDistance = Number.MAX_VALUE;
-    var closestBusStop = null;
-
+    // find nearby bus stops that fall within the nearby threshold
+    var busStopsNearby = [];
     for (var i = 0; i < dataSet.length; i++) {
-
-
         var busStop = dataSet[i];
 
         var busStopLocation = busStop[DATA_SET_KEYS.location];
 
         var distance = distanceFrom(currentLocation, busStopLocation);
-        if (distance < closestDistance) {
-            closestDistance = distance;
-            closestBusStop = busStop
+
+        if (distance < NEARBY_THRESHOLD) {
+            var nearbyBusStop = {};
+            nearbyBusStop[CLOSEST_BUS_STOP_KEYS.description] = busStop[DATA_SET_KEYS.description];
+            nearbyBusStop[CLOSEST_BUS_STOP_KEYS.distance] = distance; // in metres
+            nearbyBusStop[CLOSEST_BUS_STOP_KEYS.stopId] = busStop[DATA_SET_KEYS.stopId];
+            nearbyBusStop[CLOSEST_BUS_STOP_KEYS.road] = busStop[DATA_SET_KEYS.road];
+
+
+            busStopsNearby.push(nearbyBusStop);
         }
     }
 
-    const result = {};
-    result[CLOSEST_BUS_STOP_KEYS.description] = closestBusStop[DATA_SET_KEYS.description];
-    result[CLOSEST_BUS_STOP_KEYS.distance] = closestDistance; // in metres
-    result[CLOSEST_BUS_STOP_KEYS.stopId] = closestBusStop[DATA_SET_KEYS.stopId];
+    busStopsNearby.sort(function (a, b) {
 
-    return result
+        distanceA = a[CLOSEST_BUS_STOP_KEYS.distance];
+        distanceB = b[CLOSEST_BUS_STOP_KEYS.distance];
+        return distanceA - distanceB;
+    });
+
+    return busStopsNearby;
+
+
+    //var closestDistance = Number.MAX_VALUE;
+    //var closestBusStop = null;
+    //
+    //for (var i = 0; i < dataSet.length; i++) {
+    //
+    //
+    //    var busStop = dataSet[i];
+    //
+    //    var busStopLocation = busStop[DATA_SET_KEYS.location];
+    //
+    //    var distance = distanceFrom(currentLocation, busStopLocation);
+    //    if (distance < closestDistance) {
+    //        closestDistance = distance;
+    //        closestBusStop = busStop
+    //    }
+    //}
+    //
+    //
+
 
 }
 
@@ -89,8 +120,11 @@ function testDistance() {
     //var dist = distanceFrom(dataPoint, gmapsPoint);
     //console.log(dist); // 5
 
-    var closest = getClosest(gmapsPoint);
-    console.log(closest[CLOSEST_BUS_STOP_KEYS.description]);
+    var nearby = getNearbyBusStops(gmapsPoint);
+
+    var firstDescription = nearby[0][CLOSEST_BUS_STOP_KEYS.description];
+
+    console.log(firstDescription);
 }
 
 
