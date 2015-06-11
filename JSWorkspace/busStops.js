@@ -21,7 +21,7 @@ CLOSEST_BUS_STOP_KEYS = {
 };
 
 /**
- *
+ * Iterates through the data store and finds the closest bus stop
  * @param {array} location [latitude, longitude]
  */
 function getClosest(currentLocation) {
@@ -46,7 +46,7 @@ function getClosest(currentLocation) {
 
     const result = {};
     result[CLOSEST_BUS_STOP_KEYS.description] = closestBusStop[DATA_SET_KEYS.description];
-    result[CLOSEST_BUS_STOP_KEYS.distance] = closestDistance;
+    result[CLOSEST_BUS_STOP_KEYS.distance] = closestDistance; // in metres
     result[CLOSEST_BUS_STOP_KEYS.stopId] = closestBusStop[DATA_SET_KEYS.stopId];
 
     return result
@@ -75,12 +75,11 @@ function distanceFrom(point1, point2) {
 }
 
 
-
+/**
+ * REMOVE THIS
+ * test function to get the description of the closest bus stop
+ */
 function testDistance() {
-    //dataPoint = [
-    //    1.340369853269315,
-    //    103.96126224408162
-    //];
     // point taken from google places OPP TROPICANA CONDO
     gmapsPoint = [
         1.340414,
