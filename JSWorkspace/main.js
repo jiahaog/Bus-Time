@@ -30,7 +30,10 @@ const APP_MESSAGE_KEYS = {
 
     KEY_BUS_STOP_LIST_START: 'KEY_BUS_STOP_LIST_START',
     KEY_BUS_STOP_LIST_VALUE: 'KEY_BUS_STOP_LIST_VALUE',
-    KEY_BUS_STOP_LIST_END: 'KEY_BUS_STOP_LIST_END'
+    KEY_BUS_STOP_LIST_END: 'KEY_BUS_STOP_LIST_END',
+
+    KEY_CONNECTION_ERROR: 'KEY_CONNECTION_ERROR'
+
 };
 const RESPONSE_KEYS = {
     metadata: 'odata.metadata',
@@ -107,7 +110,7 @@ function getValidRecordFromStore(stopId, serviceNo) {
 }
 /**
  * @callback responseCallback
- * @param error SHOULD NOT BE CALLED
+ * @param error
  * @param {object} record object appended with the current time
  */
 
@@ -134,17 +137,25 @@ function getBusTimings(stopId, serviceNo, callback) {
             BusStopID: stopId
         };
 
-        pebbleHelpers.xhrRequest(API_URL, 'GET', REQUEST_HEADERS, params, function(responseText) {
+        pebbleHelpers.xhrRequest(API_URL, 'GET', REQUEST_HEADERS, params, function(error, responseText) {
             //console.log('StopId ' + stopId + ' request completed');
 
-            record = JSON.parse(responseText);
-            // add the time of the query in
-            record[RESPONSE_KEYS.time] = Date.now();
+            if (error) {
+                console.log('Error making request');
+                handleConnectionError();
 
-            // cache it in the store
-            store.push(record);
+            } else {
 
-            callback(undefined, record);
+                record = JSON.parse(responseText);
+                // add the time of the query in
+                record[RESPONSE_KEYS.time] = Date.now();
+
+                // cache it in the store
+                store.push(record);
+
+                callback(undefined, record);
+            }
+
         });
     }
 }
@@ -258,6 +269,7 @@ function processLocation() {
         } else {
 
             var positionArray = [position.coords.latitude, position.coords.longitude];
+
             var nearbyBusStops = busStops.getNearbyBusStops(positionArray);
 
             // iterates through the nearby bus stops and populates two arrays of descriptions and
@@ -283,6 +295,22 @@ function processLocation() {
             lastBusStopsIDsSent = stopIds;
         }
     })
+}
+
+
+function handleConnectionError() {
+
+    var dictionaryMessage = {};
+    dictionaryMessage[APP_MESSAGE_KEYS.KEY_CONNECTION_ERROR] = 'e';
+
+    pebbleHelpers.sendMessage(dictionaryMessage, function (error) {
+        if (error) {
+            console.log('Error sending connection error message!' + error);
+        } else {
+            // callback
+        }
+    });
+
 }
 
 var busTimings = {
@@ -336,6 +364,7 @@ var busTimings = {
 // when the app is launched get the location and send nearby bus stops to the watch
 pebbleHelpers.addEventListener.onReady(function (event) {
     processLocation();
+    
 });
 
 pebbleHelpers.addEventListener.onAppMessage(function (event) {

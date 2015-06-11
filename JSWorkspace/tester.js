@@ -1,3 +1,3 @@
-var dataSet = require('./dataSet.js');
 
-console.log(dataSet);
+
+var xhr = new XMLHttpRequest();

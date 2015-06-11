@@ -12,6 +12,8 @@ enum {
     KEY_BUS_STOP_LIST_START = 6,
     KEY_BUS_STOP_LIST_VALUE = 7,
     KEY_BUS_STOP_LIST_END = 8,
+
+    KEY_CONNECTION_ERROR = 9
 };
 
 // [size of string][number of elements]
@@ -21,11 +23,13 @@ static char s_bus_stops_list[37][30];
 static Window *s_bus_stops_window;
 static Window *s_services_menu_window;
 static Window *s_service_detail_window;
+static Window *s_error_screen_window;
 
 static MenuLayer *s_services_menu_layer;
 static MenuLayer *s_bus_stops_menu_layer;
 
 static TextLayer *s_service_detail_text_layer;
+static TextLayer *s_error_screen_text_layer;
 
 static int s_bus_stop_list_message_counter = 0;
 static int s_service_list_message_counter = 0; // for use with app message as a counter
@@ -184,6 +188,24 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 text_layer_set_text(s_service_detail_text_layer, t->value->cstring);
                 break;
 
+            case KEY_CONNECTION_ERROR:
+                // #ifdef PBL_COLOR
+                //     if (s_bus_stops_menu_layer) {
+                //         menu_layer_set_normal_colors(s_bus_stops_menu_layer, GColorRed, GColorBlue);
+                //         layer_mark_dirty(window_get_root_layer(s_bus_stops_window));
+                //     }
+
+                //     if (s_services_menu_layer) {
+                //         menu_layer_set_normal_colors(s_services_menu_layer, GColorRed, GColorBlue);
+                //         layer_mark_dirty(window_get_root_layer(s_services_menu_window));
+                //     }
+                // #endif
+
+                window_stack_pop_all(false);
+                window_stack_push(s_error_screen_window, true);
+
+                break;
+
             default:
                 APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
                 break;
@@ -220,7 +242,12 @@ static void window_load_bus_stops_menu(Window *window) {
         .select_click = callback_menu_layer_bus_stops_select_click
     });
 
+    #ifdef PBL_COLOR
+        menu_layer_set_normal_colors(s_bus_stops_menu_layer, GColorYellow, GColorBlue);
+    #endif
+
     menu_layer_set_click_config_onto_window(s_bus_stops_menu_layer, s_bus_stops_window);
+
     layer_add_child(window_layer, menu_layer_get_layer(s_bus_stops_menu_layer));
 }
 
@@ -269,6 +296,25 @@ static void window_unload_service_details(Window *window) {
     text_layer_destroy(s_service_detail_text_layer);
 }
 
+static void window_load_error_screen(Window *window) {
+    Layer *window_layer = window_get_root_layer(window);
+
+
+    GRect bounds = layer_get_bounds(window_layer);
+
+    // Create and Add to layer hierarchy:
+    s_error_screen_text_layer = text_layer_create(bounds);
+
+
+    text_layer_set_font(s_error_screen_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+    text_layer_set_text(s_error_screen_text_layer, "Connection Error");
+    layer_add_child(window_layer, text_layer_get_layer(s_error_screen_text_layer));
+}
+
+static void window_unload_error_screen(Window *window) {
+    text_layer_destroy(s_error_screen_text_layer);
+}
+
 // init and deinit
 
 static void init(void) {
@@ -280,6 +326,8 @@ static void init(void) {
         .unload = window_unload_bus_stops_menu,
     });
     
+    
+
 
     s_services_menu_window = window_create();
     window_set_window_handlers(s_services_menu_window, (WindowHandlers) {
@@ -292,6 +340,12 @@ static void init(void) {
     window_set_window_handlers(s_service_detail_window, (WindowHandlers) {
         .load = window_load_service_details,
         .unload = window_unload_service_details
+    });
+
+    s_error_screen_window = window_create();
+    window_set_window_handlers(s_error_screen_window, (WindowHandlers) {
+        .load = window_load_error_screen,
+        .unload = window_unload_error_screen
     });
 
     // AppMessage

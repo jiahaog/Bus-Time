@@ -2,6 +2,7 @@
  * Created by JiaHao on 9/6/15.
  */
 
+
 /**
  * Appends query paramteres to a url
  *
@@ -112,27 +113,48 @@ function sendMessageStream(startKey, valueKey, endKey, messages) {
     })();
 }
 
-
+/**
+ *
+ * @param url
+ * @param type
+ * @param headers
+ * @param params
+ * @param {sendMessageCallback} callback
+ */
 function xhrRequest(url, type, headers, params, callback) {
     console.log('Making request...');
 
     // todo implement some error catching here
     const urlWithParams = appendParamsToUrl(url, params);
 
-    var xhr = new XMLHttpRequest();
-    xhr.onload = function() {
-        callback(this.responseText);
+    var req = new XMLHttpRequest();
+    req.onerror = function (error) {
+        console.log('XHR ERROR ' + JSON.stringify(error));
+        callback('error', undefined);
     };
-    xhr.open(type, urlWithParams);
+    req.onload = function(e) {
+
+        if (req.readyState == 4 && req.status == 200) {
+            if(req.status == 200) {
+                callback(undefined, req.responseText);
+            } else {
+                callback('error', undefined) ;
+            }
+        } else {
+            callback('error', undefined) ;
+        }
+
+    };
+    req.open(type, urlWithParams);
 
     for (var key in headers) {
 
         if (headers.hasOwnProperty(key)) {
-            xhr.setRequestHeader(key, headers[key]);
+            req.setRequestHeader(key, headers[key]);
         }
     }
 
-    xhr.send();
+    req.send();
 }
 
 /**

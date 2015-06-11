@@ -51,6 +51,7 @@ function getNearbyBusStops(currentLocation) {
         }
     }
 
+    // sorts the nearby bus stops by distance
     busStopsNearby.sort(function (a, b) {
 
         var distanceA = a[CLOSEST_BUS_STOP_KEYS.distance];
@@ -58,7 +59,8 @@ function getNearbyBusStops(currentLocation) {
         return distanceA - distanceB;
     });
 
-    return busStopsNearby.slice(0, MAX_NEARBY); // don't return more than the max nearby bus stops
+    // slice so we don't return more than the max no of  nearby bus stops
+    return busStopsNearby.slice(0, MAX_NEARBY);
 }
 
 /**
@@ -82,7 +84,6 @@ function distanceFrom(point1, point2) {
     return geolib.getDistance(point1LatLong, point2LatLong)
 }
 
-
 /**
  * REMOVE THIS
  * test function to get the description of the closest bus stop
@@ -103,7 +104,6 @@ function testDistance() {
 
     console.log(firstDescription);
 }
-
 
 module.exports = {
     CLOSEST_BUS_STOP_KEYS: CLOSEST_BUS_STOP_KEYS,
@@ -126,6 +126,12 @@ module.exports = {
 
 },{}],3:[function(require,module,exports){
 /**
+ * Dataset generated painfully
+ *
+ * Cannot write to file as there's no way to fs.read on pebble
+ *
+ * See DataDumps/README.md for details
+ *
  * Created by JiaHao on 11/6/15.
  */
 
@@ -138,6 +144,7 @@ module.exports = data["data"];
 /**
 * Created by JiaHao on 8/6/15.
 */
+
 var pebbleHelpers = require('./pebbleHelpers');
 var config = require('./config');
 var busStops = require('./busStops');
@@ -150,10 +157,10 @@ const REQUEST_HEADERS = {
     accept: 'application/json'
 };
 
-
 const TEST_RESPONSE = '{"odata.metadata":"http://datamall2.mytransport.sg/ltaodataservice/$metadata#BusArrival/@Element","BusStopID":"83139","Services":[{"ServiceNo":"15","Status":"In Operation","Operator":"SBST","NextBus":{"EstimatedArrival":"2015-06-09T14:25:49+00:00","Load":"Standing Available","Feature":"WAB"},"SubsequentBus":{"EstimatedArrival":"2015-06-09T13:56:32+00:00","Load":"Seats Available","Feature":"WAB"}},{"ServiceNo":"155","Status":"In Operation","Operator":"SBST","NextBus":{"EstimatedArrival":"2015-06-09T13:47:03+00:00","Load":"Seats Available","Feature":"WAB"},"SubsequentBus":{"EstimatedArrival":"2015-06-09T14:01:57+00:00","Load":"Seats Available","Feature":"WAB"}}]}';
 const REFRESH_THRESHOLD = 60*60*1000; // in ms (temporarily set to 60 mins)
 
+// Keys so we don't make typos
 const APP_MESSAGE_KEYS = {
 
     KEY_BUS_SERVICE_LIST_START: 'KEY_BUS_SERVICE_LIST_START',
@@ -166,9 +173,11 @@ const APP_MESSAGE_KEYS = {
 
     KEY_BUS_STOP_LIST_START: 'KEY_BUS_STOP_LIST_START',
     KEY_BUS_STOP_LIST_VALUE: 'KEY_BUS_STOP_LIST_VALUE',
-    KEY_BUS_STOP_LIST_END: 'KEY_BUS_STOP_LIST_END'
-};
+    KEY_BUS_STOP_LIST_END: 'KEY_BUS_STOP_LIST_END',
 
+    KEY_CONNECTION_ERROR: 'KEY_CONNECTION_ERROR'
+
+};
 const RESPONSE_KEYS = {
     metadata: 'odata.metadata',
     stopId: 'BusStopID',
@@ -185,12 +194,11 @@ const RESPONSE_KEYS = {
 
     time: 'Time' // added key
 };
-
 const PEBBLE_KEYS = {
     payload: 'payload'
 };
 
-
+// todo figure out a way to cache these things to disk
 var store = [];
 var lastBusStopsIDsSent = [];
 var lastStopID;
@@ -245,7 +253,7 @@ function getValidRecordFromStore(stopId, serviceNo) {
 }
 /**
  * @callback responseCallback
- * @param error SHOULD NOT BE CALLED
+ * @param error
  * @param {object} record object appended with the current time
  */
 
@@ -272,17 +280,25 @@ function getBusTimings(stopId, serviceNo, callback) {
             BusStopID: stopId
         };
 
-        pebbleHelpers.xhrRequest(API_URL, 'GET', REQUEST_HEADERS, params, function(responseText) {
+        pebbleHelpers.xhrRequest(API_URL, 'GET', REQUEST_HEADERS, params, function(error, responseText) {
             //console.log('StopId ' + stopId + ' request completed');
 
-            record = JSON.parse(responseText);
-            // add the time of the query in
-            record[RESPONSE_KEYS.time] = Date.now();
+            if (error) {
+                console.log('Error making request');
+                handleConnectionError();
 
-            // cache it in the store
-            store.push(record);
+            } else {
 
-            callback(undefined, record);
+                record = JSON.parse(responseText);
+                // add the time of the query in
+                record[RESPONSE_KEYS.time] = Date.now();
+
+                // cache it in the store
+                store.push(record);
+
+                callback(undefined, record);
+            }
+
         });
     }
 }
@@ -386,8 +402,9 @@ function getTimeToArrival(arrivalString) {
     return min + 'm ' + sec + 's';
 }
 
-
-
+/**
+ * Gets the location of the watch and sends nearby bus stops to the watch
+ */
 function processLocation() {
     pebbleHelpers.getLocation(function (error, position) {
         if (error) {
@@ -395,18 +412,20 @@ function processLocation() {
         } else {
 
             var positionArray = [position.coords.latitude, position.coords.longitude];
+
             var nearbyBusStops = busStops.getNearbyBusStops(positionArray);
 
-
+            // iterates through the nearby bus stops and populates two arrays of descriptions and
+            // stop id
             var descriptions = [];
             var stopIds = [];
             for (var i = 0; i < nearbyBusStops.length; i++) {
                 var busStop = nearbyBusStops[i];
                 descriptions.push(busStop[busStops.CLOSEST_BUS_STOP_KEYS.description]);
                 stopIds.push(busStop[busStops.CLOSEST_BUS_STOP_KEYS.stopId]);
-
             }
 
+            // sends the message to the watch
             pebbleHelpers.sendMessageStream(
                 APP_MESSAGE_KEYS.KEY_BUS_STOP_LIST_START,
                 APP_MESSAGE_KEYS.KEY_BUS_STOP_LIST_VALUE,
@@ -414,25 +433,27 @@ function processLocation() {
                 descriptions
             );
 
+            // save the last stop ids sent to the watch, so that when the user chooses the item on the menu,
+            // the index will be sent back and we can get the corresponding stopId
             lastBusStopsIDsSent = stopIds;
-
-
-            //var closest = nearbyBusStops[0];
-
-            //var closestStopId = closest[busStops.CLOSEST_BUS_STOP_KEYS.stopId];
-            //var closestDescription = closest[busStops.CLOSEST_BUS_STOP_KEYS.description];
-            //
-            //lastStopID = closestStopId;
-            //console.log('Getting data for bus stop: ' + closestStopId + closestDescription);
-            //
-            //
-            //busTimings.sendServicesList(closestStopId);
-            //
-
-
-
         }
     })
+}
+
+
+function handleConnectionError() {
+
+    var dictionaryMessage = {};
+    dictionaryMessage[APP_MESSAGE_KEYS.KEY_CONNECTION_ERROR] = 'e';
+
+    pebbleHelpers.sendMessage(dictionaryMessage, function (error) {
+        if (error) {
+            console.log('Error sending connection error message!' + error);
+        } else {
+            // callback
+        }
+    });
+
 }
 
 var busTimings = {
@@ -483,9 +504,14 @@ var busTimings = {
     }
 };
 
+// when the app is launched get the location and send nearby bus stops to the watch
 pebbleHelpers.addEventListener.onReady(function (event) {
     processLocation();
+    
+});
 
+pebbleHelpers.addEventListener.onAppMessage(function (event) {
+    processReceivedMessage(event);
 });
 
 function processReceivedMessage(event) {
@@ -510,12 +536,6 @@ function processReceivedMessage(event) {
         }
     }
 }
-pebbleHelpers.addEventListener.onAppMessage(function (event) {
-    
-    processReceivedMessage(event);
-
-});
-//
 
 },{"./busStops":1,"./config":2,"./pebbleHelpers":6}],5:[function(require,module,exports){
 /*! geolib 2.0.17 by Manuel Bieh
@@ -1753,6 +1773,7 @@ pebbleHelpers.addEventListener.onAppMessage(function (event) {
  * Created by JiaHao on 9/6/15.
  */
 
+
 /**
  * Appends query paramteres to a url
  *
@@ -1863,27 +1884,48 @@ function sendMessageStream(startKey, valueKey, endKey, messages) {
     })();
 }
 
-
+/**
+ *
+ * @param url
+ * @param type
+ * @param headers
+ * @param params
+ * @param {sendMessageCallback} callback
+ */
 function xhrRequest(url, type, headers, params, callback) {
     console.log('Making request...');
 
     // todo implement some error catching here
     const urlWithParams = appendParamsToUrl(url, params);
 
-    var xhr = new XMLHttpRequest();
-    xhr.onload = function() {
-        callback(this.responseText);
+    var req = new XMLHttpRequest();
+    req.onerror = function (error) {
+        console.log('XHR ERROR ' + JSON.stringify(error));
+        callback('error', undefined);
     };
-    xhr.open(type, urlWithParams);
+    req.onload = function(e) {
+
+        if (req.readyState == 4 && req.status == 200) {
+            if(req.status == 200) {
+                callback(undefined, req.responseText);
+            } else {
+                callback('error', undefined) ;
+            }
+        } else {
+            callback('error', undefined) ;
+        }
+
+    };
+    req.open(type, urlWithParams);
 
     for (var key in headers) {
 
         if (headers.hasOwnProperty(key)) {
-            xhr.setRequestHeader(key, headers[key]);
+            req.setRequestHeader(key, headers[key]);
         }
     }
 
-    xhr.send();
+    req.send();
 }
 
 /**
