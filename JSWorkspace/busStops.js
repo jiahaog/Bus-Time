@@ -21,6 +21,7 @@ CLOSEST_BUS_STOP_KEYS = {
 };
 
 NEARBY_THRESHOLD = 500; // 500m
+MAX_NEARBY = 5;
 
 /**
  * Iterates through the data store and finds the nearby bus stops that fall within the threshold
@@ -56,7 +57,7 @@ function getNearbyBusStops(currentLocation) {
         return distanceA - distanceB;
     });
 
-    return busStopsNearby;
+    return busStopsNearby.slice(0, MAX_NEARBY); // don't return more than the max nearby bus stops
 }
 
 /**
