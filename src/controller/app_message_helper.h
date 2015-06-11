@@ -1,3 +1,8 @@
+#pragma once
+
+#include <pebble.h>
+
+#include "../model/app_message_keys.c"
 
 enum {
     KEY_BUS_SERVICE_LIST_START = 0,
@@ -14,3 +19,7 @@ enum {
 
     KEY_CONNECTION_ERROR = 9
 };
+
+
+void send_app_message_string(int key, char *message);
+void send_app_message_int(int key, int message);

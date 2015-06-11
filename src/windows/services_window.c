@@ -6,7 +6,8 @@ static MenuLayer *s_services_menu_layer;
 
 
 static uint16_t callback_menu_layer_get_num_rows(struct MenuLayer* menu_layer, uint16_t section_index, void *callback_context) {
-    
+    // int numberOfRows = numberOfServices();
+    // APP_LOG(APP_LOG_LEVEL_DEBUG, "NO OF ROWS : %i", numberOfRows);
     return numberOfServices();
 }
 
@@ -20,16 +21,15 @@ static void callback_menu_layer_draw_row(GContext *ctx, const Layer *cell_layer,
 
 // Whatp happens when the select button is pushed
 static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
-    // APP_LOG(APP_LOG_LEVEL_DEBUG, "menu layer services select click");
-    // push the service details window in
-    char *currentService = services_list[cell_index->row];
 
-    // sendAppMessageChar(KEY_BUS_SERVICE_DETAILS_START, currentService);
-    // window_stack_push(s_service_detail_window, true);
-    details_window_push();
+    // only act on the button click if the number of rows is more than zero
+    if (numberOfServices() > 0) {
+        char *currentService = services_list[cell_index->row];
+        send_app_message_string(KEY_BUS_SERVICE_DETAILS_START, currentService);
+        details_window_push();
+    }
+    
 }
-
-
 
 static void window_load(Window *window) {
 
@@ -67,3 +67,10 @@ void services_window_push() {
 
     window_stack_push(s_services_window, true);
 }
+
+void services_window_reload() {
+    if (s_services_menu_layer) {
+        menu_layer_reload_data(s_services_menu_layer);
+    }
+}
+

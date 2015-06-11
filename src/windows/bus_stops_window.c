@@ -21,12 +21,15 @@ static void callback_menu_layer_draw_row(GContext *ctx, const Layer *cell_layer,
 // Whatp happens when the select button is pushed
 static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
 
-    // APP_LOG(APP_LOG_LEVEL_DEBUG, "Bus stops menu select click");
-    int currentBusStopIndex = cell_index->row;
-    // sendAppMessageInt(KEY_BUS_SERVICE_LIST_START, currentBusStopIndex);
-
-    // // push the service details window in
-    services_window_push();
+    
+    // only act on the button click if the number of rows is more than zero
+    if (numberOfBusStops() > 0) {
+        int currentBusStopIndex = cell_index->row;
+        send_app_message_int(KEY_BUS_SERVICE_LIST_START, currentBusStopIndex);
+        services_window_push();
+    }
+    
+    
 }
 
 
@@ -71,3 +74,12 @@ void bus_stops_window_push() {
 
     window_stack_push(s_bus_stops_window, true);
 }
+
+
+void bus_stops_window_reload() {
+    if (s_bus_stops_menu_layer) {
+        menu_layer_reload_data(s_bus_stops_menu_layer);
+    }
+}
+
+

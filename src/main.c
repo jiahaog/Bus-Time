@@ -3,10 +3,15 @@
 #include "model/store.h"
 #include "windows/bus_stops_window.h"
 
+#include "controller/controller.h"
+
 
 static void init(void) {
     setUpStore();
+    controller_init();
+
     bus_stops_window_push();
+
 }
 
 static void deinit(void) {
