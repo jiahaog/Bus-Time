@@ -364,7 +364,7 @@ var busTimings = {
 // when the app is launched get the location and send nearby bus stops to the watch
 pebbleHelpers.addEventListener.onReady(function (event) {
     processLocation();
-    
+
 });
 
 pebbleHelpers.addEventListener.onAppMessage(function (event) {
