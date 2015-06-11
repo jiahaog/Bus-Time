@@ -42,7 +42,6 @@ static void window_load(Window *window) {
         .select_click = callback_menu_layer_select_click
     });
 
-
     menu_layer_set_click_config_onto_window(s_services_menu_layer, s_services_window);
 
     layer_add_child(window_layer, menu_layer_get_layer(s_services_menu_layer));
@@ -52,7 +51,6 @@ static void window_unload(Window *window) {
     menu_layer_destroy(s_services_menu_layer);
     window_destroy(window);
     s_services_window = NULL;
-    
 }
 
 void services_window_push() {

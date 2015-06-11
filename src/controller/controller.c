@@ -43,8 +43,17 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
             case KEY_CONNECTION_ERROR:
 
+                // todo send a error message over and handle it here using the error screen
+                // 1. no connection
+                // 2. no services operational
+                // might want to use numbers as error codes
+
                 window_stack_pop_all(false);
-                error_window_push();
+                snprintf(message_buffer, sizeof(message_buffer), "Network failure");
+                error_window_push(message_buffer);
+
+                // char message[] = "No services operational";
+                // error_window_push(message);
 
                 break;
 

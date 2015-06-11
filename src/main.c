@@ -11,7 +11,6 @@ static void init(void) {
     controller_init();
 
     bus_stops_window_push();
-
 }
 
 static void deinit(void) {

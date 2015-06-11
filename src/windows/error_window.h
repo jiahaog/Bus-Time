@@ -2,5 +2,5 @@
 
 #include <pebble.h>
 
-void error_window_push();
+void error_window_push(char *message);
 

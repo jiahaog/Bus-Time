@@ -3,6 +3,8 @@
 static Window *s_error_window;
 static TextLayer *s_error_text_layer;
 
+char s_error_message[25] = "DEFAULT ERROR MESSAGE";
+
 static void window_load(Window *window) {
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
@@ -11,7 +13,7 @@ static void window_load(Window *window) {
     s_error_text_layer = text_layer_create(bounds);
 
     text_layer_set_font(s_error_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
-    text_layer_set_text(s_error_text_layer, "Connection Error");
+    text_layer_set_text(s_error_text_layer, s_error_message);
 
     #ifdef PBL_COLOR
         text_layer_set_background_color(s_error_text_layer, GColorRed);
@@ -28,8 +30,11 @@ static void window_unload(Window *window) {
     
 }
 
-void error_window_push() {
+void error_window_push(char *message) {
 
+    // s_error_message = message;
+    snprintf(s_error_message, sizeof(s_error_message), "%s", message);
+    
     if (!s_error_window) {
         s_error_window = window_create();
         window_set_window_handlers(s_error_window, (WindowHandlers) {
@@ -38,5 +43,9 @@ void error_window_push() {
         });
     }
 
+    
     window_stack_push(s_error_window, true);
+
+    // text_layer_set_text(s_error_text_layer, message);
+
 }
