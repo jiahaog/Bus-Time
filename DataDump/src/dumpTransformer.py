@@ -14,7 +14,7 @@ DUMP_KEYS = {
 
 DESIRED_KEYS = [DUMP_KEYS['busStopCode'], DUMP_KEYS['description'], DUMP_KEYS['road']]
 
-REDUCED_DUMP_PATH = '../out/bus_stop_data.json'
+REDUCED_DUMP_PATH = '../out/reduced_dump_data.json'
 
 def read_file_and_parse():
     dump = open('../out/prettyfiedDump.json').read()
@@ -87,8 +87,6 @@ def main():
 
     write_reduced_dump_to_file(reduced_list)
 
-    keyword_list = get_bus_stop_keyword(reduced_list)
 
-    print search_for_duplicates(keyword_list)
 if __name__ == '__main__':
     main()

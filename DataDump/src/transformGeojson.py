@@ -1,4 +1,5 @@
 
+
 # use http://ogre.adc4gis.com to convert the data downloaded from
 # http://www.mytransport.sg/content/mytransport/home/dataMall.html bus stop location SHP
 
@@ -11,8 +12,10 @@ from pprint import pprint
 
 
 
-REDUCED_DUMP_PATH = '../out/bus_stop_data.json'
+DESIRED_DATA_PATH = '../out/bus_stop_data.json'
+REDUCED_DUMP_PATH = '../out/reduced_dump_data.json'  # path of data reduced from repeatedly calling the api
 
+reducedDump = json.loads(open(REDUCED_DUMP_PATH).read())
 
 def read_file_and_parse():
     dump = open('../out/staticBusStops.geojson').read()
@@ -21,7 +24,7 @@ def read_file_and_parse():
 
 
 # reduces it to a list
-def reduce_geojson(json_dict):
+def reduce_geojson(json_dict, excludeNil=True):
 
     features = json_dict['features']
 
@@ -34,15 +37,46 @@ def reduce_geojson(json_dict):
         description = bus_stop['properties']['LOC_DESC']
         stop_number = bus_stop['properties']['BUS_STOP_N']
 
-        bus_stop_obj = {
-            'l': locationLatLong,
-            'd': description,
-            'n': stop_number
-        }
+        if excludeNil:
+            if stop_number == 'NIL':
+                print 'skipping'
+                continue
+
+        if not description:
+
+            description = get_description_from_reduced_dump(stop_number)
+
+        # size of keys are reduced, to reduce the file size
+        bus_stop_obj = {'l': locationLatLong,
+                        'd': description,
+                        'n': stop_number,
+                        'r': get_description_from_reduced_dump(stop_number)}
 
         result.append(bus_stop_obj)
 
     return result
+
+
+def get_value_from_reduced_dump(stopId, key):
+
+    # some stop ids will have unknown keys, will just return null
+
+
+    dataList = reducedDump['data']
+
+    for busStop in dataList:
+        if str(stopId) == busStop['Code']:
+            return busStop[key];
+
+    print str(stopId) + ' stopid not found for key ' + key
+    return None
+
+
+def get_description_from_reduced_dump(stopId):
+    return get_value_from_reduced_dump(stopId, 'Description')
+
+def get_road_from_reduced_dump(stopId):
+    return get_value_from_reduced_dump(stopId, 'Road')
 
 def write_reduced_dump_to_file(reduced_list):
 
@@ -50,7 +84,7 @@ def write_reduced_dump_to_file(reduced_list):
         'data': reduced_list
     }
 
-    with open(REDUCED_DUMP_PATH, 'w') as myFile:
+    with open(DESIRED_DATA_PATH, 'w') as myFile:
         # serialise with json
         json.dump(data_set, myFile)
 
@@ -64,3 +98,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+    # print get_value_from_reduced_dump(46561, 'Description')
+
