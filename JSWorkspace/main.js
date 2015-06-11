@@ -25,7 +25,11 @@ const APP_MESSAGE_KEYS = {
 
     KEY_BUS_SERVICE_DETAILS_START: 'KEY_BUS_SERVICE_DETAILS_START',
     KEY_BUS_SERVICE_DETAILS_VALUE: 'KEY_BUS_SERVICE_DETAILS_VALUE',
-    KEY_BUS_SERVICE_DETAILS_END: 'KEY_BUS_SERVICE_DETAILS_END'
+    KEY_BUS_SERVICE_DETAILS_END: 'KEY_BUS_SERVICE_DETAILS_END',
+
+    KEY_BUS_STOP_LIST_START: 'KEY_BUS_STOP_LIST_START',
+    KEY_BUS_STOP_LIST_VALUE: 'KEY_BUS_STOP_LIST_VALUE',
+    KEY_BUS_STOP_LIST_END: 'KEY_BUS_STOP_LIST_END'
 };
 
 const RESPONSE_KEYS = {
@@ -51,9 +55,8 @@ const PEBBLE_KEYS = {
 
 
 var store = [];
+var lastBusStopsIDsSent = [];
 var lastStopID;
-
-
 
 /**
  * Queries the store for a valid record that falls within the threshold and has the same stopId
@@ -246,6 +249,8 @@ function getTimeToArrival(arrivalString) {
     return min + 'm ' + sec + 's';
 }
 
+
+
 function processLocation() {
     pebbleHelpers.getLocation(function (error, position) {
         if (error) {
@@ -255,16 +260,38 @@ function processLocation() {
             var positionArray = [position.coords.latitude, position.coords.longitude];
             var nearbyBusStops = busStops.getNearbyBusStops(positionArray);
 
-            var closest = nearbyBusStops[0];
 
-            var closestStopId = closest[busStops.CLOSEST_BUS_STOP_KEYS.stopId];
-            var closestDescription = closest[busStops.CLOSEST_BUS_STOP_KEYS.description];
+            var descriptions = [];
+            var stopIds = [];
+            for (var i = 0; i < nearbyBusStops.length; i++) {
+                var busStop = nearbyBusStops[i];
+                descriptions.push(busStop[busStops.CLOSEST_BUS_STOP_KEYS.description]);
+                stopIds.push(busStop[busStops.CLOSEST_BUS_STOP_KEYS.stopId]);
 
-            lastStopID = closestStopId;
-            console.log('Getting data for bus stop: ' + closestStopId + closestDescription);
+            }
+
+            pebbleHelpers.sendMessageStream(
+                APP_MESSAGE_KEYS.KEY_BUS_STOP_LIST_START,
+                APP_MESSAGE_KEYS.KEY_BUS_STOP_LIST_VALUE,
+                APP_MESSAGE_KEYS.KEY_BUS_STOP_LIST_END,
+                descriptions
+            );
+
+            lastBusStopsIDsSent = stopIds;
 
 
-            busTimings.sendServicesList(closestStopId);
+            //var closest = nearbyBusStops[0];
+
+            //var closestStopId = closest[busStops.CLOSEST_BUS_STOP_KEYS.stopId];
+            //var closestDescription = closest[busStops.CLOSEST_BUS_STOP_KEYS.description];
+            //
+            //lastStopID = closestStopId;
+            //console.log('Getting data for bus stop: ' + closestStopId + closestDescription);
+            //
+            //
+            //busTimings.sendServicesList(closestStopId);
+            //
+
 
 
         }
@@ -301,9 +328,7 @@ var busTimings = {
                 console.log('Error getting bus timings');
                 console.log(error);
             } else {
-
                 const serviceDetails = parseForServiceDetails(record, serviceNo);
-                console.log(JSON.stringify(serviceDetails));
                 const messageString = 'Bus ' + serviceDetails[RESPONSE_KEYS.serviceNo] + ': ' + serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival] + ' ' +  serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.load];
 
                 var dictionaryMessage = {};
@@ -329,11 +354,19 @@ pebbleHelpers.addEventListener.onReady(function (event) {
 function processReceivedMessage(event) {
 
     const payload = event[PEBBLE_KEYS.payload];
+
     for (var key in payload) {
         if (payload.hasOwnProperty(key)) {
             // value is an int
             var value = payload[key];
-            if (key === APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
+
+            if (key === APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START) {
+                var stopId = lastBusStopsIDsSent[value];
+                console.log('Received request for service list for stopID: ' + stopId);
+                lastStopID = stopId;
+                busTimings.sendServicesList(stopId);
+
+            } else if (key === APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
                 console.log('Received request for service: ' + value);
                 busTimings.sendServiceDetails(lastStopID, value);
             }

@@ -8,7 +8,7 @@ enum {
     KEY_BUS_SERVICE_DETAILS_START = 3,
     KEY_BUS_SERVICE_DETAILS_VALUE = 4,
     KEY_BUS_SERVICE_DETAILS_END = 5,
-    
+
     KEY_BUS_STOP_LIST_START = 6,
     KEY_BUS_STOP_LIST_VALUE = 7,
     KEY_BUS_STOP_LIST_END = 8,
@@ -16,7 +16,7 @@ enum {
 
 // [size of string][number of elements]
 static char s_services_list[20][12];
-static char s_bus_stops_list[37][12];
+static char s_bus_stops_list[37][30];
 
 static Window *s_bus_stops_window;
 static Window *s_services_menu_window;
@@ -27,7 +27,7 @@ static MenuLayer *s_bus_stops_menu_layer;
 
 static TextLayer *s_service_detail_text_layer;
 
-static int s_current_service; 
+static int s_bus_stop_list_message_counter = 0;
 static int s_service_list_message_counter = 0; // for use with app message as a counter
 
 // service list store
@@ -64,7 +64,7 @@ static int numberOfBusStops() {
 }
 
 // helper method to parse string into an int and send it as an appmessage
-static void sendAppMessage(int key, char *message) {
+static void sendAppMessageChar(int key, char *message) {
     // Begin dictionary
     DictionaryIterator *iter;
     app_message_outbox_begin(&iter);
@@ -72,6 +72,20 @@ static void sendAppMessage(int key, char *message) {
     // Add a key-value pair
     // parse the message to a int at the same time
     dict_write_uint8(iter, key, atoi(message));
+
+    // Send the message!
+    app_message_outbox_send();
+}
+
+// helper method to parse string into an int and send it as an appmessage
+static void sendAppMessageInt(int key, int message) {
+    // Begin dictionary
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+
+    // Add a key-value pair
+    // parse the message to a int at the same time
+    dict_write_uint8(iter, key, message);
 
     // Send the message!
     app_message_outbox_send();
@@ -98,8 +112,8 @@ static void callback_menu_layer_bus_stops_draw_row(GContext *ctx, const Layer *c
 static void callback_menu_layer_bus_stops_select_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
 
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Bus stops menu select click");
-    char *currentBusStop = s_bus_stops_list[cell_index->row];
-    // sendAppMessage(KEY_BUS_SERVICE_DETAILS_START, currentBusStop);
+    int currentBusStopIndex = cell_index->row;
+    sendAppMessageInt(KEY_BUS_SERVICE_LIST_START, currentBusStopIndex);
 
     // push the service details window in
     window_stack_push(s_services_menu_window, true);
@@ -127,7 +141,7 @@ static void callback_menu_layer_services_select_click(struct MenuLayer *menu_lay
     // push the service details window in
     char *currentService = s_services_list[cell_index->row];
 
-    sendAppMessage(KEY_BUS_SERVICE_DETAILS_START, currentService);
+    sendAppMessageChar(KEY_BUS_SERVICE_DETAILS_START, currentService);
     window_stack_push(s_service_detail_window, true);
 }
 
@@ -141,6 +155,23 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
     while(t != NULL) {
         switch (t->key) {
+            case KEY_BUS_STOP_LIST_START:
+                s_bus_stop_list_message_counter = 0;
+                break;
+            case KEY_BUS_STOP_LIST_VALUE:
+                // assigns the string to the buffer
+                snprintf(s_bus_stops_list[s_bus_stop_list_message_counter], sizeof(s_bus_stops_list[s_bus_stop_list_message_counter]), "%s", t->value->cstring);
+
+                // APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Service list: %s", s_services_list[s_service_list_message_counter]);
+                s_bus_stop_list_message_counter++;
+                break;
+            case KEY_BUS_STOP_LIST_END:
+                if (s_bus_stops_menu_layer) {
+                    menu_layer_reload_data(s_bus_stops_menu_layer);
+                }
+                break;
+
+
             case KEY_BUS_SERVICE_LIST_START:
                 s_service_list_message_counter = 0;
                 break;
@@ -155,7 +186,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 if (s_services_menu_layer) {
                     menu_layer_reload_data(s_services_menu_layer);
                 }
-
                 break;
 
             case KEY_BUS_SERVICE_DETAILS_VALUE:
