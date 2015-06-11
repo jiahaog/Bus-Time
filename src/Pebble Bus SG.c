@@ -36,8 +36,8 @@ static int s_service_list_message_counter = 0; // for use with app message as a 
 
 // Sets up default variables for store
 static void setUpStore() {
-    strcpy(s_bus_stops_list[0], "Loading...");
-    strcpy(s_services_list[0], "Loading...");
+    // strcpy(s_bus_stops_list[0], "Loading...");
+    // strcpy(s_services_list[0], "Loading...");
 }
 
 static int numberOfServices() {
