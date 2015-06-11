@@ -50,6 +50,7 @@ function getNearbyBusStops(currentLocation) {
         }
     }
 
+    // sorts the nearby bus stops by distance
     busStopsNearby.sort(function (a, b) {
 
         var distanceA = a[CLOSEST_BUS_STOP_KEYS.distance];
@@ -57,7 +58,8 @@ function getNearbyBusStops(currentLocation) {
         return distanceA - distanceB;
     });
 
-    return busStopsNearby.slice(0, MAX_NEARBY); // don't return more than the max nearby bus stops
+    // slice so we don't return more than the max no of  nearby bus stops
+    return busStopsNearby.slice(0, MAX_NEARBY);
 }
 
 /**
@@ -81,7 +83,6 @@ function distanceFrom(point1, point2) {
     return geolib.getDistance(point1LatLong, point2LatLong)
 }
 
-
 /**
  * REMOVE THIS
  * test function to get the description of the closest bus stop
@@ -102,7 +103,6 @@ function testDistance() {
 
     console.log(firstDescription);
 }
-
 
 module.exports = {
     CLOSEST_BUS_STOP_KEYS: CLOSEST_BUS_STOP_KEYS,

@@ -1,6 +1,7 @@
 /**
 * Created by JiaHao on 8/6/15.
 */
+
 var pebbleHelpers = require('./pebbleHelpers');
 var config = require('./config');
 var busStops = require('./busStops');
@@ -13,10 +14,10 @@ const REQUEST_HEADERS = {
     accept: 'application/json'
 };
 
-
 const TEST_RESPONSE = '{"odata.metadata":"http://datamall2.mytransport.sg/ltaodataservice/$metadata#BusArrival/@Element","BusStopID":"83139","Services":[{"ServiceNo":"15","Status":"In Operation","Operator":"SBST","NextBus":{"EstimatedArrival":"2015-06-09T14:25:49+00:00","Load":"Standing Available","Feature":"WAB"},"SubsequentBus":{"EstimatedArrival":"2015-06-09T13:56:32+00:00","Load":"Seats Available","Feature":"WAB"}},{"ServiceNo":"155","Status":"In Operation","Operator":"SBST","NextBus":{"EstimatedArrival":"2015-06-09T13:47:03+00:00","Load":"Seats Available","Feature":"WAB"},"SubsequentBus":{"EstimatedArrival":"2015-06-09T14:01:57+00:00","Load":"Seats Available","Feature":"WAB"}}]}';
 const REFRESH_THRESHOLD = 60*60*1000; // in ms (temporarily set to 60 mins)
 
+// Keys so we don't make typos
 const APP_MESSAGE_KEYS = {
 
     KEY_BUS_SERVICE_LIST_START: 'KEY_BUS_SERVICE_LIST_START',
@@ -31,7 +32,6 @@ const APP_MESSAGE_KEYS = {
     KEY_BUS_STOP_LIST_VALUE: 'KEY_BUS_STOP_LIST_VALUE',
     KEY_BUS_STOP_LIST_END: 'KEY_BUS_STOP_LIST_END'
 };
-
 const RESPONSE_KEYS = {
     metadata: 'odata.metadata',
     stopId: 'BusStopID',
@@ -48,12 +48,11 @@ const RESPONSE_KEYS = {
 
     time: 'Time' // added key
 };
-
 const PEBBLE_KEYS = {
     payload: 'payload'
 };
 
-
+// todo figure out a way to cache these things to disk
 var store = [];
 var lastBusStopsIDsSent = [];
 var lastStopID;
@@ -249,8 +248,9 @@ function getTimeToArrival(arrivalString) {
     return min + 'm ' + sec + 's';
 }
 
-
-
+/**
+ * Gets the location of the watch and sends nearby bus stops to the watch
+ */
 function processLocation() {
     pebbleHelpers.getLocation(function (error, position) {
         if (error) {
@@ -260,16 +260,17 @@ function processLocation() {
             var positionArray = [position.coords.latitude, position.coords.longitude];
             var nearbyBusStops = busStops.getNearbyBusStops(positionArray);
 
-
+            // iterates through the nearby bus stops and populates two arrays of descriptions and
+            // stop id
             var descriptions = [];
             var stopIds = [];
             for (var i = 0; i < nearbyBusStops.length; i++) {
                 var busStop = nearbyBusStops[i];
                 descriptions.push(busStop[busStops.CLOSEST_BUS_STOP_KEYS.description]);
                 stopIds.push(busStop[busStops.CLOSEST_BUS_STOP_KEYS.stopId]);
-
             }
 
+            // sends the message to the watch
             pebbleHelpers.sendMessageStream(
                 APP_MESSAGE_KEYS.KEY_BUS_STOP_LIST_START,
                 APP_MESSAGE_KEYS.KEY_BUS_STOP_LIST_VALUE,
@@ -277,23 +278,9 @@ function processLocation() {
                 descriptions
             );
 
+            // save the last stop ids sent to the watch, so that when the user chooses the item on the menu,
+            // the index will be sent back and we can get the corresponding stopId
             lastBusStopsIDsSent = stopIds;
-
-
-            //var closest = nearbyBusStops[0];
-
-            //var closestStopId = closest[busStops.CLOSEST_BUS_STOP_KEYS.stopId];
-            //var closestDescription = closest[busStops.CLOSEST_BUS_STOP_KEYS.description];
-            //
-            //lastStopID = closestStopId;
-            //console.log('Getting data for bus stop: ' + closestStopId + closestDescription);
-            //
-            //
-            //busTimings.sendServicesList(closestStopId);
-            //
-
-
-
         }
     })
 }
@@ -346,9 +333,13 @@ var busTimings = {
     }
 };
 
+// when the app is launched get the location and send nearby bus stops to the watch
 pebbleHelpers.addEventListener.onReady(function (event) {
     processLocation();
+});
 
+pebbleHelpers.addEventListener.onAppMessage(function (event) {
+    processReceivedMessage(event);
 });
 
 function processReceivedMessage(event) {
@@ -373,9 +364,3 @@ function processReceivedMessage(event) {
         }
     }
 }
-pebbleHelpers.addEventListener.onAppMessage(function (event) {
-    
-    processReceivedMessage(event);
-
-});
-//

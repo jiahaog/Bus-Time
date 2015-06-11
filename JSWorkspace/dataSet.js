@@ -1,4 +1,10 @@
 /**
+ * Dataset generated painfully
+ *
+ * Cannot write to file as there's no way to fs.read on pebble
+ *
+ * See DataDumps/README.md for details
+ *
  * Created by JiaHao on 11/6/15.
  */
 

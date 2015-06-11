@@ -30,10 +30,9 @@ static TextLayer *s_service_detail_text_layer;
 static int s_bus_stop_list_message_counter = 0;
 static int s_service_list_message_counter = 0; // for use with app message as a counter
 
-// service list store
-
+// Sets up default variables for store
 static void setUpStore() {
-    strcpy(s_bus_stops_list[0], "BS...");
+    strcpy(s_bus_stops_list[0], "Loading...");
     strcpy(s_services_list[0], "Loading...");
 }
 
@@ -42,7 +41,6 @@ static int numberOfServices() {
     int counter = 0;
     for (int index = 0; index < arraySize; index++) {
         char *currentElement = s_services_list[index];
-        // APP_LOG(APP_LOG_LEVEL_DEBUG, "Service: |%s|, len: %i", currentElement, (int)strlen(currentElement));
         if ((int)strlen(currentElement) > 0) {
             counter++;
         }
@@ -55,7 +53,6 @@ static int numberOfBusStops() {
     int counter = 0;
     for (int index = 0; index < arraySize; index++) {
         char *currentElement = s_bus_stops_list[index];
-        // APP_LOG(APP_LOG_LEVEL_DEBUG, "Service: |%s|, len: %i", currentElement, (int)strlen(currentElement));
         if ((int)strlen(currentElement) > 0) {
             counter++;
         }
@@ -77,7 +74,7 @@ static void sendAppMessageChar(int key, char *message) {
     app_message_outbox_send();
 }
 
-// helper method to parse string into an int and send it as an appmessage
+// helper method to send an int as an appmessage
 static void sendAppMessageInt(int key, int message) {
     // Begin dictionary
     DictionaryIterator *iter;
@@ -159,30 +156,25 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 s_bus_stop_list_message_counter = 0;
                 break;
             case KEY_BUS_STOP_LIST_VALUE:
-                // assigns the string to the buffer
                 snprintf(s_bus_stops_list[s_bus_stop_list_message_counter], sizeof(s_bus_stops_list[s_bus_stop_list_message_counter]), "%s", t->value->cstring);
-
-                // APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Service list: %s", s_services_list[s_service_list_message_counter]);
                 s_bus_stop_list_message_counter++;
                 break;
             case KEY_BUS_STOP_LIST_END:
+                // perform a check to see if the layer exists first before reloading
                 if (s_bus_stops_menu_layer) {
                     menu_layer_reload_data(s_bus_stops_menu_layer);
                 }
                 break;
 
-
             case KEY_BUS_SERVICE_LIST_START:
                 s_service_list_message_counter = 0;
                 break;
             case KEY_BUS_SERVICE_LIST_VALUE:
-                // assigns the string to the buffer
                 snprintf(s_services_list[s_service_list_message_counter], sizeof(s_services_list[s_service_list_message_counter]), "%s", t->value->cstring);
-
-                // APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Service list: %s", s_services_list[s_service_list_message_counter]);
                 s_service_list_message_counter++;
                 break;
             case KEY_BUS_SERVICE_LIST_END:
+                // perform a check to see if the layer exists first before reloading
                 if (s_services_menu_layer) {
                     menu_layer_reload_data(s_services_menu_layer);
                 }
@@ -191,6 +183,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
             case KEY_BUS_SERVICE_DETAILS_VALUE:
                 text_layer_set_text(s_service_detail_text_layer, t->value->cstring);
                 break;
+
             default:
                 APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
                 break;
@@ -217,7 +210,6 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 
 // window load
 
-
 static void window_load_bus_stops_menu(Window *window) {
     Layer *window_layer = window_get_root_layer(window);
     s_bus_stops_menu_layer = menu_layer_create(layer_get_bounds(window_layer));
@@ -229,7 +221,6 @@ static void window_load_bus_stops_menu(Window *window) {
     });
 
     menu_layer_set_click_config_onto_window(s_bus_stops_menu_layer, s_bus_stops_window);
-
     layer_add_child(window_layer, menu_layer_get_layer(s_bus_stops_menu_layer));
 }
 
@@ -249,7 +240,6 @@ static void window_load_services_menu(Window *window) {
     });
 
     menu_layer_set_click_config_onto_window(s_services_menu_layer, s_services_menu_window);
-// 
     layer_add_child(window_layer, menu_layer_get_layer(s_services_menu_layer));
 }
 
