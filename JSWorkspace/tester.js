@@ -1,3 +1,3 @@
-var a = null || 2;
+var dataSet = require('./dataSet.js');
 
-console.log(a);
+console.log(dataSet);

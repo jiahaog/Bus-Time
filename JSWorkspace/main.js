@@ -51,6 +51,9 @@ const PEBBLE_KEYS = {
 
 
 var store = [];
+var lastStopID;
+
+
 
 /**
  * Queries the store for a valid record that falls within the threshold and has the same stopId
@@ -243,6 +246,30 @@ function getTimeToArrival(arrivalString) {
     return min + 'm ' + sec + 's';
 }
 
+function processLocation() {
+    pebbleHelpers.getLocation(function (error, position) {
+        if (error) {
+            console.log('location error (' + error.code + '): ' + error.message);
+        } else {
+
+            var positionArray = [position.coords.latitude, position.coords.longitude];
+            var nearbyBusStops = busStops.getNearbyBusStops(positionArray);
+
+            var closest = nearbyBusStops[0];
+
+            var closestStopId = closest[busStops.CLOSEST_BUS_STOP_KEYS.stopId];
+            var closestDescription = closest[busStops.CLOSEST_BUS_STOP_KEYS.description];
+
+            lastStopID = closestStopId;
+            console.log('Getting data for bus stop: ' + closestStopId + closestDescription);
+
+
+            busTimings.sendServicesList(closestStopId);
+
+
+        }
+    })
+}
 
 var busTimings = {
 
@@ -276,6 +303,7 @@ var busTimings = {
             } else {
 
                 const serviceDetails = parseForServiceDetails(record, serviceNo);
+                console.log(JSON.stringify(serviceDetails));
                 const messageString = 'Bus ' + serviceDetails[RESPONSE_KEYS.serviceNo] + ': ' + serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival] + ' ' +  serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.load];
 
                 var dictionaryMessage = {};
@@ -294,7 +322,8 @@ var busTimings = {
 };
 
 pebbleHelpers.addEventListener.onReady(function (event) {
-    busTimings.sendServicesList(96041);
+    processLocation();
+
 });
 
 function processReceivedMessage(event) {
@@ -306,7 +335,7 @@ function processReceivedMessage(event) {
             var value = payload[key];
             if (key === APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
                 console.log('Received request for service: ' + value);
-                busTimings.sendServiceDetails(96041, value);
+                busTimings.sendServiceDetails(lastStopID, value);
             }
         }
     }

@@ -172,12 +172,51 @@ function cloneObject(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
 
+/**
+ * @typedef {Object} locationCallbackOptions
+ * @property {boolean} enableHighAccuracy
+ * @property {number} maximumAge
+ * @property {number} timeout
+ */
+
+/**
+ * @callback locationCallback
+ * @param error
+ * @param position
+ */
+
+/**
+ * Gets the current location
+ * @param {locationCallback} callback
+ * @param {locationCallbackOptions} [options]
+ */
+function getLocation(callback, options) {
+
+    var optionsToSet = options || {timeout: 15000, maximumAge: 60000};
+
+    // use node.js callback style
+    var onSuccess = function (position) {
+        callback(undefined, position);
+    };
+
+    var onError = function (error) {
+        callback(error, undefined);
+    };
+
+    navigator.geolocation.getCurrentPosition(
+        onSuccess,
+        onError,
+        optionsToSet
+    );
+}
+
 module.exports = {
     xhrRequest: xhrRequest,
     sendMessage: sendMessage,
     sendMessageStream: sendMessageStream,
     addEventListener: addEventListener,
-    cloneObject: cloneObject
+    cloneObject: cloneObject,
+    getLocation: getLocation
 };
 
 if (require.main === module) {

@@ -2,10 +2,8 @@
  * Created by JiaHao on 11/6/15.
  */
 
-
 var dataSet = require('./dataSet.js');
 var geolib = require('geolib');
-var pebbleHelpers = require('./pebbleHelpers');
 
 DATA_SET_KEYS = {
     data: 'data',
@@ -47,41 +45,18 @@ function getNearbyBusStops(currentLocation) {
             nearbyBusStop[CLOSEST_BUS_STOP_KEYS.stopId] = busStop[DATA_SET_KEYS.stopId];
             nearbyBusStop[CLOSEST_BUS_STOP_KEYS.road] = busStop[DATA_SET_KEYS.road];
 
-
             busStopsNearby.push(nearbyBusStop);
         }
     }
 
     busStopsNearby.sort(function (a, b) {
 
-        distanceA = a[CLOSEST_BUS_STOP_KEYS.distance];
-        distanceB = b[CLOSEST_BUS_STOP_KEYS.distance];
+        var distanceA = a[CLOSEST_BUS_STOP_KEYS.distance];
+        var distanceB = b[CLOSEST_BUS_STOP_KEYS.distance];
         return distanceA - distanceB;
     });
 
     return busStopsNearby;
-
-
-    //var closestDistance = Number.MAX_VALUE;
-    //var closestBusStop = null;
-    //
-    //for (var i = 0; i < dataSet.length; i++) {
-    //
-    //
-    //    var busStop = dataSet[i];
-    //
-    //    var busStopLocation = busStop[DATA_SET_KEYS.location];
-    //
-    //    var distance = distanceFrom(currentLocation, busStopLocation);
-    //    if (distance < closestDistance) {
-    //        closestDistance = distance;
-    //        closestBusStop = busStop
-    //    }
-    //}
-    //
-    //
-
-
 }
 
 /**
@@ -129,7 +104,9 @@ function testDistance() {
 
 
 module.exports = {
-    testDistance: testDistance
+    CLOSEST_BUS_STOP_KEYS: CLOSEST_BUS_STOP_KEYS,
+    testDistance: testDistance,
+    getNearbyBusStops: getNearbyBusStops
 };
 
 

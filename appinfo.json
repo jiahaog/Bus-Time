@@ -19,5 +19,7 @@
   },
   "resources": {
     "media": []
-  }
+  },
+  "capabilities": 
+  [ "location" ]
 }
