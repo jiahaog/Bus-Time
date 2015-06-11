@@ -3,6 +3,8 @@
 */
 var pebbleHelpers = require('./pebbleHelpers');
 var config = require('./config');
+var busStops = require('./busStops');
+
 const API_URL = 'http://datamall2.mytransport.sg/ltaodataservice/BusArrival';
 
 const REQUEST_HEADERS = {
@@ -143,17 +145,6 @@ function getBusTimings(stopId, serviceNo, callback) {
 }
 
 /**
- * Quick and easy way to deep copy an object
- *
- * This should not be used for objects with functions (I think)
- * @param obj
- * @returns {*}
- */
-function cloneObject(obj) {
-    return JSON.parse(JSON.stringify(obj));
-}
-
-/**
  *
  * @param record
  * @param {number} desiredServiceNo bus service number
@@ -227,7 +218,7 @@ function parseForServicesList(record) {
  * @returns {string} e.g. '1m 20s', null if negative
  */
 function getTimeToArrival(arrivalString) {
-    console.log('ARrivalstring: ' + arrivalString);
+    // todo WHAT IS THIS
     if (arrivalString === 'null') {
         console.log('Unable to get parse arrival time');
         return arrivalString;
