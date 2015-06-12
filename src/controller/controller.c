@@ -14,24 +14,30 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         switch (t->key) {
             case KEY_BUS_STOP_LIST_START:
                 s_bus_stop_list_message_counter = 0;
+                bus_stop_list_reset();
                 break;
             case KEY_BUS_STOP_LIST_VALUE:
+                // APP_LOG(APP_LOG_LEVEL_ERROR, "received service: %s", t->value->cstring);
                 snprintf(bus_stops_list[s_bus_stop_list_message_counter], sizeof(bus_stops_list[s_bus_stop_list_message_counter]), "%s", t->value->cstring);
                 s_bus_stop_list_message_counter++;
                 break;
             case KEY_BUS_STOP_LIST_END:
+
                 bus_stops_window_reload();
                 break;
 
             case KEY_BUS_SERVICE_LIST_START:
                 s_service_list_message_counter = 0;
+                // need to reset service list so that if the previous service list contains more elements than the received one, it will not 
+                // be shown
+                service_list_reset();
                 break;
             case KEY_BUS_SERVICE_LIST_VALUE:
                 snprintf(services_list[s_service_list_message_counter], sizeof(services_list[s_service_list_message_counter]), "%s", t->value->cstring);
                 s_service_list_message_counter++;
                 break;
             case KEY_BUS_SERVICE_LIST_END:
-                
+
                 services_window_reload();
                 break;
 
@@ -39,6 +45,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
                 snprintf(message_buffer, sizeof(message_buffer), "%s", t->value->cstring);
                 details_window_set_text(message_buffer);
+                APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting details window text!");
                 break;
 
             case KEY_CONNECTION_ERROR:
