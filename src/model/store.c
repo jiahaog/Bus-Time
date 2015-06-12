@@ -1,7 +1,7 @@
 #include "store.h"
 
 // Sets up default variables for store
-void setUpStore() {
+void store_init() {
     // strcpy(bus_stops_list[0], "Stop 1");
     // strcpy(bus_stops_list[1], "Stop 2");
     // strcpy(bus_stops_list[2], "Stop 3");
@@ -12,6 +12,14 @@ void setUpStore() {
     // strcpy(services_list[2], "Service 3");
     // strcpy(services_list[3], "Service 4");
     
+}
+
+void service_list_reset() {
+    memset(services_list, 0, sizeof services_list);
+}
+
+void bus_stop_list_reset() {
+    memset(bus_stops_list, 0, sizeof bus_stops_list);   
 }
 
 int numberOfServices() {
