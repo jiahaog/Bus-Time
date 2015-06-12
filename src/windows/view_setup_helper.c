@@ -28,4 +28,5 @@ void text_layer_set_up(TextLayer *text_layer) {
     #endif
     text_layer_set_background_color(text_layer, GColorClear);
     text_layer_set_font(text_layer, fonts_get_system_font(FONT_BASIC_TEXT));
+    text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
 }
