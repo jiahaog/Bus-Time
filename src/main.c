@@ -7,7 +7,7 @@
 
 
 static void init(void) {
-    setUpStore();
+    store_init();
     controller_init();
 
     bus_stops_window_push();
