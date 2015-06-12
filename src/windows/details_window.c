@@ -48,4 +48,5 @@ void details_window_push() {
 
 void details_window_set_text(char *message) {
     snprintf(s_details_message, sizeof(s_details_message), "%s", message);
+    layer_mark_dirty(text_layer_get_layer(s_details_text_layer));
 }
