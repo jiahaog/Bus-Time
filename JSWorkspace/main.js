@@ -160,10 +160,19 @@ function getBusTimings(stopId, serviceNo, callback) {
     }
 }
 
+
+/**
+ * @typedef {Object} parsedServiceDetailsResult
+ * @property {string} serviceNo
+ * @property {Object} nextbus
+ * @property {Object} subsequentbus
+ */
+
 /**
  *
  * @param record
  * @param {number} desiredServiceNo bus service number
+ * @return {parsedServiceDetailsResult} or null if service not found
  */
 function parseForServiceDetails(record, desiredServiceNo) {
     const services = record[RESPONSE_KEYS.services];
@@ -191,6 +200,8 @@ function parseForServiceDetails(record, desiredServiceNo) {
             return serviceObject;
         }
     }
+
+    return null;
 }
 
 
@@ -343,8 +354,15 @@ var busTimings = {
                 console.log('Error getting bus timings');
                 console.log(error);
             } else {
+                //console.log(JSON.stringify(record));
                 const serviceDetails = parseForServiceDetails(record, serviceNo);
-                const messageString = 'Bus ' + serviceDetails[RESPONSE_KEYS.serviceNo] + ': ' + serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival] + ' ' +  serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.load];
+
+                var messageString;
+                if (serviceDetails) {
+                    messageString = 'Bus ' + serviceDetails[RESPONSE_KEYS.serviceNo] + ': ' + serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival] + ' ' +  serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.load];
+                } else {
+                    messageString = 'Service not found'
+                }
 
                 var dictionaryMessage = {};
                 dictionaryMessage[APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_VALUE] = messageString;
