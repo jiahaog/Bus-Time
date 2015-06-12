@@ -35,6 +35,15 @@ const APP_MESSAGE_KEYS = {
     KEY_ERROR: 'KEY_ERROR'
 
 };
+
+// misc keys to access received appmessage
+const MISC_KEYS = {
+    payload: 'payload', // get object from received app message
+    data: 'data' // key to store objects in localstorage
+};
+
+
+// keys to access DataMall api response
 const RESPONSE_KEYS = {
     metadata: 'odata.metadata',
     stopId: 'BusStopID',
@@ -48,11 +57,7 @@ const RESPONSE_KEYS = {
     load: 'Load',
     feature: 'Feature',
     inOperation: 'In Operation',
-
     time: 'Time' // added key
-};
-const PEBBLE_KEYS = {
-    payload: 'payload'
 };
 
 const ERROR_CODES = {
@@ -157,7 +162,7 @@ function getBusTimings(stopId, serviceNo, callback) {
 
                 // cache it in the store
                 store.push(record);
-
+                pebbleHelpers.storageLocal.saveObject(MISC_KEYS.data, store);
                 callback(undefined, record);
             }
 
@@ -395,6 +400,9 @@ var busTimings = {
 
 // when the app is launched get the location and send nearby bus stops to the watch
 pebbleHelpers.addEventListener.onReady(function (event) {
+    // restore bus data
+    store = pebbleHelpers.storageLocal.readObject(MISC_KEYS.data);
+
     processLocation();
 
 });
@@ -405,7 +413,7 @@ pebbleHelpers.addEventListener.onAppMessage(function (event) {
 
 function processReceivedMessage(event) {
 
-    const payload = event[PEBBLE_KEYS.payload];
+    const payload = event[MISC_KEYS.payload];
 
     for (var key in payload) {
         if (payload.hasOwnProperty(key)) {

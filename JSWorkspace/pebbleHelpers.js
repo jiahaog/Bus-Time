@@ -232,13 +232,43 @@ function getLocation(callback, options) {
     );
 }
 
+/**
+ *
+ * @param {string} key
+ * @param {object} obj
+ */
+function saveObject(key, obj) {
+    // Persist write a key with associated value
+    localStorage.setItem(key, JSON.stringify(obj));
+}
+
+/**
+ *
+ * @param {string} key
+ * @returns {object} if valid object found, else null
+ */
+function readObject(key) {
+    var stringRetrieved = localStorage.getItem(key);
+    if (!stringRetrieved) {
+        return null;
+    } else {
+        return JSON.parse(stringRetrieved);
+    }
+}
+
+var storageLocal = {
+    saveObject: saveObject,
+    readObject: readObject
+};
+
 module.exports = {
     xhrRequest: xhrRequest,
     sendMessage: sendMessage,
     sendMessageStream: sendMessageStream,
     addEventListener: addEventListener,
     cloneObject: cloneObject,
-    getLocation: getLocation
+    getLocation: getLocation,
+    storageLocal: storageLocal
 };
 
 if (require.main === module) {
