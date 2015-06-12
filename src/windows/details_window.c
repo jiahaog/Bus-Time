@@ -4,7 +4,7 @@
 static Window *s_details_window;
 static TextLayer *s_details_text_layer;
 
-char s_details_message[25] = "Loading...";
+char s_details_message[100] = "Loading...";
 
 
 static void window_load(Window *window) {
