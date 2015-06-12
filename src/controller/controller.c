@@ -23,14 +23,14 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 break;
             case KEY_BUS_STOP_LIST_END:
 
-                bus_stops_window_reload();
+                bus_stops_window_reload_menu();
                 break;
 
             case KEY_BUS_SERVICE_LIST_START:
                 s_service_list_message_counter = 0;
                 // need to reset service list so that if the previous service list contains more elements than the received one, it will not 
                 // be shown
-                service_list_reset();
+                services_list_reset();
                 break;
             case KEY_BUS_SERVICE_LIST_VALUE:
                 snprintf(services_list[s_service_list_message_counter], sizeof(services_list[s_service_list_message_counter]), "%s", t->value->cstring);
@@ -38,7 +38,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 break;
             case KEY_BUS_SERVICE_LIST_END:
 
-                services_window_reload();
+                services_window_reload_menu();
                 break;
 
             case KEY_BUS_SERVICE_DETAILS_VALUE:

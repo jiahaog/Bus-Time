@@ -6,4 +6,4 @@
 #include "../controller/app_message_helper.h"
 
 void bus_stops_window_push();
-void bus_stops_window_reload();
+void bus_stops_window_reload_menu();

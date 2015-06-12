@@ -3,6 +3,7 @@
 
 static Window *s_services_window;
 static MenuLayer *s_services_menu_layer;
+static TextLayer *s_loading_text_layer; 
 
 
 static uint16_t callback_menu_layer_get_num_rows(struct MenuLayer* menu_layer, uint16_t section_index, void *callback_context) {
@@ -31,9 +32,9 @@ static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuI
     
 }
 
-static void window_load(Window *window) {
+static void menu_load() {
 
-    Layer *window_layer = window_get_root_layer(window);
+    Layer *window_layer = window_get_root_layer(s_services_window);
     s_services_menu_layer = menu_layer_create(layer_get_bounds(window_layer));
 
     menu_layer_set_callbacks(s_services_menu_layer, services_list, (MenuLayerCallbacks) {
@@ -47,10 +48,26 @@ static void window_load(Window *window) {
     layer_add_child(window_layer, menu_layer_get_layer(s_services_menu_layer));
 }
 
+static void window_load(Window *window) {
+    Layer *window_layer = window_get_root_layer(window);   
+    GRect bounds = layer_get_bounds(window_layer);
+
+    // Create and Add to layer hierarchy:
+    s_loading_text_layer = text_layer_create(bounds);
+
+    text_layer_set_font(s_loading_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+    text_layer_set_text(s_loading_text_layer, "Loading...");
+    layer_add_child(window_layer, text_layer_get_layer(s_loading_text_layer));
+}
+
 static void window_unload(Window *window) {
+    // reset the service list on unload so the wrong service list won't be displayed then changed immediately on load
+    services_list_reset();
+
     menu_layer_destroy(s_services_menu_layer);
     window_destroy(window);
     s_services_window = NULL;
+    s_services_menu_layer = NULL;
 }
 
 void services_window_push() {
@@ -66,9 +83,11 @@ void services_window_push() {
     window_stack_push(s_services_window, true);
 }
 
-void services_window_reload() {
+void services_window_reload_menu() {
     if (s_services_menu_layer) {
         menu_layer_reload_data(s_services_menu_layer);
+    } else {
+        menu_load();
     }
 }
 

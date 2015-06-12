@@ -29,6 +29,7 @@ static void window_load(Window *window) {
 static void window_unload(Window *window) {
     text_layer_destroy(s_details_text_layer);
     window_destroy(window);
+    snprintf(s_details_message, sizeof(s_details_message), "Loading...");
     s_details_window = NULL;
 }
 

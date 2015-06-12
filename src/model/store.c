@@ -14,7 +14,7 @@ void store_init() {
     
 }
 
-void service_list_reset() {
+void services_list_reset() {
     memset(services_list, 0, sizeof services_list);
 }
 

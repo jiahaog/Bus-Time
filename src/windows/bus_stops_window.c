@@ -3,7 +3,7 @@
 
 static Window *s_bus_stops_window;
 static MenuLayer *s_bus_stops_menu_layer;
-
+static TextLayer *s_loading_text_layer; 
 
 static uint16_t callback_menu_layer_get_num_rows(struct MenuLayer* menu_layer, uint16_t section_index, void *callback_context) {
     
@@ -28,15 +28,10 @@ static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuI
         send_app_message_int(KEY_BUS_SERVICE_LIST_START, currentBusStopIndex);
         services_window_push();
     }
-    
-    
 }
 
-
-
-static void window_load(Window *window) {
-
-    Layer *window_layer = window_get_root_layer(window);
+static void menu_load() {
+    Layer *window_layer = window_get_root_layer(s_bus_stops_window);
     s_bus_stops_menu_layer = menu_layer_create(layer_get_bounds(window_layer));
 
     menu_layer_set_callbacks(s_bus_stops_menu_layer, bus_stops_list, (MenuLayerCallbacks) {
@@ -54,10 +49,22 @@ static void window_load(Window *window) {
     layer_add_child(window_layer, menu_layer_get_layer(s_bus_stops_menu_layer));
 }
 
+static void window_load(Window *window) {
+    Layer *window_layer = window_get_root_layer(window);   
+    GRect bounds = layer_get_bounds(window_layer);
+
+    // Create and Add to layer hierarchy:
+    s_loading_text_layer = text_layer_create(bounds);
+
+    text_layer_set_font(s_loading_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+    text_layer_set_text(s_loading_text_layer, "Loading...");
+    layer_add_child(window_layer, text_layer_get_layer(s_loading_text_layer));
+}
+
 static void window_unload(Window *window) {
     menu_layer_destroy(s_bus_stops_menu_layer);
     window_destroy(window);
-
+    s_bus_stops_menu_layer = NULL;
     s_bus_stops_window = NULL;
     
 }
@@ -76,9 +83,11 @@ void bus_stops_window_push() {
 }
 
 
-void bus_stops_window_reload() {
+void bus_stops_window_reload_menu() {
     if (s_bus_stops_menu_layer) {
         menu_layer_reload_data(s_bus_stops_menu_layer);
+    } else {
+        menu_load();
     }
 }
 

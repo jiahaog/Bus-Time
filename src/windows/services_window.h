@@ -7,4 +7,4 @@
 #include "../controller/app_message_helper.h"
 
 void services_window_push();
-void services_window_reload();
+void services_window_reload_menu();
