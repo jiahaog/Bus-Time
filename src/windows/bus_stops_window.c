@@ -36,7 +36,7 @@ static void menu_load() {
     Layer *window_layer = window_get_root_layer(s_bus_stops_window);
     s_bus_stops_menu_layer = menu_layer_create(layer_get_bounds(window_layer));
 
-    menu_layer_set_callbacks(s_bus_stops_menu_layer, bus_stops_list, (MenuLayerCallbacks) {
+    menu_layer_set_callbacks(s_bus_stops_menu_layer, bus_stop_list, (MenuLayerCallbacks) {
         .get_num_rows = callback_menu_layer_get_num_rows,
         .draw_row = callback_menu_layer_draw_row,
         .select_click = callback_menu_layer_select_click
