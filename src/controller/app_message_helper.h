@@ -2,7 +2,6 @@
 
 #include <pebble.h>
 
-#include "../model/app_message_keys.c"
 
 enum {
     KEY_BUS_SERVICE_LIST_START = 0,
