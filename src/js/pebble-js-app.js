@@ -175,7 +175,7 @@ const APP_MESSAGE_KEYS = {
     KEY_BUS_STOP_LIST_VALUE: 'KEY_BUS_STOP_LIST_VALUE',
     KEY_BUS_STOP_LIST_END: 'KEY_BUS_STOP_LIST_END',
 
-    KEY_CONNECTION_ERROR: 'KEY_CONNECTION_ERROR'
+    KEY_ERROR: 'KEY_ERROR'
 
 };
 const RESPONSE_KEYS = {
@@ -196,6 +196,11 @@ const RESPONSE_KEYS = {
 };
 const PEBBLE_KEYS = {
     payload: 'payload'
+};
+
+const ERROR_CODES = {
+    NETWORK_ERROR: 1,
+    NO_SERVICES_OPERATIONAL: 2
 };
 
 // todo figure out a way to cache these things to disk
@@ -285,7 +290,7 @@ function getBusTimings(stopId, serviceNo, callback) {
 
             if (error) {
                 console.log('Error making request');
-                handleConnectionError();
+                sendErrorCode(ERROR_CODES.NETWORK_ERROR);
 
             } else {
 
@@ -303,10 +308,19 @@ function getBusTimings(stopId, serviceNo, callback) {
     }
 }
 
+
+/**
+ * @typedef {Object} parsedServiceDetailsResult
+ * @property {string} serviceNo
+ * @property {Object} nextbus
+ * @property {Object} subsequentbus
+ */
+
 /**
  *
  * @param record
  * @param {number} desiredServiceNo bus service number
+ * @return {parsedServiceDetailsResult} or null if service not found
  */
 function parseForServiceDetails(record, desiredServiceNo) {
     const services = record[RESPONSE_KEYS.services];
@@ -334,6 +348,8 @@ function parseForServiceDetails(record, desiredServiceNo) {
             return serviceObject;
         }
     }
+
+    return null;
 }
 
 
@@ -441,14 +457,17 @@ function processLocation() {
 }
 
 
-function handleConnectionError() {
+/**
+ * @param {int} code
+ */
+function sendErrorCode(code) {
 
     var dictionaryMessage = {};
-    dictionaryMessage[APP_MESSAGE_KEYS.KEY_CONNECTION_ERROR] = 'e';
+    dictionaryMessage[APP_MESSAGE_KEYS.KEY_ERROR] = code;
 
     pebbleHelpers.sendMessage(dictionaryMessage, function (error) {
         if (error) {
-            console.log('Error sending connection error message!' + error);
+            console.log('Error sending connection error message! REASON:' + error);
         } else {
             // callback
         }
@@ -467,12 +486,18 @@ var busTimings = {
             } else {
 
                 const serviceList = parseForServicesList(record);
-                pebbleHelpers.sendMessageStream(
-                    APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START,
-                    APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_VALUE,
-                    APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_END,
-                    serviceList
-                );
+
+                if (serviceList.length > 0) {
+                    pebbleHelpers.sendMessageStream(
+                        APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START,
+                        APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_VALUE,
+                        APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_END,
+                        serviceList
+                    );
+                } else {
+                    sendErrorCode(ERROR_CODES.NO_SERVICES_OPERATIONAL);
+                }
+
 
 
             }
@@ -486,8 +511,15 @@ var busTimings = {
                 console.log('Error getting bus timings');
                 console.log(error);
             } else {
+                //console.log(JSON.stringify(record));
                 const serviceDetails = parseForServiceDetails(record, serviceNo);
-                const messageString = 'Bus ' + serviceDetails[RESPONSE_KEYS.serviceNo] + ': ' + serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival] + ' ' +  serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.load];
+
+                var messageString;
+                if (serviceDetails) {
+                    messageString = 'Bus ' + serviceDetails[RESPONSE_KEYS.serviceNo] + ': ' + serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival] + ' ' +  serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.load];
+                } else {
+                    messageString = 'Service not found'
+                }
 
                 var dictionaryMessage = {};
                 dictionaryMessage[APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_VALUE] = messageString;

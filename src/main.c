@@ -2,14 +2,13 @@
 
 #include "model/store.h"
 #include "windows/bus_stops_window.h"
-
 #include "controller/controller.h"
 
 
 static void init(void) {
     store_init();
     controller_init();
-
+    
     bus_stops_window_push();
 }
 

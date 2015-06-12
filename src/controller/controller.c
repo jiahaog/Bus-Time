@@ -3,6 +3,22 @@
 static int s_bus_stop_list_message_counter = 0;
 static int s_service_list_message_counter = 0; 
 
+
+static void handleError(int code) {
+    if (code == 1) {
+        // network error
+        window_stack_pop_all(false);
+        error_window_push((char*)"network failure");
+    } else {
+        // no services available
+        window_stack_pop(false);
+        error_window_push((char*)"No services available");
+    }
+
+    // // char message[] = "No services operational";
+    // // error_window_push(message);
+}
+
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
 
     // read first item    
@@ -48,20 +64,9 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting details window text!");
                 break;
 
-            case KEY_CONNECTION_ERROR:
+            case KEY_ERROR:
 
-                // todo send a error message over and handle it here using the error screen
-                // 1. no connection
-                // 2. no services operational
-                // might want to use numbers as error codes
-
-                window_stack_pop_all(false);
-                snprintf(message_buffer, sizeof(message_buffer), "Network failure");
-                error_window_push(message_buffer);
-
-                // char message[] = "No services operational";
-                // error_window_push(message);
-
+                handleError(t->value->int32);
                 break;
 
             default:
