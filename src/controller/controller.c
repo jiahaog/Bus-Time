@@ -46,11 +46,11 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 break;
             case KEY_BUS_STOP_LIST_VALUE:
                 // APP_LOG(APP_LOG_LEVEL_ERROR, "received service: %s", t->value->cstring);
-                snprintf(bus_stops_list[s_bus_stop_list_message_counter], sizeof(bus_stops_list[s_bus_stop_list_message_counter]), "%s", t->value->cstring);
+                snprintf(bus_stop_string_buffer[s_bus_stop_list_message_counter], sizeof(bus_stop_string_buffer[s_bus_stop_list_message_counter]), "%s", t->value->cstring);
                 s_bus_stop_list_message_counter++;
                 break;
             case KEY_BUS_STOP_LIST_END:
-
+                split_bus_stop_data();
                 bus_stops_window_reload_menu();
                 break;
 

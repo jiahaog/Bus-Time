@@ -19,7 +19,8 @@ void services_list_reset() {
 }
 
 void bus_stop_list_reset() {
-    memset(bus_stops_list, 0, sizeof bus_stops_list);   
+    memset(bus_stop_string_buffer, 0, sizeof bus_stop_string_buffer);
+    memset(bus_stop_list, 0, sizeof bus_stop_list);   
 }
 
 int numberOfServices() {
@@ -35,13 +36,46 @@ int numberOfServices() {
 }
 
 int numberOfBusStops() {
-    int arraySize = sizeof(bus_stops_list) / sizeof(bus_stops_list[0]);
+    int arraySize = sizeof(bus_stop_string_buffer) / sizeof(bus_stop_string_buffer[0]);
     int counter = 0;
     for (int index = 0; index < arraySize; index++) {
-        char *currentElement = bus_stops_list[index];
+        char *currentElement = bus_stop_string_buffer[index];
         if ((int)strlen(currentElement) > 0) {
             counter++;
         }
     }
     return counter;
+}
+
+void split_bus_stop_data() {
+
+    int noBusStops = numberOfBusStops();
+    for (int j = 0; j < noBusStops; j++) {
+        char *currentBusStopString = bus_stop_string_buffer[j];
+
+           int spaceAt = 0;
+            for (int i = 0; (unsigned)i < strlen(currentBusStopString); i++) {
+                
+                if (currentBusStopString[i] == ',') {
+                    spaceAt = i;
+                    break;
+                }
+            }
+
+        for (int i = 0; (unsigned)i < strlen(currentBusStopString); i++) {
+            char currentChar = currentBusStopString[i];
+            if (i == spaceAt) {
+                continue;
+            }
+            
+            if (i < spaceAt) {
+                bus_stop_list[j][0][i] = currentChar;
+                
+            } else {
+                int subtitleIndex = i - spaceAt - 1;
+                bus_stop_list[j][1][subtitleIndex] = currentChar;
+            }
+        }
+    }
+
 }

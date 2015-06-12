@@ -13,9 +13,11 @@ static uint16_t callback_menu_layer_get_num_rows(struct MenuLayer* menu_layer, u
 // callback to draw all the rows
 static void callback_menu_layer_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
     uint16_t row_index = cell_index->row;
-    char* title = bus_stops_list[row_index];
+    char* title = bus_stop_list[row_index][0];
+    char* subtitle = bus_stop_list[row_index][1];
 
-    menu_cell_basic_draw(ctx, cell_layer, title, NULL, NULL);
+    menu_cell_basic_draw(ctx, cell_layer, title, subtitle, NULL);
+
 }
 
 // Whatp happens when the select button is pushed
