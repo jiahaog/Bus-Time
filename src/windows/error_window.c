@@ -32,7 +32,6 @@ static void window_unload(Window *window) {
 
 void error_window_push(char *message) {
 
-    // s_error_message = message;
     snprintf(s_error_message, sizeof(s_error_message), "%s", message);
     
     if (!s_error_window) {
@@ -45,7 +44,5 @@ void error_window_push(char *message) {
 
     
     window_stack_push(s_error_window, true);
-
-    // text_layer_set_text(s_error_text_layer, message);
 
 }

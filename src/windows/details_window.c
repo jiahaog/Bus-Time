@@ -4,6 +4,9 @@
 static Window *s_details_window;
 static TextLayer *s_details_text_layer;
 
+char s_details_message[25] = "Loading...";
+
+
 static void window_load(Window *window) {
 
     Layer *window_layer = window_get_root_layer(window);
@@ -19,7 +22,7 @@ static void window_load(Window *window) {
     #endif
 
     text_layer_set_font(s_details_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
-    text_layer_set_text(s_details_text_layer, "Loading...");
+    text_layer_set_text(s_details_text_layer, s_details_message);
     layer_add_child(window_layer, text_layer_get_layer(s_details_text_layer));
 }
 
@@ -44,5 +47,5 @@ void details_window_push() {
 }
 
 void details_window_set_text(char *message) {
-    text_layer_set_text(s_details_text_layer, message);
+    snprintf(s_details_message, sizeof(s_details_message), "%s", message);
 }
