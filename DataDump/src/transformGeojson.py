@@ -57,7 +57,7 @@ def reduce_geojson(json_dict, excludeNil=True):
         bus_stop_obj = {'l': locationLatLong,
                         'd': description,
                         'n': stop_number,
-                        'r': get_description_from_reduced_dump(stop_number)}
+                        'r': get_road_from_reduced_dump(stop_number)}
 
         result.append(bus_stop_obj)
 
