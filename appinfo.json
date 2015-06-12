@@ -1,8 +1,8 @@
 {
   "uuid": "49d9dcee-a403-489b-8138-e043bffa97ea",
-  "shortName": "Pebble Bus SG",
-  "longName": "Pebble Bus SG",
-  "companyName": "MakeAwesomeHappen",
+  "shortName": "Bus Time",
+  "longName": "Bus Time",
+  "companyName": "Hippo Design",
   "versionLabel": "1.0",
   "sdkVersion": "3",
   "targetPlatforms": ["aplite", "basalt"],
