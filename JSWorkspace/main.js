@@ -66,7 +66,7 @@ const ERROR_CODES = {
 };
 
 // todo figure out a way to cache these things to disk
-var store = [];
+var store;
 var lastBusStopsIDsSent = [];
 var lastStopID;
 
@@ -401,7 +401,7 @@ var busTimings = {
 // when the app is launched get the location and send nearby bus stops to the watch
 pebbleHelpers.addEventListener.onReady(function (event) {
     // restore bus data
-    store = pebbleHelpers.storageLocal.readObject(MISC_KEYS.data);
+    store = pebbleHelpers.storageLocal.readObject(MISC_KEYS.data) || [];
 
     processLocation();
 
