@@ -17,10 +17,12 @@ static void handleError(int code) {
         // phone is not connected
         window_stack_pop_all(false);
         error_window_push((char*)"Phone is not connected");
+    } else if (code == 4) {
+        window_stack_pop_all(false);
+        error_window_push((char*)"Failed to get location");
+    } else {
+        APP_LOG(APP_LOG_LEVEL_ERROR, "Error code %i not recognized", code);
     }
-
-    // // char message[] = "No services operational";
-    // // error_window_push(message);
 }
 
 static void bluetooth_event_callback(bool connected) {

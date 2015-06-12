@@ -62,7 +62,9 @@ const RESPONSE_KEYS = {
 
 const ERROR_CODES = {
     NETWORK_ERROR: 1,
-    NO_SERVICES_OPERATIONAL: 2
+    NO_SERVICES_OPERATIONAL: 2,
+    // 3 is used by the watch to handle error in bluetooth
+    LOCATION_ERROR: 4
 };
 
 // todo figure out a way to cache these things to disk
@@ -287,6 +289,7 @@ function processLocation() {
     pebbleHelpers.getLocation(function (error, position) {
         if (error) {
             console.log('location error (' + error.code + '): ' + error.message);
+            sendErrorCode(ERROR_CODES.LOCATION_ERROR);
         } else {
 
             var positionArray = [position.coords.latitude, position.coords.longitude];
