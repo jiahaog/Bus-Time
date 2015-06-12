@@ -9,14 +9,24 @@ static void handleError(int code) {
         // network error
         window_stack_pop_all(false);
         error_window_push((char*)"network failure");
-    } else {
+    } else if (code == 2) {
         // no services available
         window_stack_pop(false);
         error_window_push((char*)"No services available");
+    } else if (code == 3) {
+        // phone is not connected
+        window_stack_pop_all(false);
+        error_window_push((char*)"Phone is not connected");
     }
 
     // // char message[] = "No services operational";
     // // error_window_push(message);
+}
+
+static void bluetooth_event_callback(bool connected) {
+    if (!connected) {
+        handleError(3);
+    }
 }
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
@@ -93,9 +103,18 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 
 void controller_init() {
     // AppMessage register callbacks
+
+    if (!bluetooth_connection_service_peek()) {
+        return handleError(3);
+    }
+
     app_message_register_inbox_received(inbox_received_callback);
     app_message_register_inbox_dropped(inbox_dropped_callback);
     app_message_register_outbox_failed(outbox_failed_callback);
     app_message_register_outbox_sent(outbox_sent_callback);
     app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+
+    bluetooth_connection_service_subscribe(bluetooth_event_callback);
+
+
 }
