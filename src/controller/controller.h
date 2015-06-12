@@ -11,4 +11,4 @@
 
 #include "app_message_helper.h"
 
-void controller_init();
+bool controller_init();
