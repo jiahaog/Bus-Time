@@ -8,7 +8,7 @@ char s_details_message[100] = "Loading...";
 
 
 static void window_load(Window *window) {
-
+    window_set_up(window);
     Layer *window_layer = window_get_root_layer(window);
 
 
@@ -16,12 +16,8 @@ static void window_load(Window *window) {
 
     // Create and Add to layer hierarchy:
     s_details_text_layer = text_layer_create(bounds);
+    text_layer_set_up(s_details_text_layer);
 
-    #ifdef PBL_COLOR
-        text_layer_set_background_color(s_details_text_layer, GColorMayGreen);
-    #endif
-
-    text_layer_set_font(s_details_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
     text_layer_set_text(s_details_text_layer, s_details_message);
     layer_add_child(window_layer, text_layer_get_layer(s_details_text_layer));
 }

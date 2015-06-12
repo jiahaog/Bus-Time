@@ -40,9 +40,7 @@ static void menu_load() {
         .select_click = callback_menu_layer_select_click
     });
 
-    #ifdef PBL_COLOR
-        menu_layer_set_normal_colors(s_bus_stops_menu_layer, GColorYellow, GColorBlue);
-    #endif
+    menu_layer_set_up(s_bus_stops_menu_layer);
 
     menu_layer_set_click_config_onto_window(s_bus_stops_menu_layer, s_bus_stops_window);
 
@@ -50,13 +48,14 @@ static void menu_load() {
 }
 
 static void window_load(Window *window) {
+    window_set_up(window);
     Layer *window_layer = window_get_root_layer(window);   
     GRect bounds = layer_get_bounds(window_layer);
 
     // Create and Add to layer hierarchy:
     s_loading_text_layer = text_layer_create(bounds);
-
-    text_layer_set_font(s_loading_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+    text_layer_set_up(s_loading_text_layer);
+    
     text_layer_set_text(s_loading_text_layer, "Loading...");
     layer_add_child(window_layer, text_layer_get_layer(s_loading_text_layer));
 }
