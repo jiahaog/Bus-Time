@@ -10,7 +10,10 @@ var recordCache = require('./recordCache');
 
 
 var lastBusStopsIDsSent = [];
-var lastStopID;
+var lastStopID; // hold the last bus stop id so we know which bus stop to query for arrivals
+var watchBusStopIntervalId;
+
+const WATCH_BUS_STOP_INTERVAL = 1*60*1000; // 1 min
 
 /**
  * Gets the location of the watch and sends nearby bus stops to the watch
@@ -73,12 +76,22 @@ function sendErrorCode(code) {
     });
 }
 
-// gets a list of services at the bus stop
-function sendServicesList(stopId) {
+/**
+ * @callback sentAppMessageCallback
+ * @param error
+ */
+
+/**
+ * Sends a list of the services available at the current bus stop
+ * @param stopId
+ * @param {sentAppMessageCallback} callback
+ */
+function sendServicesList(stopId, callback) {
     recordCache.getBusTimings(stopId, undefined, function (error, record) {
         if (error) {
             console.log('Error getting bus timings');
             sendErrorCode(constants.ERROR_CODES.NETWORK_ERROR);
+            callback(error);
         } else {
 
             const serviceList = recordParser.parseForServicesList(record);
@@ -92,6 +105,7 @@ function sendServicesList(stopId) {
                 );
             } else {
                 sendErrorCode(constants.ERROR_CODES.NO_SERVICES_OPERATIONAL);
+                callback('No Services Operational');
             }
         }
     });
@@ -134,6 +148,54 @@ function sendServiceDetails(stopId, serviceNo) {
     })
 }
 
+function watchBusStop(stopId) {
+
+    function sendAndManageServicesList(stopId) {
+        sendServicesList(stopId, function (error) {
+            if (error) {
+                // if the interval has been set
+                if (watchBusStopIntervalId) {
+                    console.log('Clearing interval');
+                    clearInterval(intervalId);
+                }
+            }
+        });
+    }
+
+    if (watchBusStopIntervalId) {
+        clearInterval(watchBusStopIntervalId);
+    }
+
+    lastStopID = stopId;
+    sendAndManageServicesList(stopId);
+    watchBusStopIntervalId = setInterval(function () {
+        sendAndManageServicesList(stopId);
+    }, 1000); //todo change the interval here to use the constant defined above
+
+}
+
+function processReceivedMessage(event) {
+
+    const payload = event[constants.MISC_KEYS.payload];
+
+    for (var key in payload) {
+        if (payload.hasOwnProperty(key)) {
+            // value is an int
+            var value = payload[key];
+
+            if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START) {
+                var stopId = lastBusStopsIDsSent[value];
+                console.log('Received request for service list for stopID: ' + stopId);
+                watchBusStop(stopId);
+
+
+            } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
+                console.log('Received request for service: ' + value);
+                sendServiceDetails(lastStopID, value);
+            }
+        }
+    }
+}
 
 // when the app is launched get the location and send nearby bus stops to the watch
 pebbleHelpers.addEventListener.onReady(function () {
@@ -151,26 +213,3 @@ pebbleHelpers.addEventListener.onReady(function () {
 pebbleHelpers.addEventListener.onAppMessage(function (event) {
     processReceivedMessage(event);
 });
-
-function processReceivedMessage(event) {
-
-    const payload = event[constants.MISC_KEYS.payload];
-
-    for (var key in payload) {
-        if (payload.hasOwnProperty(key)) {
-            // value is an int
-            var value = payload[key];
-
-            if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START) {
-                var stopId = lastBusStopsIDsSent[value];
-                console.log('Received request for service list for stopID: ' + stopId);
-                lastStopID = stopId;
-                sendServicesList(stopId);
-
-            } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
-                console.log('Received request for service: ' + value);
-                sendServiceDetails(lastStopID, value);
-            }
-        }
-    }
-}

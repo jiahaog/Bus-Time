@@ -231,6 +231,8 @@ var recordCache = require('./recordCache');
 var lastBusStopsIDsSent = [];
 var lastStopID;
 
+const WATCH_BUS_STOP_INTERVAL = 1*60*1000; // 1 min
+
 /**
  * Gets the location of the watch and sends nearby bus stops to the watch
  */
@@ -292,12 +294,22 @@ function sendErrorCode(code) {
     });
 }
 
-// gets a list of services at the bus stop
-function sendServicesList(stopId) {
+/**
+ * @callback sentAppMessageCallback
+ * @param error
+ */
+
+/**
+ * Sends a list of the services available at the current bus stop
+ * @param stopId
+ * @param {sentAppMessageCallback} callback
+ */
+function sendServicesList(stopId, callback) {
     recordCache.getBusTimings(stopId, undefined, function (error, record) {
         if (error) {
             console.log('Error getting bus timings');
             sendErrorCode(constants.ERROR_CODES.NETWORK_ERROR);
+            callback(error);
         } else {
 
             const serviceList = recordParser.parseForServicesList(record);
@@ -311,6 +323,7 @@ function sendServicesList(stopId) {
                 );
             } else {
                 sendErrorCode(constants.ERROR_CODES.NO_SERVICES_OPERATIONAL);
+                callback('No Services Operational');
             }
         }
     });
@@ -353,6 +366,52 @@ function sendServiceDetails(stopId, serviceNo) {
     })
 }
 
+function watchBusStop(stopId) {
+
+    function sendAndManageServicesList(stopId) {
+        sendServicesList(stopId, function (error) {
+            if (error) {
+                console.log("Send service list erorr");
+                // if the interval has been set
+                if (intervalId) {
+                    console.log('Clearing interval');
+                    clearInterval(intervalId);
+                }
+            }
+        });
+    }
+
+    lastStopID = stopId;
+
+    sendAndManageServicesList(stopId);
+    var intervalId = setInterval(function () {
+        sendAndManageServicesList(stopId);
+    }, 1000);
+
+}
+
+function processReceivedMessage(event) {
+
+    const payload = event[constants.MISC_KEYS.payload];
+
+    for (var key in payload) {
+        if (payload.hasOwnProperty(key)) {
+            // value is an int
+            var value = payload[key];
+
+            if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START) {
+                var stopId = lastBusStopsIDsSent[value];
+                console.log('Received request for service list for stopID: ' + stopId);
+                watchBusStop(stopId);
+
+
+            } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
+                console.log('Received request for service: ' + value);
+                sendServiceDetails(lastStopID, value);
+            }
+        }
+    }
+}
 
 // when the app is launched get the location and send nearby bus stops to the watch
 pebbleHelpers.addEventListener.onReady(function () {
@@ -370,30 +429,6 @@ pebbleHelpers.addEventListener.onReady(function () {
 pebbleHelpers.addEventListener.onAppMessage(function (event) {
     processReceivedMessage(event);
 });
-
-function processReceivedMessage(event) {
-
-    const payload = event[constants.MISC_KEYS.payload];
-
-    for (var key in payload) {
-        if (payload.hasOwnProperty(key)) {
-            // value is an int
-            var value = payload[key];
-
-            if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START) {
-                var stopId = lastBusStopsIDsSent[value];
-                console.log('Received request for service list for stopID: ' + stopId);
-                lastStopID = stopId;
-                sendServicesList(stopId);
-
-            } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
-                console.log('Received request for service: ' + value);
-                sendServiceDetails(lastStopID, value);
-            }
-        }
-    }
-}
-
 },{"./busStops":1,"./constants":3,"./pebbleHelpers":7,"./recordCache":8,"./recordParser":9}],6:[function(require,module,exports){
 /*! geolib 2.0.17 by Manuel Bieh
 * Library to provide geo functions like distance calculation,
@@ -1931,7 +1966,7 @@ var recordParser = require('./recordParser');
 var pebbleHelpers = require('./pebbleHelpers');
 
 var store;
-const REFRESH_THRESHOLD = 60*60*1000; // in ms (temporarily set to 60 mins)
+const RECORD_LIVE_DURATION = 60*60*1000; // in ms (temporarily set to 60 mins)
 
 /**
  * Queries the store for a valid record that falls within the threshold and has the same stopId
@@ -1946,7 +1981,7 @@ function getValidRecordFromStore(stopId, serviceNo) {
         var storeRecord = store[i];
 
         var sameStopId = storeRecord[constants.RESPONSE_KEYS.stopId] === stopId.toString();
-        var recordWithinUpdateThreshold = (Date.now() - storeRecord[constants.RESPONSE_KEYS.time]) < REFRESH_THRESHOLD;
+        var recordWithinUpdateThreshold = (Date.now() - storeRecord[constants.RESPONSE_KEYS.time]) < RECORD_LIVE_DURATION;
         var serviceNeedsRefresh = false;
 
         // if serviceNo is provided as an argument

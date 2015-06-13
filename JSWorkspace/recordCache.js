@@ -7,7 +7,7 @@ var recordParser = require('./recordParser');
 var pebbleHelpers = require('./pebbleHelpers');
 
 var store;
-const REFRESH_THRESHOLD = 60*60*1000; // in ms (temporarily set to 60 mins)
+const RECORD_LIVE_DURATION = 60*60*1000; // in ms (temporarily set to 60 mins)
 
 /**
  * Queries the store for a valid record that falls within the threshold and has the same stopId
@@ -22,7 +22,7 @@ function getValidRecordFromStore(stopId, serviceNo) {
         var storeRecord = store[i];
 
         var sameStopId = storeRecord[constants.RESPONSE_KEYS.stopId] === stopId.toString();
-        var recordWithinUpdateThreshold = (Date.now() - storeRecord[constants.RESPONSE_KEYS.time]) < REFRESH_THRESHOLD;
+        var recordWithinUpdateThreshold = (Date.now() - storeRecord[constants.RESPONSE_KEYS.time]) < RECORD_LIVE_DURATION;
         var serviceNeedsRefresh = false;
 
         // if serviceNo is provided as an argument
