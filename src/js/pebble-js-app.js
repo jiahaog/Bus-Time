@@ -531,7 +531,14 @@ var busTimings = {
 
                 var messageString;
                 if (serviceDetails) {
-                    messageString = 'Bus ' + serviceDetails[RESPONSE_KEYS.serviceNo] + ': ' + serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival] + ' ' +  serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.load];
+                    messageString =
+                        'Service ' + serviceDetails[RESPONSE_KEYS.serviceNo] + '\n' +
+                        'Next Bus:\n' +
+                        serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival] + '\n' +
+                        serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.load] + '\n' +
+                        'Subsequent Bus:\n' +
+                        serviceDetails[RESPONSE_KEYS.subsequentBus][RESPONSE_KEYS.estimatedArrival] + '\n' +
+                        serviceDetails[RESPONSE_KEYS.subsequentBus][RESPONSE_KEYS.load];
                 } else {
                     messageString = 'Service not found'
                 }
@@ -557,6 +564,9 @@ pebbleHelpers.addEventListener.onReady(function (event) {
     store = pebbleHelpers.storageLocal.readObject(MISC_KEYS.data) || [];
 
     processLocation();
+    setTimeout(function () {
+        pebbleHelpers.sendNotification('message title', 'message text');
+    }, 10000);
 
 });
 
@@ -2077,6 +2087,15 @@ function readObject(key) {
     }
 }
 
+/**
+ * Sends a notification to the watch
+ * @param title
+ * @param text
+ */
+function sendNotification(title, text) {
+    Pebble.showSimpleNotificationOnPebble(title, text);
+}
+
 var storageLocal = {
     saveObject: saveObject,
     readObject: readObject
@@ -2089,7 +2108,8 @@ module.exports = {
     addEventListener: addEventListener,
     cloneObject: cloneObject,
     getLocation: getLocation,
-    storageLocal: storageLocal
+    storageLocal: storageLocal,
+    sendNotification: sendNotification
 };
 
 if (require.main === module) {

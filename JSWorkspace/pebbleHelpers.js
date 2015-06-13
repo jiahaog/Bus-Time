@@ -256,6 +256,15 @@ function readObject(key) {
     }
 }
 
+/**
+ * Sends a notification to the watch
+ * @param title
+ * @param text
+ */
+function sendNotification(title, text) {
+    Pebble.showSimpleNotificationOnPebble(title, text);
+}
+
 var storageLocal = {
     saveObject: saveObject,
     readObject: readObject
@@ -268,7 +277,8 @@ module.exports = {
     addEventListener: addEventListener,
     cloneObject: cloneObject,
     getLocation: getLocation,
-    storageLocal: storageLocal
+    storageLocal: storageLocal,
+    sendNotification: sendNotification
 };
 
 if (require.main === module) {

@@ -203,8 +203,8 @@ function parseForServiceDetails(record, desiredServiceNo) {
             var subsequentBus = pebbleHelpers.cloneObject(currentService[RESPONSE_KEYS.subsequentBus]);
 
             // short circuit evaluation in case the tta is negative
-            nextBus[RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(nextBus[RESPONSE_KEYS.estimatedArrival]) || 'arriving';
-            subsequentBus[RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(subsequentBus[RESPONSE_KEYS.estimatedArrival]) || 'arriving';
+            nextBus[RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(nextBus[RESPONSE_KEYS.estimatedArrival]) || 'Arr.';
+            subsequentBus[RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(subsequentBus[RESPONSE_KEYS.estimatedArrival]) || 'Arr.';
 
             const serviceObject = {};
             serviceObject[RESPONSE_KEYS.serviceNo] = currentService[RESPONSE_KEYS.serviceNo];
@@ -388,7 +388,14 @@ var busTimings = {
 
                 var messageString;
                 if (serviceDetails) {
-                    messageString = 'Bus ' + serviceDetails[RESPONSE_KEYS.serviceNo] + ': ' + serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival] + ' ' +  serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.load];
+                    messageString =
+                        'Service ' + serviceDetails[RESPONSE_KEYS.serviceNo] + '\n' +
+                        'Next Bus:\n' +
+                        serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival] + '\n' +
+                        serviceDetails[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.load] + '\n' +
+                        'Subsequent Bus:\n' +
+                        serviceDetails[RESPONSE_KEYS.subsequentBus][RESPONSE_KEYS.estimatedArrival] + '\n' +
+                        serviceDetails[RESPONSE_KEYS.subsequentBus][RESPONSE_KEYS.load];
                 } else {
                     messageString = 'Service not found'
                 }
@@ -414,6 +421,9 @@ pebbleHelpers.addEventListener.onReady(function (event) {
     store = pebbleHelpers.storageLocal.readObject(MISC_KEYS.data) || [];
 
     processLocation();
+    setTimeout(function () {
+        pebbleHelpers.sendNotification('message title', 'message text');
+    }, 10000);
 
 });
 
