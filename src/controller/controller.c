@@ -58,14 +58,14 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 s_service_list_message_counter = 0;
                 // need to reset service list so that if the previous service list contains more elements than the received one, it will not 
                 // be shown
-                services_list_reset();
+                service_list_reset();
                 break;
             case KEY_BUS_SERVICE_LIST_VALUE:
-                snprintf(services_list[s_service_list_message_counter], sizeof(services_list[s_service_list_message_counter]), "%s", t->value->cstring);
+                service_list_add_string(t->value->cstring);
                 s_service_list_message_counter++;
                 break;
             case KEY_BUS_SERVICE_LIST_END:
-
+                split_service_list_data();
                 services_window_reload_menu();
                 break;
 

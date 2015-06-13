@@ -9,13 +9,13 @@ static TextLayer *s_loading_text_layer;
 static uint16_t callback_menu_layer_get_num_rows(struct MenuLayer* menu_layer, uint16_t section_index, void *callback_context) {
     // int numberOfRows = numberOfServices();
     // APP_LOG(APP_LOG_LEVEL_DEBUG, "NO OF ROWS : %i", numberOfRows);
-    return numberOfServices();
+    return get_service_list_count();
 }
 
 // callback to draw all the rows
 static void callback_menu_layer_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
     uint16_t row_index = cell_index->row;
-    char* title = services_list[row_index];
+    char* title = service_list[row_index][0];
 
     menu_cell_basic_draw(ctx, cell_layer, title, NULL, NULL);
 }
@@ -24,8 +24,8 @@ static void callback_menu_layer_draw_row(GContext *ctx, const Layer *cell_layer,
 static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
 
     // only act on the button click if the number of rows is more than zero
-    if (numberOfServices() > 0) {
-        char *currentService = services_list[cell_index->row];
+    if (get_service_list_count() > 0) {
+        char *currentService = service_list[cell_index->row][0];
         send_app_message_string(KEY_BUS_SERVICE_DETAILS_START, currentService);
         details_window_push();
     }
@@ -37,7 +37,7 @@ static void menu_load() {
     Layer *window_layer = window_get_root_layer(s_services_window);
     s_services_menu_layer = menu_layer_create(layer_get_bounds(window_layer));
 
-    menu_layer_set_callbacks(s_services_menu_layer, services_list, (MenuLayerCallbacks) {
+    menu_layer_set_callbacks(s_services_menu_layer, service_list, (MenuLayerCallbacks) {
         .get_num_rows = callback_menu_layer_get_num_rows,
         .draw_row = callback_menu_layer_draw_row,
         .select_click = callback_menu_layer_select_click
@@ -65,7 +65,7 @@ static void window_load(Window *window) {
 
 static void window_unload(Window *window) {
     // reset the service list on unload so the wrong service list won't be displayed then changed immediately on load
-    services_list_reset();
+    service_list_reset();
 
     menu_layer_destroy(s_services_menu_layer);
     window_destroy(window);
