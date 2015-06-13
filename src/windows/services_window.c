@@ -1,5 +1,9 @@
 #include "services_window.h"
 
+#define SERVICES_CELL_H1_TOP_MARGIN 5
+#define SERVICES_CELL_H2_TOP_MARGIN 10
+
+#define SERVICES_CELL_X_PADDING 5
 
 static Window *s_services_window;
 static MenuLayer *s_services_menu_layer;
@@ -14,10 +18,32 @@ static uint16_t callback_menu_layer_get_num_rows(struct MenuLayer* menu_layer, u
 
 // callback to draw all the rows
 static void callback_menu_layer_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
-    uint16_t row_index = cell_index->row;
-    char* title = service_list[row_index][0];
+    // this guard is needed to prevent crashing when switching back and forth quickly
+    if (ctx && cell_layer && cell_index) {
+        graphics_context_set_text_color(ctx, CELL_TEXT_COLOR);
 
-    menu_cell_basic_draw(ctx, cell_layer, title, NULL, NULL);
+        uint16_t row_index = cell_index->row;
+        char* service_no = service_list[row_index][0];
+        char* arrival_time = service_list[row_index][1];
+
+        GRect cell_bounds = layer_get_bounds(cell_layer);
+
+        int16_t cell_layer_width = cell_bounds.size.w - 2*SERVICES_CELL_X_PADDING;
+
+        GRect title_bounds = GRect(cell_bounds.origin.x + SERVICES_CELL_X_PADDING, cell_bounds.origin.y + SERVICES_CELL_H1_TOP_MARGIN, cell_layer_width, cell_bounds.size.h);
+        graphics_draw_text(ctx, service_no, fonts_get_system_font(CELL_H1_FONT), title_bounds, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+        
+        GRect arrival_time_bounds = GRect(cell_bounds.origin.x, cell_bounds.origin.y + SERVICES_CELL_H2_TOP_MARGIN, cell_layer_width, cell_bounds.size.h);
+        graphics_draw_text(ctx, arrival_time, fonts_get_system_font(CELL_H2_FONT), arrival_time_bounds, GTextOverflowModeFill, GTextAlignmentRight, NULL);
+
+        // GRect subtitle_bounds = GRect(cell_bounds.origin.x + CELL_LEFT_MARGIN, title_bounds.origin.y + title_bounds.size.h, cell_bounds.size.w, s_cell_h2_height);
+        
+        // GRect stop_id_bounds = GRect(cell_bounds.origin.x + CELL_LEFT_MARGIN, subtitle_bounds.origin.y + subtitle_bounds.size.h, cell_bounds.size.w, s_cell_h2_height);
+        // graphics_draw_text(ctx, stop_id, fonts_get_system_font(CELL_H2_FONT), stop_id_bounds, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+    }
+
+
+
 }
 
 // Whatp happens when the select button is pushed

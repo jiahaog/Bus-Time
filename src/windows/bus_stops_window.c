@@ -1,13 +1,9 @@
 #include "bus_stops_window.h"
 
-#define CELL_H1_TOP_MARGIN -5
-#define CELL_H1_FONT FONT_KEY_GOTHIC_24_BOLD
+#define BUS_STOP_CELL_H1_TOP_MARGIN -5
+#define BUS_STOP_CELL_HEIGHT 60
+#define BUS_STOP_CELL_LEFT_MARGIN 5
 
-#define CELL_H2_FONT FONT_KEY_GOTHIC_18
-
-#define CELL_HEIGHT 60
-#define CELL_LEFT_MARGIN 5
-#define CELL_TEXT_COLOR GColorWhite
 
 static Window *s_bus_stops_window;
 static MenuLayer *s_bus_stops_menu_layer;
@@ -24,7 +20,7 @@ static uint16_t callback_menu_layer_get_num_rows(struct MenuLayer* menu_layer, u
 
 static int16_t callback_menu_layer_get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
 
-    return CELL_HEIGHT;
+    return BUS_STOP_CELL_HEIGHT;
 }
 
 // callback to draw all the rows
@@ -42,16 +38,14 @@ static void callback_menu_layer_draw_row(GContext *ctx, const Layer *cell_layer,
         GRect cell_bounds = layer_get_bounds(cell_layer);
 
 
-        GRect title_bounds = GRect(cell_bounds.origin.x + CELL_LEFT_MARGIN, cell_bounds.origin.y + CELL_H1_TOP_MARGIN, cell_bounds.size.w, s_cell_h1_height);
+        GRect title_bounds = GRect(cell_bounds.origin.x + BUS_STOP_CELL_LEFT_MARGIN, cell_bounds.origin.y + BUS_STOP_CELL_H1_TOP_MARGIN, cell_bounds.size.w, s_cell_h1_height);
         graphics_draw_text(ctx, title, fonts_get_system_font(CELL_H1_FONT), title_bounds, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
         
-        GRect subtitle_bounds = GRect(cell_bounds.origin.x + CELL_LEFT_MARGIN, title_bounds.origin.y + title_bounds.size.h, cell_bounds.size.w, s_cell_h2_height);
+        GRect subtitle_bounds = GRect(cell_bounds.origin.x + BUS_STOP_CELL_LEFT_MARGIN, title_bounds.origin.y + title_bounds.size.h, cell_bounds.size.w, s_cell_h2_height);
         graphics_draw_text(ctx, subtitle, fonts_get_system_font(CELL_H2_FONT), subtitle_bounds, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
         
-        GRect stop_id_bounds = GRect(cell_bounds.origin.x + CELL_LEFT_MARGIN, subtitle_bounds.origin.y + subtitle_bounds.size.h, cell_bounds.size.w, s_cell_h2_height);
+        GRect stop_id_bounds = GRect(cell_bounds.origin.x + BUS_STOP_CELL_LEFT_MARGIN, subtitle_bounds.origin.y + subtitle_bounds.size.h, cell_bounds.size.w, s_cell_h2_height);
         graphics_draw_text(ctx, stop_id, fonts_get_system_font(CELL_H2_FONT), stop_id_bounds, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
-
-
     }
 }
 
