@@ -2,18 +2,12 @@
 
 #define MESSAGE_DELIMITER ','
 
+char s_bus_stop_string_buffer[30][50];
+int s_bus_stop_list_counter = 0;
+
 // Sets up default variables for store
 void store_init() {
     // strcpy(bus_stops_list[0], "Stop 1");
-    // strcpy(bus_stops_list[1], "Stop 2");
-    // strcpy(bus_stops_list[2], "Stop 3");
-    // strcpy(bus_stops_list[3], "Stop 4");
-
-    // strcpy(services_list[0], "Service 1");
-    // strcpy(services_list[1], "Service 2");
-    // strcpy(services_list[2], "Service 3");
-    // strcpy(services_list[3], "Service 4");
-    
 }
 
 void services_list_reset() {
@@ -21,8 +15,14 @@ void services_list_reset() {
 }
 
 void bus_stop_list_reset() {
-    memset(bus_stop_string_buffer, 0, sizeof bus_stop_string_buffer);
+    s_bus_stop_list_counter = 0;
+    memset(s_bus_stop_string_buffer, 0, sizeof s_bus_stop_string_buffer);
     memset(bus_stop_list, 0, sizeof bus_stop_list);   
+}
+
+void bus_stop_list_add_string(char *string) {
+    snprintf(s_bus_stop_string_buffer[s_bus_stop_list_counter], sizeof(s_bus_stop_string_buffer[s_bus_stop_list_counter]), "%s", string);
+    s_bus_stop_list_counter++;
 }
 
 int numberOfServices() {
@@ -37,24 +37,23 @@ int numberOfServices() {
     return counter;
 }
 
-int numberOfBusStops() {
-    int arraySize = sizeof(bus_stop_string_buffer) / sizeof(bus_stop_string_buffer[0]);
-    int counter = 0;
-    for (int index = 0; index < arraySize; index++) {
-        char *currentElement = bus_stop_string_buffer[index];
-        if ((int)strlen(currentElement) > 0) {
-            counter++;
-        }
-    }
-    return counter;
+int get_bus_stop_list_count() {
+    // int arraySize = sizeof(bus_stop_string_buffer) / sizeof(bus_stop_string_buffer[0]);
+    // int counter = 0;
+    // for (int index = 0; index < arraySize; index++) {
+    //     char *currentElement = bus_stop_string_buffer[index];
+    //     if ((int)strlen(currentElement) > 0) {
+    //         counter++;
+    //     }
+    // }
+    // return counter;
+    return s_bus_stop_list_counter;
 }
 
 void split_bus_stop_data() {
 
-    int noBusStops = numberOfBusStops();
-
-    for (int j = 0; j < noBusStops; j++) {
-        char *currentBusStopString = bus_stop_string_buffer[j];
+    for (int j = 0; j < get_bus_stop_list_count(); j++) {
+        char *currentBusStopString = s_bus_stop_string_buffer[j];
         
         
         int delimiters[NO_OF_BUS_STOP_LIST_MESSAGE_PARTS - 1];

@@ -19,7 +19,7 @@ static int16_t s_cell_h2_height = 0;
 
 static uint16_t callback_menu_layer_get_num_rows(struct MenuLayer* menu_layer, uint16_t section_index, void *callback_context) {
     
-    return numberOfBusStops();
+    return get_bus_stop_list_count();
 }
 
 static int16_t callback_menu_layer_get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
@@ -60,7 +60,7 @@ static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuI
 
     
     // only act on the button click if the number of rows is more than zero
-    if (numberOfBusStops() > 0) {
+    if (get_bus_stop_list_count() > 0) {
         int currentBusStopIndex = cell_index->row;
         send_app_message_int(KEY_BUS_SERVICE_LIST_START, currentBusStopIndex);
         services_window_push();
