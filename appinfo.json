@@ -22,7 +22,13 @@
     "KEY_ERROR": 9
   },
   "resources": {
-    "media": []
+    "media": [
+      {
+        "type": "png",
+        "name": "IMAGE_ALERT_SET",
+        "file": "images/alert_set.png"
+      }
+    ]
   },
   "capabilities": 
   [ "location" ]

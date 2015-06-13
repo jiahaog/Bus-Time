@@ -421,9 +421,9 @@ pebbleHelpers.addEventListener.onReady(function (event) {
     store = pebbleHelpers.storageLocal.readObject(MISC_KEYS.data) || [];
 
     processLocation();
-    setTimeout(function () {
-        pebbleHelpers.sendNotification('message title', 'message text');
-    }, 10000);
+    //setTimeout(function () {
+    //    pebbleHelpers.sendNotification('message title', 'message text');
+    //}, 10000);
 
 });
 

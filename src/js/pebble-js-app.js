@@ -346,8 +346,8 @@ function parseForServiceDetails(record, desiredServiceNo) {
             var subsequentBus = pebbleHelpers.cloneObject(currentService[RESPONSE_KEYS.subsequentBus]);
 
             // short circuit evaluation in case the tta is negative
-            nextBus[RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(nextBus[RESPONSE_KEYS.estimatedArrival]) || 'arriving';
-            subsequentBus[RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(subsequentBus[RESPONSE_KEYS.estimatedArrival]) || 'arriving';
+            nextBus[RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(nextBus[RESPONSE_KEYS.estimatedArrival]) || 'Arr.';
+            subsequentBus[RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(subsequentBus[RESPONSE_KEYS.estimatedArrival]) || 'Arr.';
 
             const serviceObject = {};
             serviceObject[RESPONSE_KEYS.serviceNo] = currentService[RESPONSE_KEYS.serviceNo];
@@ -564,9 +564,9 @@ pebbleHelpers.addEventListener.onReady(function (event) {
     store = pebbleHelpers.storageLocal.readObject(MISC_KEYS.data) || [];
 
     processLocation();
-    setTimeout(function () {
-        pebbleHelpers.sendNotification('message title', 'message text');
-    }, 10000);
+    //setTimeout(function () {
+    //    pebbleHelpers.sendNotification('message title', 'message text');
+    //}, 10000);
 
 });
 
