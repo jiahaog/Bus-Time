@@ -1,5 +1,7 @@
 #include "store.h"
 
+#define MESSAGE_DELIMITER ','
+
 // Sets up default variables for store
 void store_init() {
     // strcpy(bus_stops_list[0], "Stop 1");
@@ -50,30 +52,34 @@ int numberOfBusStops() {
 void split_bus_stop_data() {
 
     int noBusStops = numberOfBusStops();
+
     for (int j = 0; j < noBusStops; j++) {
         char *currentBusStopString = bus_stop_string_buffer[j];
-
-           int spaceAt = 0;
-            for (int i = 0; (unsigned)i < strlen(currentBusStopString); i++) {
-                
-                if (currentBusStopString[i] == ',') {
-                    spaceAt = i;
-                    break;
-                }
+        
+        
+        int delimiters[NO_OF_BUS_STOP_LIST_MESSAGE_PARTS - 1];
+        int delimiter_counter = 0;
+        
+        for (int i = 0; (unsigned)i < strlen(currentBusStopString); i++) {
+            
+            if (currentBusStopString[i] == MESSAGE_DELIMITER) {
+                delimiters[delimiter_counter] = i;
+                delimiter_counter++;
             }
-
+        }
+    
+        delimiter_counter = 0;
+        int current_char_counter = 0;
         for (int i = 0; (unsigned)i < strlen(currentBusStopString); i++) {
             char currentChar = currentBusStopString[i];
-            if (i == spaceAt) {
-                continue;
-            }
             
-            if (i < spaceAt) {
-                bus_stop_list[j][0][i] = currentChar;
-                
+            if (i == delimiters[delimiter_counter]) {
+                delimiter_counter++;
+                current_char_counter = 0;
+                continue;
             } else {
-                int subtitleIndex = i - spaceAt - 1;
-                bus_stop_list[j][1][subtitleIndex] = currentChar;
+                bus_stop_list[j][delimiter_counter][current_char_counter] = currentChar;
+                current_char_counter++;
             }
         }
     }

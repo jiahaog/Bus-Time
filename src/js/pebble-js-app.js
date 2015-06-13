@@ -445,8 +445,11 @@ function processLocation() {
             var stopIds = [];
             for (var i = 0; i < nearbyBusStops.length; i++) {
                 var busStop = nearbyBusStops[i];
-                descriptions.push(busStop[busStops.CLOSEST_BUS_STOP_KEYS.description] + ',' + busStop[busStops.CLOSEST_BUS_STOP_KEYS.road]);
-                console.log('message: ' + busStop[busStops.CLOSEST_BUS_STOP_KEYS.description] + ',' + busStop[busStops.CLOSEST_BUS_STOP_KEYS.road]);
+                descriptions.push(
+                    busStop[busStops.CLOSEST_BUS_STOP_KEYS.description] + ',' +
+                    busStop[busStops.CLOSEST_BUS_STOP_KEYS.road] + ',' +
+                    busStop[busStops.CLOSEST_BUS_STOP_KEYS.stopId]);
+               
                 stopIds.push(busStop[busStops.CLOSEST_BUS_STOP_KEYS.stopId]);
             }
 

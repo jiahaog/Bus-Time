@@ -1,23 +1,58 @@
 #include "bus_stops_window.h"
 
+#define CELL_H1_TOP_MARGIN -5
+#define CELL_H1_FONT FONT_KEY_GOTHIC_24_BOLD
+
+#define CELL_H2_FONT FONT_KEY_GOTHIC_18
+
+#define CELL_HEIGHT 60
+#define CELL_LEFT_MARGIN 5
+#define CELL_TEXT_COLOR GColorWhite
 
 static Window *s_bus_stops_window;
 static MenuLayer *s_bus_stops_menu_layer;
 static TextLayer *s_loading_text_layer; 
+
+static int16_t s_cell_h1_height = 0;
+static int16_t s_cell_h2_height = 0;
+
 
 static uint16_t callback_menu_layer_get_num_rows(struct MenuLayer* menu_layer, uint16_t section_index, void *callback_context) {
     
     return numberOfBusStops();
 }
 
+static int16_t callback_menu_layer_get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
+
+    return CELL_HEIGHT;
+}
+
 // callback to draw all the rows
 static void callback_menu_layer_draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
-    uint16_t row_index = cell_index->row;
-    char* title = bus_stop_list[row_index][0];
-    char* subtitle = bus_stop_list[row_index][1];
 
-    menu_cell_basic_draw(ctx, cell_layer, title, subtitle, NULL);
+    // this guard is needed to prevent crashing when switching back and forth quickly
+    if (ctx && cell_layer && cell_index) {
+        graphics_context_set_text_color(ctx, CELL_TEXT_COLOR);
 
+        uint16_t row_index = cell_index->row;
+        char* title = bus_stop_list[row_index][0];
+        char* subtitle = bus_stop_list[row_index][1];
+        char* stop_id = bus_stop_list[row_index][2];
+
+        GRect cell_bounds = layer_get_bounds(cell_layer);
+
+
+        GRect title_bounds = GRect(cell_bounds.origin.x + CELL_LEFT_MARGIN, cell_bounds.origin.y + CELL_H1_TOP_MARGIN, cell_bounds.size.w, s_cell_h1_height);
+        graphics_draw_text(ctx, title, fonts_get_system_font(CELL_H1_FONT), title_bounds, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+        
+        GRect subtitle_bounds = GRect(cell_bounds.origin.x + CELL_LEFT_MARGIN, title_bounds.origin.y + title_bounds.size.h, cell_bounds.size.w, s_cell_h2_height);
+        graphics_draw_text(ctx, subtitle, fonts_get_system_font(CELL_H2_FONT), subtitle_bounds, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+        
+        GRect stop_id_bounds = GRect(cell_bounds.origin.x + CELL_LEFT_MARGIN, subtitle_bounds.origin.y + subtitle_bounds.size.h, cell_bounds.size.w, s_cell_h2_height);
+        graphics_draw_text(ctx, stop_id, fonts_get_system_font(CELL_H2_FONT), stop_id_bounds, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+
+
+    }
 }
 
 // Whatp happens when the select button is pushed
@@ -33,13 +68,17 @@ static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuI
 }
 
 static void menu_load() {
+    s_cell_h1_height = get_font_height(s_bus_stops_window, CELL_H1_FONT);
+    s_cell_h2_height = get_font_height(s_bus_stops_window, CELL_H2_FONT);
+
     Layer *window_layer = window_get_root_layer(s_bus_stops_window);
     s_bus_stops_menu_layer = menu_layer_create(layer_get_bounds(window_layer));
 
     menu_layer_set_callbacks(s_bus_stops_menu_layer, bus_stop_list, (MenuLayerCallbacks) {
         .get_num_rows = callback_menu_layer_get_num_rows,
         .draw_row = callback_menu_layer_draw_row,
-        .select_click = callback_menu_layer_select_click
+        .select_click = callback_menu_layer_select_click,
+        .get_cell_height = callback_menu_layer_get_cell_height
     });
 
     menu_layer_set_up(s_bus_stops_menu_layer);
