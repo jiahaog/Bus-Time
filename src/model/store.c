@@ -1,6 +1,6 @@
 #include "store.h"
 
-#define MESSAGE_DELIMITER ','
+#define MESSAGE_DELIMITER '|'
 
 char s_bus_stop_string_buffer[BUS_STOP_LIST_MAX_ELEMENTS][STRING_SIZE];
 char s_service_list_string_buffer[SERVICE_LIST_MAX_ELEMENTS][STRING_SIZE];

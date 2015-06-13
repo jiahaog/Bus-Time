@@ -185,6 +185,8 @@ const MISC_KEYS = {
     data: 'data' // key to store objects in localstorage
 };
 
+const MESSAGE_DELIMITER = '|';
+
 
 // keys to access DataMall api response
 const RESPONSE_KEYS = {
@@ -377,7 +379,7 @@ function parseForServicesList(record) {
         // only push if service is operational
         if (currentService[RESPONSE_KEYS.status] === RESPONSE_KEYS.inOperation) {
             var nextBusArrivalTime = getTimeToArrival(currentService[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival]) || "Arr.";
-            result.push(currentService[RESPONSE_KEYS.serviceNo] + ',' + nextBusArrivalTime);
+            result.push(currentService[RESPONSE_KEYS.serviceNo] + MESSAGE_DELIMITER + nextBusArrivalTime);
         }
     }
 
@@ -447,8 +449,8 @@ function processLocation() {
             for (var i = 0; i < nearbyBusStops.length; i++) {
                 var busStop = nearbyBusStops[i];
                 descriptions.push(
-                    busStop[busStops.CLOSEST_BUS_STOP_KEYS.description] + ',' +
-                    busStop[busStops.CLOSEST_BUS_STOP_KEYS.road] + ',' +
+                    busStop[busStops.CLOSEST_BUS_STOP_KEYS.description] + MESSAGE_DELIMITER +
+                    busStop[busStops.CLOSEST_BUS_STOP_KEYS.road] + MESSAGE_DELIMITER +
                     busStop[busStops.CLOSEST_BUS_STOP_KEYS.stopId]);
 
                 stopIds.push(busStop[busStops.CLOSEST_BUS_STOP_KEYS.stopId]);
