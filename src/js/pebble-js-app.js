@@ -376,7 +376,8 @@ function parseForServicesList(record) {
 
         // only push if service is operational
         if (currentService[RESPONSE_KEYS.status] === RESPONSE_KEYS.inOperation) {
-            result.push(currentService[RESPONSE_KEYS.serviceNo]);
+            var nextBusArrivalTime = getTimeToArrival(currentService[RESPONSE_KEYS.nextBus][RESPONSE_KEYS.estimatedArrival]) || "Arr.";
+            result.push(currentService[RESPONSE_KEYS.serviceNo] + ',' + nextBusArrivalTime);
         }
     }
 
@@ -449,7 +450,7 @@ function processLocation() {
                     busStop[busStops.CLOSEST_BUS_STOP_KEYS.description] + ',' +
                     busStop[busStops.CLOSEST_BUS_STOP_KEYS.road] + ',' +
                     busStop[busStops.CLOSEST_BUS_STOP_KEYS.stopId]);
-               
+
                 stopIds.push(busStop[busStops.CLOSEST_BUS_STOP_KEYS.stopId]);
             }
 

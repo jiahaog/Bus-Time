@@ -58,6 +58,7 @@ void split_bus_stop_data() {
     for (int j = 0; j < get_bus_stop_list_count(); j++) {
         char *currentBusStopString = s_bus_stop_string_buffer[j];
 
+
         int delimiters[BUS_STOP_LIST_MESSAGE_PARTS - 1];
         int delimiter_counter = 0;
         
@@ -83,6 +84,7 @@ void split_bus_stop_data() {
                 current_char_counter++;
             }
         }
+
     }
 }
 
@@ -91,33 +93,30 @@ void split_service_list_data() {
     for (int j = 0; j < get_service_list_count(); j++) {
         char *current_string = s_service_list_string_buffer[j];
 
-        strcpy(service_list[j][0], current_string);
-        // service_list[j][0] = *current_string;
-
-        // int delimiters[BUS_STOP_LIST_MESSAGE_PARTS - 1];
-        // int delimiter_counter = 0;
+        int delimiters[20];
+        int delimiter_counter = 0;
         
-        // for (int i = 0; (unsigned)i < strlen(current_string); i++) {
+        for (int i = 0; (unsigned)i < strlen(current_string); i++) {
             
-        //     if (current_string[i] == MESSAGE_DELIMITER) {
-        //         delimiters[delimiter_counter] = i;
-        //         delimiter_counter++;
-        //     }
-        // }
+            if (current_string[i] == MESSAGE_DELIMITER) {
+                delimiters[delimiter_counter] = i;
+                delimiter_counter++;
+            }
+        }
     
-        // delimiter_counter = 0;
-        // int current_char_counter = 0;
-        // for (int i = 0; (unsigned)i < strlen(current_string); i++) {
-        //     char currentChar = current_string[i];
+        delimiter_counter = 0;
+        int current_char_counter = 0;
+        for (int i = 0; (unsigned)i < strlen(current_string); i++) {
+            char currentChar = current_string[i];
             
-        //     if (i == delimiters[delimiter_counter]) {
-        //         delimiter_counter++;
-        //         current_char_counter = 0;
-        //         continue;
-        //     } else {
-        //         bus_stop_list[j][delimiter_counter][current_char_counter] = currentChar;
-        //         current_char_counter++;
-        //     }
-        // }
+            if (i == delimiters[delimiter_counter]) {
+                delimiter_counter++;
+                current_char_counter = 0;
+                continue;
+            } else {
+                service_list[j][delimiter_counter][current_char_counter] = currentChar;
+                current_char_counter++;
+            }
+        }
     }
 }
