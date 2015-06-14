@@ -173,7 +173,7 @@ function watchBusStop(stopId) {
     watchBusStopIntervalId = setInterval(function () {
         console.log('Updating services list');
         sendAndManageServicesList(stopId);
-    }, 5000); //todo change the interval here to use the constant defined above
+    }, WATCH_BUS_STOP_INTERVAL);
 
 }
 

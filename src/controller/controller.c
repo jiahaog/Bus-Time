@@ -73,7 +73,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
                 snprintf(message_buffer, sizeof(message_buffer), "%s", t->value->cstring);
                 details_window_set_text(message_buffer);
-                APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting details window text!");
+                // APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting details window text!");
                 break;
 
             case KEY_ERROR:
