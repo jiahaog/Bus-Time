@@ -11,15 +11,17 @@ var recordCache = require('./recordCache');
 
 var lastBusStopsIDsSent = [];
 var lastStopID; // hold the last bus stop id so we know which bus stop to query for arrivals
+var lastAppMessageTime;
 var watchBusStopIntervalId;
 var watchBusServiceIntervalId;
 
 if (constants.RELEASE_MODE) {
-    var REFRESH_INTERVAL = 60*1000;
+    var REFRESH_INTERVAL = 60*1000; // 1 min
 } else {
-    REFRESH_INTERVAL = 10*1000;
+    REFRESH_INTERVAL = 10*1000; // 10 sec
 }
 
+const REFRESH_TIMEOUT = 10*60*1000; // 10 min
 
 /**
  * Gets the location of the watch and sends nearby bus stops to the watch
@@ -175,6 +177,7 @@ function watchBusStop(stopId) {
                 }
             }
         });
+        checkIfAppTimeout();
     }
 
     if (watchBusStopIntervalId) {
@@ -204,6 +207,7 @@ function watchBusServiceDetails(stopId, serviceNo) {
                 }
             }
         });
+        checkIfAppTimeout();
     }
 
     if (watchBusServiceIntervalId) {
@@ -222,10 +226,25 @@ function watchBusServiceDetails(stopId, serviceNo) {
 
 }
 
+/**
+ * Checks if the last app message is within the REFRESH_TIMEOUT, and clears intervals if so
+ */
+function checkIfAppTimeout() {
+
+    const currentTime = Date.now();
+    console.log(currentTime - lastAppMessageTime);
+    if (currentTime - lastAppMessageTime > REFRESH_TIMEOUT) {
+        clearInterval(watchBusStopIntervalId);
+        clearInterval(watchBusServiceIntervalId);
+        console.log('App timeout. Cleared poll intervals');
+    }
+}
+
 
 function processReceivedMessage(event) {
 
     const payload = event[constants.MISC_KEYS.payload];
+
 
     for (var key in payload) {
         if (payload.hasOwnProperty(key)) {
@@ -233,13 +252,14 @@ function processReceivedMessage(event) {
             var value = payload[key];
 
             if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START) {
-
+                lastAppMessageTime = Date.now();
                 var stopId = lastBusStopsIDsSent[value];
                 watchBusStop(stopId);
 
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
                 // enter the services details page from services list
 
+                lastAppMessageTime = Date.now();
                 console.log('Received request for service: ' + value);
 
                 // stop watching the bus services list
@@ -247,8 +267,11 @@ function processReceivedMessage(event) {
 
                 // watch the service details
                 watchBusServiceDetails(lastStopID, value);
+
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_END) {
                 // going back to services list from details window
+
+                lastAppMessageTime = Date.now();
 
                 // stop watching the service details
                 clearInterval(watchBusServiceIntervalId);
@@ -258,8 +281,8 @@ function processReceivedMessage(event) {
 
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_END) {
                 // going back to bus stop list from bus services list
-
-                // stop watching teh bus services list
+                lastAppMessageTime = Date.now();
+                // stop watching the bus services list
                 clearInterval(watchBusStopIntervalId);
             }
         }

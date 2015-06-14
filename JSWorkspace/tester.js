@@ -1,5 +1,3 @@
 
 
-var a = 'a';
-
-clearInterval(a);
+console.log(undefined - 5);
