@@ -8,18 +8,21 @@ static GBitmapSequence *s_sequence = NULL;
 static AppTimer *s_animation_timer;
 
 static void timer_handler(void *context) {
-    uint32_t next_delay;
-    
-    if (gbitmap_sequence_update_bitmap_next_frame(s_sequence, s_bitmap, &next_delay)) {
-        bitmap_layer_set_bitmap(s_bitmap_layer, s_bitmap);
-        layer_mark_dirty(bitmap_layer_get_layer(s_bitmap_layer));
+    if (s_bitmap_layer) {
+        uint32_t next_delay;
+        
+        if (gbitmap_sequence_update_bitmap_next_frame(s_sequence, s_bitmap, &next_delay)) {
+            bitmap_layer_set_bitmap(s_bitmap_layer, s_bitmap);
+            layer_mark_dirty(bitmap_layer_get_layer(s_bitmap_layer));
+            
 
-        s_animation_timer = app_timer_register(next_delay, timer_handler, NULL);
-    
-    } else {
-        gbitmap_sequence_restart(s_sequence);
+                s_animation_timer = app_timer_register(next_delay, timer_handler, NULL);
+        
+        
+        } else {
+            gbitmap_sequence_restart(s_sequence);
+        }
     }
-
 }
 
 
