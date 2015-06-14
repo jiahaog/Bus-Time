@@ -89,7 +89,7 @@ function distanceFrom(point1, point2) {
  */
 function testDistance() {
     // point taken from google places OPP TROPICANA CONDO
-    gmapsPoint = [
+    var gmapsPoint = [
         1.340414,
         103.961279
     ];

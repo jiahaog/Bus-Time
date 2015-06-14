@@ -14,7 +14,12 @@ var lastStopID; // hold the last bus stop id so we know which bus stop to query 
 var watchBusStopIntervalId;
 var watchBusServiceIntervalId;
 
-const WATCH_BUS_STOP_INTERVAL = 10*1000; // todo supposed to be 1 min (1*60*1000)
+if (constants.RELEASE_MODE) {
+    var REFRESH_INTERVAL = 60*1000;
+} else {
+    REFRESH_INTERVAL = 10*1000;
+}
+
 
 /**
  * Gets the location of the watch and sends nearby bus stops to the watch
@@ -184,7 +189,7 @@ function watchBusStop(stopId) {
     watchBusStopIntervalId = setInterval(function () {
         console.log('Updating services list');
         sendAndManageServicesList(stopId);
-    }, WATCH_BUS_STOP_INTERVAL);
+    }, REFRESH_INTERVAL);
 }
 
 function watchBusServiceDetails(stopId, serviceNo) {
@@ -213,7 +218,7 @@ function watchBusServiceDetails(stopId, serviceNo) {
     watchBusServiceIntervalId = setInterval(function () {
         console.log('Updating service details');
         sendAndManageServiceDetails(stopId, serviceNo);
-    }, WATCH_BUS_STOP_INTERVAL);
+    }, REFRESH_INTERVAL);
 
 }
 

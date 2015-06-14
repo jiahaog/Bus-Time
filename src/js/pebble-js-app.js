@@ -90,7 +90,7 @@ function distanceFrom(point1, point2) {
  */
 function testDistance() {
     // point taken from google places OPP TROPICANA CONDO
-    gmapsPoint = [
+    var gmapsPoint = [
         1.340414,
         103.961279
     ];
@@ -130,6 +130,9 @@ module.exports = {
  */
 
 var config = require('./config');
+
+// change this to false for testing, which will affect polling and record live intervals
+const RELEASE_MODE = true;
 
 const API_URL = 'http://datamall2.mytransport.sg/ltaodataservice/BusArrival';
 const REQUEST_HEADERS = {
@@ -197,7 +200,8 @@ module.exports = {
     MISC_KEYS: MISC_KEYS,
     MESSAGE_DELIMITER: MESSAGE_DELIMITER,
     RESPONSE_KEYS: RESPONSE_KEYS,
-    ERROR_CODES: ERROR_CODES
+    ERROR_CODES: ERROR_CODES,
+    RELEASE_MODE: RELEASE_MODE
 };
 },{"./config":2}],4:[function(require,module,exports){
 /**
@@ -233,7 +237,12 @@ var lastStopID; // hold the last bus stop id so we know which bus stop to query 
 var watchBusStopIntervalId;
 var watchBusServiceIntervalId;
 
-const WATCH_BUS_STOP_INTERVAL = 10*1000; // todo supposed to be 1 min (1*60*1000)
+if (constants.RELEASE_MODE) {
+    var REFRESH_INTERVAL = 60*1000;
+} else {
+    REFRESH_INTERVAL = 10*1000;
+}
+
 
 /**
  * Gets the location of the watch and sends nearby bus stops to the watch
@@ -403,7 +412,7 @@ function watchBusStop(stopId) {
     watchBusStopIntervalId = setInterval(function () {
         console.log('Updating services list');
         sendAndManageServicesList(stopId);
-    }, WATCH_BUS_STOP_INTERVAL);
+    }, REFRESH_INTERVAL);
 }
 
 function watchBusServiceDetails(stopId, serviceNo) {
@@ -432,7 +441,7 @@ function watchBusServiceDetails(stopId, serviceNo) {
     watchBusServiceIntervalId = setInterval(function () {
         console.log('Updating service details');
         sendAndManageServiceDetails(stopId, serviceNo);
-    }, WATCH_BUS_STOP_INTERVAL);
+    }, REFRESH_INTERVAL);
 
 }
 
@@ -1734,9 +1743,9 @@ pebbleHelpers.addEventListener.onAppMessage(function (event) {
 
 
 /**
- * Appends query paramteres to a url
+ * Appends query parameters to a url
  *
- * @param {obj} url keys will be used as the query keys, and values as the value
+ * @param {object} url keys will be used as the query keys, and values as the value
  * @param params
  */
 function appendParamsToUrl(url, params) {
@@ -1854,7 +1863,6 @@ function sendMessageStream(startKey, valueKey, endKey, messages) {
 function xhrRequest(url, type, headers, params, callback) {
     console.log('Making REST request...');
 
-    // todo implement some error catching here
     const urlWithParams = appendParamsToUrl(url, params);
 
     var req = new XMLHttpRequest();
@@ -1876,7 +1884,7 @@ function xhrRequest(url, type, headers, params, callback) {
         }
 
     };
-    
+
     req.open(type, urlWithParams);
 
     for (var key in headers) {
@@ -2035,7 +2043,13 @@ var recordParser = require('./recordParser');
 var pebbleHelpers = require('./pebbleHelpers');
 
 var store;
-const RECORD_LIVE_DURATION = 60*60*1000; // in ms (todo temporarily set to 60 mins)
+
+// time the record is alive
+if (constants.RELEASE_MODE) {
+    var RECORD_LIVE_DURATION = 60*1000; // 1 min
+} else {
+    RECORD_LIVE_DURATION = 60*60*1000; // 1 hour
+}
 
 /**
  * Queries the store for a valid record that falls within the threshold and has the same stopId

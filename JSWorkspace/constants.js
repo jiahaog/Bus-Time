@@ -4,6 +4,9 @@
 
 var config = require('./config');
 
+// change this to false for testing, which will affect polling and record live intervals
+const RELEASE_MODE = true;
+
 const API_URL = 'http://datamall2.mytransport.sg/ltaodataservice/BusArrival';
 const REQUEST_HEADERS = {
     AccountKey: config.MY_TRANSPORT_KEYS.AccountKey,
@@ -70,5 +73,6 @@ module.exports = {
     MISC_KEYS: MISC_KEYS,
     MESSAGE_DELIMITER: MESSAGE_DELIMITER,
     RESPONSE_KEYS: RESPONSE_KEYS,
-    ERROR_CODES: ERROR_CODES
+    ERROR_CODES: ERROR_CODES,
+    RELEASE_MODE: RELEASE_MODE
 };

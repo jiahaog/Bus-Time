@@ -4,9 +4,9 @@
 
 
 /**
- * Appends query paramteres to a url
+ * Appends query parameters to a url
  *
- * @param {obj} url keys will be used as the query keys, and values as the value
+ * @param {object} url keys will be used as the query keys, and values as the value
  * @param params
  */
 function appendParamsToUrl(url, params) {
@@ -124,7 +124,6 @@ function sendMessageStream(startKey, valueKey, endKey, messages) {
 function xhrRequest(url, type, headers, params, callback) {
     console.log('Making REST request...');
 
-    // todo implement some error catching here
     const urlWithParams = appendParamsToUrl(url, params);
 
     var req = new XMLHttpRequest();
@@ -146,7 +145,7 @@ function xhrRequest(url, type, headers, params, callback) {
         }
 
     };
-    
+
     req.open(type, urlWithParams);
 
     for (var key in headers) {

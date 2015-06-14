@@ -7,7 +7,13 @@ var recordParser = require('./recordParser');
 var pebbleHelpers = require('./pebbleHelpers');
 
 var store;
-const RECORD_LIVE_DURATION = 60*60*1000; // in ms (todo temporarily set to 60 mins)
+
+// time the record is alive
+if (constants.RELEASE_MODE) {
+    var RECORD_LIVE_DURATION = 60*1000; // 1 min
+} else {
+    RECORD_LIVE_DURATION = 60*60*1000; // 1 hour
+}
 
 /**
  * Queries the store for a valid record that falls within the threshold and has the same stopId
