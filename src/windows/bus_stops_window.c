@@ -56,8 +56,8 @@ static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuI
     // only act on the button click if the number of rows is more than zero
     if (get_bus_stop_list_count() > 0) {
         int currentBusStopIndex = cell_index->row;
-        send_app_message_int(KEY_BUS_SERVICE_LIST_START, currentBusStopIndex);
         services_window_push();
+        send_app_message_int(KEY_BUS_SERVICE_LIST_START, currentBusStopIndex);
     }
 }
 

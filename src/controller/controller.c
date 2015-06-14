@@ -98,6 +98,7 @@ static void inbox_dropped_callback(AppMessageResult reason, void *context) {
 
 static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
+    APP_LOG(APP_LOG_LEVEL_ERROR, "%i", reason);
 }
 
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
@@ -117,6 +118,9 @@ bool controller_init() {
         app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 
         bluetooth_connection_service_subscribe(bluetooth_event_callback);
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Watch inbox opened and callbacks registered");
         return true;
     }
+
+
 }
