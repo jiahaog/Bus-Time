@@ -27,6 +27,11 @@
         "type": "png",
         "name": "IMAGE_ALERT_SET",
         "file": "images/alert_set.png"
+      },
+      {
+      "type": "raw",
+      "name": "ANIMATION_LOADING",
+      "file": "animation/loading.png"  
       }
     ]
   },

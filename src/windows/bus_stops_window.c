@@ -87,12 +87,17 @@ static void window_load(Window *window) {
     Layer *window_layer = window_get_root_layer(window);   
     GRect bounds = layer_get_bounds(window_layer);
 
-    // Create and Add to layer hierarchy:
-    s_loading_text_layer = text_layer_create(bounds);
-    text_layer_set_up(s_loading_text_layer);
-    
-    text_layer_set_text(s_loading_text_layer, "Loading...");
-    layer_add_child(window_layer, text_layer_get_layer(s_loading_text_layer));
+    // // Create and Add to layer hierarchy:
+
+
+    #ifdef PBL_PLATFORM_APLITE
+        s_loading_text_layer = text_layer_create(bounds);
+        text_layer_set_up(s_loading_text_layer);
+        text_layer_set_text(s_loading_text_layer, "Loading...");
+        layer_add_child(window_layer, text_layer_get_layer(s_loading_text_layer));
+    #else
+        create_loading_animation(window);
+    #endif
 }
 
 static void window_unload(Window *window) {
@@ -100,6 +105,10 @@ static void window_unload(Window *window) {
     window_destroy(window);
     s_bus_stops_menu_layer = NULL;
     s_bus_stops_window = NULL;
+
+    #ifdef PBL_PLATFORM_BASALT
+        destroy_loading_animation();
+    #endif
     
 }
 

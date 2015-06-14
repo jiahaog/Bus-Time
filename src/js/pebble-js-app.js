@@ -392,7 +392,7 @@ function watchBusStop(stopId) {
     watchBusStopIntervalId = setInterval(function () {
         console.log('Updating services list');
         sendAndManageServicesList(stopId);
-    }, WATCH_BUS_STOP_INTERVAL); 
+    }, WATCH_BUS_STOP_INTERVAL);
 
 }
 
@@ -1972,7 +1972,7 @@ var recordParser = require('./recordParser');
 var pebbleHelpers = require('./pebbleHelpers');
 
 var store;
-const RECORD_LIVE_DURATION = 60*60*1000; // in ms (temporarily set to 60 mins)
+const RECORD_LIVE_DURATION = 60*60*1000; // in ms (todo temporarily set to 60 mins)
 
 /**
  * Queries the store for a valid record that falls within the threshold and has the same stopId
