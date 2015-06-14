@@ -21,7 +21,7 @@ CLOSEST_BUS_STOP_KEYS = {
 };
 
 NEARBY_THRESHOLD = 500; // 500m
-MAX_NEARBY = 5;
+MAX_NEARBY = 10;
 
 /**
  * Iterates through the data store and finds the nearby bus stops that fall within the threshold

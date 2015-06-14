@@ -22,7 +22,7 @@ CLOSEST_BUS_STOP_KEYS = {
 };
 
 NEARBY_THRESHOLD = 500; // 500m
-MAX_NEARBY = 5;
+MAX_NEARBY = 10;
 
 /**
  * Iterates through the data store and finds the nearby bus stops that fall within the threshold
@@ -246,7 +246,7 @@ if (constants.RELEASE_MODE) {
 }
 
 //const REFRESH_TIMEOUT = 10*60*1000; // 10 min
-const REFRESH_TIMEOUT = 30*1000; // 10 min
+const REFRESH_TIMEOUT = 10*60*1000; // 10 min
 
 /**
  * Gets the location of the watch and sends nearby bus stops to the watch
