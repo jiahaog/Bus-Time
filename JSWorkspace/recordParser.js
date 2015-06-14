@@ -21,13 +21,13 @@ var constants = require('./constants');
  *
  *
  * @param arrivalString utc date string
- * @returns {string} e.g. '1m 20s', null if negative
+ * @returns {string} e.g. '1m 20s', null if negative, '-' if the data received from myTransport is null
  */
 function getTimeToArrival(arrivalString) {
-    // todo WHAT IS THIS
-    if (arrivalString === 'null') {
-        console.log('Unable to get parse arrival time');
-        return arrivalString;
+    if (!arrivalString) {
+        console.log('Unable to get parse arrival time: ' + arrivalString);
+        // assumes that the time is unavailable
+        return '-';
     }
 
     const utcArrival = Date.parse(arrivalString);
