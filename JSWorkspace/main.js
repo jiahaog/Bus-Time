@@ -156,7 +156,7 @@ function watchBusStop(stopId) {
                 // if the interval has been set
                 if (watchBusStopIntervalId) {
                     console.log('Clearing interval');
-                    clearInterval(intervalId);
+                    clearInterval(watchBusStopIntervalId);
                 }
             }
         });
@@ -166,11 +166,14 @@ function watchBusStop(stopId) {
         clearInterval(watchBusStopIntervalId);
     }
 
+    console.log('Watching bus stop: ' + stopId);
+
     lastStopID = stopId;
     sendAndManageServicesList(stopId);
     watchBusStopIntervalId = setInterval(function () {
+        console.log('Updating services list');
         sendAndManageServicesList(stopId);
-    }, 1000); //todo change the interval here to use the constant defined above
+    }, 5000); //todo change the interval here to use the constant defined above
 
 }
 

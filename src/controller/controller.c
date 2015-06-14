@@ -99,7 +99,7 @@ static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResul
 }
 
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
+    // APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
 
 bool controller_init() {

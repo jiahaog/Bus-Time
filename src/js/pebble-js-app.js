@@ -229,7 +229,8 @@ var recordCache = require('./recordCache');
 
 
 var lastBusStopsIDsSent = [];
-var lastStopID;
+var lastStopID; // hold the last bus stop id so we know which bus stop to query for arrivals
+var watchBusStopIntervalId;
 
 const WATCH_BUS_STOP_INTERVAL = 1*60*1000; // 1 min
 
@@ -371,22 +372,27 @@ function watchBusStop(stopId) {
     function sendAndManageServicesList(stopId) {
         sendServicesList(stopId, function (error) {
             if (error) {
-                console.log("Send service list erorr");
                 // if the interval has been set
-                if (intervalId) {
+                if (watchBusStopIntervalId) {
                     console.log('Clearing interval');
-                    clearInterval(intervalId);
+                    clearInterval(watchBusStopIntervalId);
                 }
             }
         });
     }
 
-    lastStopID = stopId;
+    if (watchBusStopIntervalId) {
+        clearInterval(watchBusStopIntervalId);
+    }
 
+    console.log('Watching bus stop: ' + stopId);
+
+    lastStopID = stopId;
     sendAndManageServicesList(stopId);
-    var intervalId = setInterval(function () {
+    watchBusStopIntervalId = setInterval(function () {
+        console.log('Updating services list');
         sendAndManageServicesList(stopId);
-    }, 1000);
+    }, 5000); //todo change the interval here to use the constant defined above
 
 }
 
@@ -2107,13 +2113,13 @@ var constants = require('./constants');
  *
  *
  * @param arrivalString utc date string
- * @returns {string} e.g. '1m 20s', null if negative
+ * @returns {string} e.g. '1m 20s', null if negative, '-' if the data received from myTransport is null
  */
 function getTimeToArrival(arrivalString) {
-    // todo WHAT IS THIS
-    if (arrivalString === 'null') {
-        console.log('Unable to get parse arrival time');
-        return arrivalString;
+    if (!arrivalString) {
+        console.log('Unable to get parse arrival time: ' + arrivalString);
+        // assumes that the time is unavailable
+        return '-';
     }
 
     const utcArrival = Date.parse(arrivalString);
