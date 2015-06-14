@@ -1,9 +1,5 @@
 #include "view_setup_helper.h"
 
-#define COLOR_BACKGROUND GColorBlack
-#define COLOR_SECONDARY GColorDarkCandyAppleRed
-#define COLOR_TEXT GColorWhite
-#define FONT_BASIC_TEXT FONT_KEY_GOTHIC_24
 
 
 

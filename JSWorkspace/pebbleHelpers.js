@@ -122,7 +122,7 @@ function sendMessageStream(startKey, valueKey, endKey, messages) {
  * @param {sendMessageCallback} callback
  */
 function xhrRequest(url, type, headers, params, callback) {
-    console.log('Making request...');
+    console.log('Making REST request...');
 
     // todo implement some error catching here
     const urlWithParams = appendParamsToUrl(url, params);
@@ -132,6 +132,7 @@ function xhrRequest(url, type, headers, params, callback) {
         console.log('XHR ERROR ' + JSON.stringify(error));
         callback('error', undefined);
     };
+
     req.onload = function(e) {
 
         if (req.readyState == 4 && req.status == 200) {
@@ -145,6 +146,7 @@ function xhrRequest(url, type, headers, params, callback) {
         }
 
     };
+    
     req.open(type, urlWithParams);
 
     for (var key in headers) {

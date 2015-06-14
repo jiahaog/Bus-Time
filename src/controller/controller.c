@@ -66,16 +66,13 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 break;
             case KEY_BUS_SERVICE_LIST_END:
                 split_service_list_data();
-                APP_LOG(APP_LOG_LEVEL_DEBUG, "received end message Bus service list");
                 services_window_reload_menu();
-                APP_LOG(APP_LOG_LEVEL_DEBUG, "Services window reloaded");  
                 break;
 
             case KEY_BUS_SERVICE_DETAILS_VALUE:
 
                 snprintf(message_buffer, sizeof(message_buffer), "%s", t->value->cstring);
                 details_window_set_text(message_buffer);
-                // APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting details window text!");
                 break;
 
             case KEY_ERROR:

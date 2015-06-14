@@ -231,6 +231,7 @@ var recordCache = require('./recordCache');
 var lastBusStopsIDsSent = [];
 var lastStopID; // hold the last bus stop id so we know which bus stop to query for arrivals
 var watchBusStopIntervalId;
+var watchBusServiceIntervalId;
 
 const WATCH_BUS_STOP_INTERVAL = 10*1000; // todo supposed to be 1 min (1*60*1000)
 
@@ -330,11 +331,18 @@ function sendServicesList(stopId, callback) {
     });
 }
 
-function sendServiceDetails(stopId, serviceNo) {
+/**
+ *
+ * @param stopId
+ * @param serviceNo
+ * @param {sentAppMessageCallback} callback
+ */
+function sendServiceDetails(stopId, serviceNo, callback) {
     recordCache.getBusTimings(stopId, serviceNo, function(error, record) {
         if (error) {
             console.log('Error getting bus timings');
             sendErrorCode(constants.ERROR_CODES.NETWORK_ERROR);
+            callback(error);
         } else {
             //console.log(JSON.stringify(record));
             const serviceDetails = recordParser.parseForServiceDetails(record, serviceNo);
@@ -350,7 +358,9 @@ function sendServiceDetails(stopId, serviceNo) {
                     serviceDetails[constants.RESPONSE_KEYS.subsequentBus][constants.RESPONSE_KEYS.estimatedArrival] + '\n' +
                     serviceDetails[constants.RESPONSE_KEYS.subsequentBus][constants.RESPONSE_KEYS.load];
             } else {
-                messageString = 'Service not found'
+                messageString = 'Service details for service ' + serviceNo + ' not found!';
+                console.log(messageString);
+                callback(messageString);
             }
 
             var dictionaryMessage = {};
@@ -374,7 +384,7 @@ function watchBusStop(stopId) {
             if (error) {
                 // if the interval has been set
                 if (watchBusStopIntervalId) {
-                    console.log('Clearing interval');
+                    console.log('Clearing interval for bus stop');
                     clearInterval(watchBusStopIntervalId);
                 }
             }
@@ -385,16 +395,47 @@ function watchBusStop(stopId) {
         clearInterval(watchBusStopIntervalId);
     }
 
-    console.log('Watching bus stop: ' + stopId);
+    console.log('Watching bus stop id: ' + stopId);
 
     lastStopID = stopId;
+
     sendAndManageServicesList(stopId);
     watchBusStopIntervalId = setInterval(function () {
         console.log('Updating services list');
         sendAndManageServicesList(stopId);
     }, WATCH_BUS_STOP_INTERVAL);
+}
+
+function watchBusServiceDetails(stopId, serviceNo) {
+
+    function sendAndManageServiceDetails(stopId, serviceNo) {
+        sendServiceDetails(stopId, serviceNo, function (error) {
+            if (error) {
+                // if the interval has been set
+                if (watchBusStopIntervalId) {
+                    console.log('Clearing interval for bus service details');
+                    clearInterval(watchBusServiceIntervalId);
+                }
+            }
+        });
+    }
+
+    if (watchBusServiceIntervalId) {
+        clearInterval(watchBusServiceIntervalId);
+    }
+
+    console.log('Watching bus service: ' + stopId + ', ' + serviceNo);
+
+
+    sendAndManageServiceDetails(stopId, serviceNo);
+
+    watchBusServiceIntervalId = setInterval(function () {
+        console.log('Updating service details');
+        sendAndManageServiceDetails(stopId, serviceNo);
+    }, WATCH_BUS_STOP_INTERVAL);
 
 }
+
 
 function processReceivedMessage(event) {
 
@@ -406,14 +447,23 @@ function processReceivedMessage(event) {
             var value = payload[key];
 
             if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START) {
-                var stopId = lastBusStopsIDsSent[value];
-                console.log('Received request for service list for stopID: ' + stopId);
-                watchBusStop(stopId);
+                console.log(value);
+                if (value === 99) {
+                    // this means we go back to the services list from the service details page
+                    clearInterval(watchBusServiceIntervalId);
+                    watchBusStop(lastStopID);
 
+                } else {
+                    var stopId = lastBusStopsIDsSent[value];
+
+                    watchBusStop(stopId);
+                }
 
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
                 console.log('Received request for service: ' + value);
-                sendServiceDetails(lastStopID, value);
+
+                clearInterval(watchBusStopIntervalId);
+                watchBusServiceDetails(lastStopID, value);
             }
         }
     }
@@ -1791,7 +1841,7 @@ function sendMessageStream(startKey, valueKey, endKey, messages) {
  * @param {sendMessageCallback} callback
  */
 function xhrRequest(url, type, headers, params, callback) {
-    console.log('Making request...');
+    console.log('Making REST request...');
 
     // todo implement some error catching here
     const urlWithParams = appendParamsToUrl(url, params);
@@ -1801,6 +1851,7 @@ function xhrRequest(url, type, headers, params, callback) {
         console.log('XHR ERROR ' + JSON.stringify(error));
         callback('error', undefined);
     };
+
     req.onload = function(e) {
 
         if (req.readyState == 4 && req.status == 200) {
@@ -1814,6 +1865,7 @@ function xhrRequest(url, type, headers, params, callback) {
         }
 
     };
+    
     req.open(type, urlWithParams);
 
     for (var key in headers) {

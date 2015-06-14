@@ -29,6 +29,7 @@ void action_bar_load() {
         action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_bitmap_set_alert);
     #else
         action_bar_layer_set_icon_animated(s_action_bar, BUTTON_ID_SELECT, s_bitmap_set_alert, true);
+        action_bar_layer_set_background_color(s_action_bar, COLOR_SECONDARY);
     #endif
 }
 
@@ -63,6 +64,9 @@ static void window_unload(Window *window) {
         memset(s_details_message, 0, sizeof s_details_message);
         destroy_loading_animation();
     #endif
+
+    // 999 is the code to tell js we are going back to the service screen
+    send_app_message_int(KEY_BUS_SERVICE_LIST_START, 99);
 }
 
 void details_window_push() {

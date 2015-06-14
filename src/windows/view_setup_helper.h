@@ -3,6 +3,10 @@
 #include <pebble.h>
 
 
+#define COLOR_BACKGROUND GColorBlack
+#define COLOR_SECONDARY GColorDarkCandyAppleRed
+#define COLOR_TEXT GColorWhite
+#define FONT_BASIC_TEXT FONT_KEY_GOTHIC_24
 
 #define CELL_H1_FONT FONT_KEY_GOTHIC_24_BOLD
 #define CELL_H2_FONT FONT_KEY_GOTHIC_18
