@@ -190,7 +190,8 @@ const ERROR_CODES = {
     NETWORK_ERROR: 1,
     NO_SERVICES_OPERATIONAL: 2,
     // 3 is used by the watch to handle error in bluetooth
-    LOCATION_ERROR: 4
+    LOCATION_ERROR: 4,
+    APP_TIMEOUT: 5
 };
 
 module.exports = {
@@ -244,6 +245,7 @@ if (constants.RELEASE_MODE) {
     REFRESH_INTERVAL = 10*1000; // 10 sec
 }
 
+//const REFRESH_TIMEOUT = 10*60*1000; // 10 min
 const REFRESH_TIMEOUT = 30*1000; // 10 min
 
 /**
@@ -391,16 +393,20 @@ function sendServiceDetails(stopId, serviceNo, callback) {
 function watchBusStop(stopId) {
 
     function sendAndManageServicesList(stopId) {
-        sendServicesList(stopId, function (error) {
-            if (error) {
-                // if the interval has been set
-                if (watchBusStopIntervalId) {
-                    console.log('Clearing interval for bus stop');
-                    clearInterval(watchBusStopIntervalId);
+        // if app has not timed out
+        if (!checkIfAppTimeout()) {
+            sendServicesList(stopId, function (error) {
+
+                if (error) {
+                    // if the interval has been set
+                    if (watchBusStopIntervalId) {
+                        console.log('Clearing interval for bus stop');
+                        clearInterval(watchBusStopIntervalId);
+                    }
                 }
-            }
-        });
-        checkIfAppTimeout();
+            });
+
+        }
     }
 
     if (watchBusStopIntervalId) {
@@ -421,16 +427,18 @@ function watchBusStop(stopId) {
 function watchBusServiceDetails(stopId, serviceNo) {
 
     function sendAndManageServiceDetails(stopId, serviceNo) {
-        sendServiceDetails(stopId, serviceNo, function (error) {
-            if (error) {
-                // if the interval has been set
-                if (watchBusStopIntervalId) {
-                    console.log('Clearing interval for bus service details');
-                    clearInterval(watchBusServiceIntervalId);
+        // if app has not timed out
+        if (!checkIfAppTimeout()) {
+            sendServiceDetails(stopId, serviceNo, function (error) {
+                if (error) {
+                    // if the interval has been set
+                    if (watchBusStopIntervalId) {
+                        console.log('Clearing interval for bus service details');
+                        clearInterval(watchBusServiceIntervalId);
+                    }
                 }
-            }
-        });
-        checkIfAppTimeout();
+            });
+        }
     }
 
     if (watchBusServiceIntervalId) {
@@ -455,11 +463,16 @@ function watchBusServiceDetails(stopId, serviceNo) {
 function checkIfAppTimeout() {
 
     const currentTime = Date.now();
-    console.log(currentTime - lastAppMessageTime);
+
     if (currentTime - lastAppMessageTime > REFRESH_TIMEOUT) {
         clearInterval(watchBusStopIntervalId);
         clearInterval(watchBusServiceIntervalId);
+        sendErrorCode(constants.ERROR_CODES.APP_TIMEOUT);
+
         console.log('App timeout. Cleared poll intervals');
+        return true;
+    } else {
+        return false;
     }
 }
 
@@ -491,7 +504,6 @@ function processReceivedMessage(event) {
                 // watch the service details
                 watchBusServiceDetails(lastStopID, value);
 
-
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_END) {
                 // going back to services list from details window
 
@@ -503,18 +515,14 @@ function processReceivedMessage(event) {
                 // start watching the bus services list
                 watchBusStop(lastStopID);
 
-
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_END) {
                 // going back to bus stop list from bus services list
                 lastAppMessageTime = Date.now();
-                // stop watching teh bus services list
+                // stop watching the bus services list
                 clearInterval(watchBusStopIntervalId);
-
-
             }
         }
     }
-    
 }
 
 // when the app is launched get the location and send nearby bus stops to the watch
@@ -1868,7 +1876,7 @@ function sendMessageStream(startKey, valueKey, endKey, messages) {
             sendMessage(messageToSend, function (error) {
                 if (error) {
                     console.log('Error sending messages to pebble!');
-                    console.log(error);
+                    console.log(JSON.stringify(error));
                 } else {
                     sendMessageRecursively();
                 }
@@ -1945,7 +1953,7 @@ var addEventListener = {
 
     onAppMessage: function(callback) {
         Pebble.addEventListener('appmessage', function(event) {
-            console.log('AppMessage received!');
+            console.log('JS received AppMessage.');
             callback(event)
         });
     }

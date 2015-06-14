@@ -101,7 +101,7 @@ function sendMessageStream(startKey, valueKey, endKey, messages) {
             sendMessage(messageToSend, function (error) {
                 if (error) {
                     console.log('Error sending messages to pebble!');
-                    console.log(error);
+                    console.log(JSON.stringify(error));
                 } else {
                     sendMessageRecursively();
                 }
@@ -178,7 +178,7 @@ var addEventListener = {
 
     onAppMessage: function(callback) {
         Pebble.addEventListener('appmessage', function(event) {
-            console.log('AppMessage received!');
+            console.log('JS received AppMessage.');
             callback(event)
         });
     }

@@ -20,6 +20,9 @@ static void handleError(int code) {
     } else if (code == 4) {
         window_stack_pop_all(false);
         error_window_push((char*)"Failed to get location");
+    } else if (code == 5) {
+        window_stack_pop_all(false);
+        error_window_push((char*)"Reopen the app to continue");
     } else {
         APP_LOG(APP_LOG_LEVEL_ERROR, "Error code %i not recognized", code);
     }

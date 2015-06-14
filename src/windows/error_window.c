@@ -1,9 +1,11 @@
 #include "error_window.h"
 
+#define ERROR_MESSAGE_SIZE 30
+
 static Window *s_error_window;
 static TextLayer *s_error_text_layer;
 
-char s_error_message[25] = "DEFAULT ERROR MESSAGE";
+char s_error_message[ERROR_MESSAGE_SIZE] = "DEFAULT ERROR MESSAGE";
 
 static void window_load(Window *window) {
     window_set_up(window);

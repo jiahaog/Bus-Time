@@ -21,6 +21,7 @@ if (constants.RELEASE_MODE) {
     REFRESH_INTERVAL = 10*1000; // 10 sec
 }
 
+//const REFRESH_TIMEOUT = 10*60*1000; // 10 min
 const REFRESH_TIMEOUT = 10*60*1000; // 10 min
 
 /**
@@ -168,16 +169,20 @@ function sendServiceDetails(stopId, serviceNo, callback) {
 function watchBusStop(stopId) {
 
     function sendAndManageServicesList(stopId) {
-        sendServicesList(stopId, function (error) {
-            if (error) {
-                // if the interval has been set
-                if (watchBusStopIntervalId) {
-                    console.log('Clearing interval for bus stop');
-                    clearInterval(watchBusStopIntervalId);
+        // if app has not timed out
+        if (!checkIfAppTimeout()) {
+            sendServicesList(stopId, function (error) {
+
+                if (error) {
+                    // if the interval has been set
+                    if (watchBusStopIntervalId) {
+                        console.log('Clearing interval for bus stop');
+                        clearInterval(watchBusStopIntervalId);
+                    }
                 }
-            }
-        });
-        checkIfAppTimeout();
+            });
+
+        }
     }
 
     if (watchBusStopIntervalId) {
@@ -198,16 +203,18 @@ function watchBusStop(stopId) {
 function watchBusServiceDetails(stopId, serviceNo) {
 
     function sendAndManageServiceDetails(stopId, serviceNo) {
-        sendServiceDetails(stopId, serviceNo, function (error) {
-            if (error) {
-                // if the interval has been set
-                if (watchBusStopIntervalId) {
-                    console.log('Clearing interval for bus service details');
-                    clearInterval(watchBusServiceIntervalId);
+        // if app has not timed out
+        if (!checkIfAppTimeout()) {
+            sendServiceDetails(stopId, serviceNo, function (error) {
+                if (error) {
+                    // if the interval has been set
+                    if (watchBusStopIntervalId) {
+                        console.log('Clearing interval for bus service details');
+                        clearInterval(watchBusServiceIntervalId);
+                    }
                 }
-            }
-        });
-        checkIfAppTimeout();
+            });
+        }
     }
 
     if (watchBusServiceIntervalId) {
@@ -232,11 +239,16 @@ function watchBusServiceDetails(stopId, serviceNo) {
 function checkIfAppTimeout() {
 
     const currentTime = Date.now();
-    console.log(currentTime - lastAppMessageTime);
+
     if (currentTime - lastAppMessageTime > REFRESH_TIMEOUT) {
         clearInterval(watchBusStopIntervalId);
         clearInterval(watchBusServiceIntervalId);
+        sendErrorCode(constants.ERROR_CODES.APP_TIMEOUT);
+
         console.log('App timeout. Cleared poll intervals');
+        return true;
+    } else {
+        return false;
     }
 }
 

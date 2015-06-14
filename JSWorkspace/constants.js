@@ -63,7 +63,8 @@ const ERROR_CODES = {
     NETWORK_ERROR: 1,
     NO_SERVICES_OPERATIONAL: 2,
     // 3 is used by the watch to handle error in bluetooth
-    LOCATION_ERROR: 4
+    LOCATION_ERROR: 4,
+    APP_TIMEOUT: 5
 };
 
 module.exports = {
