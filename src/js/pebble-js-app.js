@@ -472,6 +472,11 @@ function processReceivedMessage(event) {
                 // start watching the bus services list
                 watchBusStop(lastStopID);
 
+            } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_END) {
+                // going back to bus stop list from bus services list
+                
+                // stop watching teh bus services list
+                clearInterval(watchBusStopIntervalId);
             }
         }
     }

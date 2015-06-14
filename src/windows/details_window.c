@@ -65,6 +65,7 @@ static void window_unload(Window *window) {
         destroy_loading_animation();
     #endif
 
+    // going back to the services list
     // tell js that we are done with the service details
     send_app_message_int(KEY_BUS_SERVICE_DETAILS_END, 1);
 }

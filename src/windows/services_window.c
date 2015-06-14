@@ -100,6 +100,10 @@ static void window_unload(Window *window) {
         destroy_loading_animation();
     #endif
 
+    // going back to the bus stop list
+    // tell js that we are done with the services list
+    send_app_message_int(KEY_BUS_SERVICE_LIST_END, 1);
+
 }
 
 void services_window_push() {
