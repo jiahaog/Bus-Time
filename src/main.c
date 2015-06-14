@@ -13,7 +13,7 @@ static void init(void) {
 
 static void deinit(void) {
 
-}
+} 
 
 int main(void) {
     init();

@@ -2,7 +2,8 @@
 
 #define BUS_STOP_CELL_H1_TOP_MARGIN -5
 #define BUS_STOP_CELL_HEIGHT 60
-#define BUS_STOP_CELL_LEFT_MARGIN 5
+
+#define BUS_STOP_CELL_X_PADDING 5
 
 
 static Window *s_bus_stops_window;
@@ -37,15 +38,16 @@ static void callback_menu_layer_draw_row(GContext *ctx, const Layer *cell_layer,
 
         GRect cell_bounds = layer_get_bounds(cell_layer);
 
+        int16_t cell_layer_width = cell_bounds.size.w - 2*BUS_STOP_CELL_X_PADDING;
 
-        GRect title_bounds = GRect(cell_bounds.origin.x + BUS_STOP_CELL_LEFT_MARGIN, cell_bounds.origin.y + BUS_STOP_CELL_H1_TOP_MARGIN, cell_bounds.size.w, s_cell_h1_height);
-        graphics_draw_text(ctx, title, fonts_get_system_font(CELL_H1_FONT), title_bounds, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+        GRect title_bounds = GRect(cell_bounds.origin.x + BUS_STOP_CELL_X_PADDING, cell_bounds.origin.y + BUS_STOP_CELL_H1_TOP_MARGIN, cell_layer_width, s_cell_h1_height);
+        graphics_draw_text(ctx, title, fonts_get_system_font(CELL_H1_FONT), title_bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
         
-        GRect subtitle_bounds = GRect(cell_bounds.origin.x + BUS_STOP_CELL_LEFT_MARGIN, title_bounds.origin.y + title_bounds.size.h, cell_bounds.size.w, s_cell_h2_height);
-        graphics_draw_text(ctx, subtitle, fonts_get_system_font(CELL_H2_FONT), subtitle_bounds, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+        GRect subtitle_bounds = GRect(cell_bounds.origin.x + BUS_STOP_CELL_X_PADDING, title_bounds.origin.y + title_bounds.size.h, cell_layer_width, s_cell_h2_height);
+        graphics_draw_text(ctx, subtitle, fonts_get_system_font(CELL_H2_FONT), subtitle_bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
         
-        GRect stop_id_bounds = GRect(cell_bounds.origin.x + BUS_STOP_CELL_LEFT_MARGIN, subtitle_bounds.origin.y + subtitle_bounds.size.h, cell_bounds.size.w, s_cell_h2_height);
-        graphics_draw_text(ctx, stop_id, fonts_get_system_font(CELL_H2_FONT), stop_id_bounds, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
+        GRect stop_id_bounds = GRect(cell_bounds.origin.x + BUS_STOP_CELL_X_PADDING, subtitle_bounds.origin.y + subtitle_bounds.size.h, cell_layer_width, s_cell_h2_height);
+        graphics_draw_text(ctx, stop_id, fonts_get_system_font(CELL_H2_FONT), stop_id_bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
     }
 }
 
