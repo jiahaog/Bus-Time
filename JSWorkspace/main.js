@@ -229,10 +229,8 @@ function processReceivedMessage(event) {
 
             if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START) {
 
-
                 var stopId = lastBusStopsIDsSent[value];
                 watchBusStop(stopId);
-
 
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
                 // enter the services details page from services list

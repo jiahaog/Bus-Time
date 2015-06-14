@@ -448,10 +448,8 @@ function processReceivedMessage(event) {
 
             if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START) {
 
-
                 var stopId = lastBusStopsIDsSent[value];
                 watchBusStop(stopId);
-
 
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
                 // enter the services details page from services list
@@ -474,7 +472,7 @@ function processReceivedMessage(event) {
 
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_END) {
                 // going back to bus stop list from bus services list
-                
+
                 // stop watching teh bus services list
                 clearInterval(watchBusStopIntervalId);
             }
@@ -485,7 +483,7 @@ function processReceivedMessage(event) {
 // when the app is launched get the location and send nearby bus stops to the watch
 pebbleHelpers.addEventListener.onReady(function () {
     // restore bus data
-
+    console.log('=== B U S  T I M E ===');
     recordCache.restoreCache();
 
     sendBusStopList();

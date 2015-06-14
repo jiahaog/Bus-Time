@@ -1,6 +1,5 @@
 
 
-console.log('HELLO');
-setInterval(function () {
-    console.log('HELLO');
-},5000);
+var a = 'a';
+
+clearInterval(a);

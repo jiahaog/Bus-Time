@@ -36,9 +36,6 @@ static void callback_menu_layer_draw_row(GContext *ctx, const Layer *cell_layer,
         GRect arrival_time_bounds = GRect(cell_bounds.origin.x, cell_bounds.origin.y + SERVICES_CELL_H2_TOP_MARGIN, cell_layer_width, cell_bounds.size.h);
         graphics_draw_text(ctx, arrival_time, fonts_get_system_font(CELL_H2_FONT), arrival_time_bounds, GTextOverflowModeFill, GTextAlignmentRight, NULL);
     }
-
-
-
 }
 
 // Whatp happens when the select button is pushed
@@ -54,7 +51,7 @@ static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuI
 }
 
 static void menu_load() {
-
+    APP_LOG(APP_LOG_LEVEL_ERROR, "LOADING MENULAYER");
     Layer *window_layer = window_get_root_layer(s_services_window);
     s_services_menu_layer = menu_layer_create(layer_get_bounds(window_layer));
 

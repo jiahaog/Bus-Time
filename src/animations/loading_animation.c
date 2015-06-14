@@ -15,9 +15,7 @@ static void timer_handler(void *context) {
             bitmap_layer_set_bitmap(s_bitmap_layer, s_bitmap);
             layer_mark_dirty(bitmap_layer_get_layer(s_bitmap_layer));
             
-
-                s_animation_timer = app_timer_register(next_delay, timer_handler, NULL);
-        
+            s_animation_timer = app_timer_register(next_delay, timer_handler, NULL);
         
         } else {
             gbitmap_sequence_restart(s_sequence);
