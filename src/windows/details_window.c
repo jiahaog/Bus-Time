@@ -65,8 +65,8 @@ static void window_unload(Window *window) {
         destroy_loading_animation();
     #endif
 
-    // 999 is the code to tell js we are going back to the service screen
-    send_app_message_int(KEY_BUS_SERVICE_LIST_START, 99);
+    // tell js that we are done with the service details
+    send_app_message_int(KEY_BUS_SERVICE_DETAILS_END, 1);
 }
 
 void details_window_push() {

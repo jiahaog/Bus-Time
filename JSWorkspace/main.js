@@ -229,23 +229,30 @@ function processReceivedMessage(event) {
 
             if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START) {
 
-                // 99 is a tag to indicate that
-                if (value === 99) {
-                    // this means we go back to the services list from the service details page
-                    clearInterval(watchBusServiceIntervalId);
-                    watchBusStop(lastStopID);
 
-                } else {
-                    var stopId = lastBusStopsIDsSent[value];
+                var stopId = lastBusStopsIDsSent[value];
+                watchBusStop(stopId);
 
-                    watchBusStop(stopId);
-                }
 
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
+                // enter the services details page from services list
+
                 console.log('Received request for service: ' + value);
 
+                // stop watching the bus services list
                 clearInterval(watchBusStopIntervalId);
+
+                // watch the service details
                 watchBusServiceDetails(lastStopID, value);
+            } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_END) {
+                // going back to services list from details window
+
+                // stop watching the service details
+                clearInterval(watchBusServiceIntervalId);
+
+                // start watching the bus services list
+                watchBusStop(lastStopID);
+
             } 
         }
     }
