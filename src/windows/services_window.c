@@ -35,11 +35,6 @@ static void callback_menu_layer_draw_row(GContext *ctx, const Layer *cell_layer,
         
         GRect arrival_time_bounds = GRect(cell_bounds.origin.x, cell_bounds.origin.y + SERVICES_CELL_H2_TOP_MARGIN, cell_layer_width, cell_bounds.size.h);
         graphics_draw_text(ctx, arrival_time, fonts_get_system_font(CELL_H2_FONT), arrival_time_bounds, GTextOverflowModeFill, GTextAlignmentRight, NULL);
-
-        // GRect subtitle_bounds = GRect(cell_bounds.origin.x + CELL_LEFT_MARGIN, title_bounds.origin.y + title_bounds.size.h, cell_bounds.size.w, s_cell_h2_height);
-        
-        // GRect stop_id_bounds = GRect(cell_bounds.origin.x + CELL_LEFT_MARGIN, subtitle_bounds.origin.y + subtitle_bounds.size.h, cell_bounds.size.w, s_cell_h2_height);
-        // graphics_draw_text(ctx, stop_id, fonts_get_system_font(CELL_H2_FONT), stop_id_bounds, GTextOverflowModeFill, GTextAlignmentLeft, NULL);
     }
 
 
@@ -81,12 +76,15 @@ static void window_load(Window *window) {
     Layer *window_layer = window_get_root_layer(window);   
     GRect bounds = layer_get_bounds(window_layer);
 
-    // Create and Add to layer hierarchy:
-    s_loading_text_layer = text_layer_create(bounds);
-    text_layer_set_up(s_loading_text_layer);
+    #ifdef PBL_PLATFORM_APLITE
+        s_loading_text_layer = text_layer_create(bounds);
+        text_layer_set_up(s_loading_text_layer);
+        text_layer_set_text(s_loading_text_layer, "Loading...");
+        layer_add_child(window_layer, text_layer_get_layer(s_loading_text_layer));
+    #else
+        create_loading_animation(window);
+    #endif
 
-    text_layer_set_text(s_loading_text_layer, "Loading...");
-    layer_add_child(window_layer, text_layer_get_layer(s_loading_text_layer));
 }
 
 static void window_unload(Window *window) {
@@ -97,6 +95,12 @@ static void window_unload(Window *window) {
     window_destroy(window);
     s_services_window = NULL;
     s_services_menu_layer = NULL;
+
+    #ifdef PBL_PLATFORM_BASALT
+        destroy_loading_animation();
+    #endif
+
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "unloaded services window");
 }
 
 void services_window_push() {
@@ -116,7 +120,13 @@ void services_window_reload_menu() {
     if (s_services_menu_layer) {
         menu_layer_reload_data(s_services_menu_layer);
     } else {
-        menu_load();
+        // Guard here to prevent the menu from loading if this method is called after the window has been unloaded
+        if (s_services_window) {
+            menu_load();
+            #ifdef PBL_PLATFORM_BASALT
+                destroy_loading_animation();
+            #endif
+        }
     }
 }
 

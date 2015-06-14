@@ -28,7 +28,6 @@ static void window_unload(Window *window) {
     window_destroy(window);
 
     s_error_window = NULL;
-    
 }
 
 void error_window_push(char *message) {

@@ -128,11 +128,13 @@ void bus_stops_window_reload_menu() {
     if (s_bus_stops_menu_layer) {
         menu_layer_reload_data(s_bus_stops_menu_layer);
     } else {
-        menu_load();
+        if (s_bus_stops_window) {
+            menu_load();
 
-        #ifdef PBL_PLATFORM_BASALT
-            destroy_loading_animation();
-        #endif
+            #ifdef PBL_PLATFORM_BASALT
+                destroy_loading_animation();
+            #endif
+        }
     }
 }
 

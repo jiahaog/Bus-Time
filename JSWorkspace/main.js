@@ -13,7 +13,7 @@ var lastBusStopsIDsSent = [];
 var lastStopID; // hold the last bus stop id so we know which bus stop to query for arrivals
 var watchBusStopIntervalId;
 
-const WATCH_BUS_STOP_INTERVAL = 1*60*1000; // 1 min
+const WATCH_BUS_STOP_INTERVAL = 10*1000; // todo supposed to be 1 min (1*60*1000)
 
 /**
  * Gets the location of the watch and sends nearby bus stops to the watch

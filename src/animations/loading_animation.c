@@ -3,8 +3,9 @@
 #ifdef PBL_PLATFORM_BASALT
 
 static GBitmap *s_bitmap = NULL;
-static BitmapLayer *s_bitmap_layer;
+static BitmapLayer *s_bitmap_layer = NULL;
 static GBitmapSequence *s_sequence = NULL;
+static AppTimer *s_animation_timer;
 
 static void timer_handler(void *context) {
     uint32_t next_delay;
@@ -13,7 +14,7 @@ static void timer_handler(void *context) {
         bitmap_layer_set_bitmap(s_bitmap_layer, s_bitmap);
         layer_mark_dirty(bitmap_layer_get_layer(s_bitmap_layer));
 
-        app_timer_register(next_delay, timer_handler, NULL);
+        s_animation_timer = app_timer_register(next_delay, timer_handler, NULL);
     
     } else {
         gbitmap_sequence_restart(s_sequence);
@@ -32,12 +33,16 @@ static void load_sequence() {
         gbitmap_destroy(s_bitmap);
         s_bitmap = NULL;
     }
+    if (s_animation_timer) {
+        app_timer_cancel(s_animation_timer);
+        s_animation_timer = NULL;
+    }
 
+    s_animation_timer = app_timer_register(1, timer_handler, NULL);
 
     s_sequence = gbitmap_sequence_create_with_resource(RESOURCE_ID_ANIMATION_LOADING);
     s_bitmap = gbitmap_create_blank(gbitmap_sequence_get_bitmap_size(s_sequence), GBitmapFormat8Bit);
 
-    app_timer_register(1, timer_handler, NULL);
 
 }
 
@@ -58,6 +63,8 @@ void create_loading_animation(Window *window) {
 
 void destroy_loading_animation() {
     if (s_bitmap_layer) {
+
+        layer_remove_from_parent(bitmap_layer_get_layer(s_bitmap_layer));
         bitmap_layer_destroy(s_bitmap_layer);
         s_bitmap_layer = NULL;
     }
