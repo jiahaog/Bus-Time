@@ -100,7 +100,6 @@ static void window_unload(Window *window) {
         destroy_loading_animation();
     #endif
 
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "unloaded services window");
 }
 
 void services_window_push() {

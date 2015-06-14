@@ -6,7 +6,11 @@ static Window *s_details_window;
 static TextLayer *s_details_text_layer;
 static ActionBarLayer *s_action_bar;
 
-char s_details_message[100] = LOADING_MESSAGE;
+#ifdef PBL_PLATFORM_APLITE
+    char s_details_message[100] = LOADING_MESSAGE;
+#else 
+    char s_details_message[100];
+#endif
 
 GBitmap *s_bitmap_set_alert;
 
@@ -37,16 +41,28 @@ static void window_load(Window *window) {
     text_layer_set_up(s_details_text_layer);
     text_layer_set_text(s_details_text_layer, s_details_message);
     layer_add_child(window_layer, text_layer_get_layer(s_details_text_layer));
+
+    #ifdef PBL_PLATFORM_BASALT
+        if (strlen(s_details_message) == 0) {
+            create_loading_animation(window);
+        }
+    #endif
 }
 
 static void window_unload(Window *window) {
     text_layer_destroy(s_details_text_layer);
     window_destroy(window);
-    snprintf(s_details_message, sizeof(s_details_message), "Loading...");
     s_details_window = NULL;
 
     action_bar_layer_destroy(s_action_bar);
     gbitmap_destroy(s_bitmap_set_alert);
+
+    #ifdef PBL_PLATFORM_APLITE
+        snprintf(s_details_message, sizeof(s_details_message), LOADING_MESSAGE);
+    #else
+        memset(s_details_message, 0, sizeof s_details_message);
+        destroy_loading_animation();
+    #endif
 }
 
 void details_window_push() {
@@ -64,6 +80,10 @@ void details_window_push() {
 }
 
 void details_window_set_text(char *message) {
+    #ifdef PBL_PLATFORM_BASALT
+        destroy_loading_animation();
+    #endif
+
     snprintf(s_details_message, sizeof(s_details_message), "%s", message);
     layer_mark_dirty(text_layer_get_layer(s_details_text_layer));
 
