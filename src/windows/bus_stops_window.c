@@ -88,8 +88,6 @@ static void window_load(Window *window) {
     GRect bounds = layer_get_bounds(window_layer);
 
     // // Create and Add to layer hierarchy:
-
-
     #ifdef PBL_PLATFORM_APLITE
         s_loading_text_layer = text_layer_create(bounds);
         text_layer_set_up(s_loading_text_layer);
@@ -131,6 +129,10 @@ void bus_stops_window_reload_menu() {
         menu_layer_reload_data(s_bus_stops_menu_layer);
     } else {
         menu_load();
+
+        #ifdef PBL_PLATFORM_BASALT
+            destroy_loading_animation();
+        #endif
     }
 }
 

@@ -57,7 +57,10 @@ void create_loading_animation(Window *window) {
 
 
 void destroy_loading_animation() {
-    bitmap_layer_destroy(s_bitmap_layer);
+    if (s_bitmap_layer) {
+        bitmap_layer_destroy(s_bitmap_layer);
+        s_bitmap_layer = NULL;
+    }
 }
 
 #endif
