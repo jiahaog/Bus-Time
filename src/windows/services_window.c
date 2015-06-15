@@ -2,13 +2,16 @@
 
 #define SERVICES_CELL_H1_TOP_MARGIN 5
 #define SERVICES_CELL_H2_TOP_MARGIN 10
-
 #define SERVICES_CELL_X_PADDING 5
+
+#define MENU_LAYER_HEADER_HEIGHT 30
+#define MENU_LAYER_HEADER_FONT FONT_KEY_GOTHIC_18_BOLD
+#define BUS_STOP_NAME_BUFFER_SIZE 30
 
 static Window *s_services_window;
 static MenuLayer *s_services_menu_layer;
 static TextLayer *s_loading_text_layer; 
-
+static char s_bus_stop_name[BUS_STOP_NAME_BUFFER_SIZE] = "<placehodler>";
 
 static uint16_t callback_menu_layer_get_num_rows(struct MenuLayer* menu_layer, uint16_t section_index, void *callback_context) {
     // int numberOfRows = numberOfServices();
@@ -38,6 +41,16 @@ static void callback_menu_layer_draw_row(GContext *ctx, const Layer *cell_layer,
     }
 }
 
+static int16_t callback_menu_layer_get_header_height(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {
+    return MENU_LAYER_HEADER_HEIGHT;
+}
+static void callback_menu_layer_draw_header(GContext *ctx, const Layer *cell_layer, uint16_t section_index, void *callback_context) {
+    GRect cell_bounds = layer_get_bounds(cell_layer);
+    int16_t cell_layer_width = cell_bounds.size.w - 2*SERVICES_CELL_X_PADDING;
+    GRect header_bounds = GRect(cell_bounds.origin.x + SERVICES_CELL_X_PADDING, cell_bounds.origin.y, cell_layer_width, cell_bounds.size.h);
+    graphics_draw_text(ctx, s_bus_stop_name, fonts_get_system_font(MENU_LAYER_HEADER_FONT), header_bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
+}
+
 // Whatp happens when the select button is pushed
 static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
 
@@ -47,7 +60,6 @@ static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuI
         send_app_message_string(KEY_BUS_SERVICE_DETAILS_START, currentService);
         details_window_push();
     }
-    
 }
 
 static void menu_load() {
@@ -58,7 +70,9 @@ static void menu_load() {
     menu_layer_set_callbacks(s_services_menu_layer, service_list, (MenuLayerCallbacks) {
         .get_num_rows = callback_menu_layer_get_num_rows,
         .draw_row = callback_menu_layer_draw_row,
-        .select_click = callback_menu_layer_select_click
+        .select_click = callback_menu_layer_select_click,
+        .get_header_height = callback_menu_layer_get_header_height,
+        .draw_header = callback_menu_layer_draw_header
     });
 
     menu_layer_set_up(s_services_menu_layer);
@@ -103,8 +117,8 @@ static void window_unload(Window *window) {
 
 }
 
-void services_window_push() {
-
+void services_window_push(char *bus_stop_name) {
+    snprintf(s_bus_stop_name, sizeof(s_bus_stop_name), "%s", bus_stop_name);
     if (!s_services_window) {
         s_services_window = window_create();
         window_set_window_handlers(s_services_window, (WindowHandlers) {

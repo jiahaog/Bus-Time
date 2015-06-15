@@ -7,5 +7,5 @@
 #include "../controller/app_message_helper.h"
 #include "../animations/loading_animation.h"
 
-void services_window_push();
+void services_window_push(char *bus_stop_name);
 void services_window_reload_menu();
