@@ -29,6 +29,11 @@
         "file": "images/alert_set.png"
       },
       {
+        "type": "png",
+        "name": "IMAGE_ALERT_CANCEL",
+        "file": "images/alert_cancel.png"
+      },
+      {
         "type": "raw",
         "name": "ANIMATION_LOADING",
         "file": "animation/loading.png"  ,

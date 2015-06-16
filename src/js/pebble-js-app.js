@@ -120,10 +120,9 @@ if (require.main === module) {
 module.exports = {
     MY_TRANSPORT_KEYS: {
         AccountKey: 'cogWcDwIgUCTzEI06Vrfpg==',
-        UniqueUserId: 'b460e8e7-e015-4c6b-9ad1-b08d4498f3d4'
+        UniqueUserId: 'a43cd794-0683-43e2-9b42-e23a1c1bac28'
     }
 };
-
 },{}],3:[function(require,module,exports){
 /**
  * Created by JiaHao on 14/6/15.
@@ -132,7 +131,7 @@ module.exports = {
 var config = require('./config');
 
 // change this to false for testing, which will affect polling and record live intervals
-const RELEASE_MODE = true;
+const RELEASE_MODE = false;
 
 const API_URL = 'http://datamall2.mytransport.sg/ltaodataservice/BusArrival';
 const REQUEST_HEADERS = {
@@ -2084,7 +2083,7 @@ var store;
 if (constants.RELEASE_MODE) {
     var RECORD_LIVE_DURATION = 60*1000; // 1 min
 } else {
-    RECORD_LIVE_DURATION = 60*60*1000; // 1 hour
+    RECORD_LIVE_DURATION = 60*60*1000; // 1 hours
 }
 
 /**

@@ -6,6 +6,8 @@ static Window *s_details_window;
 static TextLayer *s_details_text_layer;
 static ActionBarLayer *s_action_bar;
 
+static bool s_notification_on = false;
+
 #ifdef PBL_PLATFORM_APLITE
     char s_details_message[100] = LOADING_MESSAGE;
 #else 
@@ -13,25 +15,74 @@ static ActionBarLayer *s_action_bar;
     static StatusBarLayer *s_status_bar_layer;
 #endif
 
-GBitmap *s_bitmap_set_alert;
+GBitmap *s_bitmap_alert_set;
+GBitmap *s_bitmap_alert_cancel;
 
-void action_bar_click_config_provider(void *context) {
-    // TODO: send app message for notification
+
+static void set_action_bar_icon(bool show_set_icon) {
+    if (show_set_icon) {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Showing set icon");
+        #ifdef PBL_PLATFORM_APLITE
+            action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_set);
+        #else
+            action_bar_layer_set_icon_animated(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_set, true);
+        #endif
+    } else {
+         APP_LOG(APP_LOG_LEVEL_DEBUG, "Showing cancel icon");
+        #ifdef PBL_PLATFORM_APLITE
+            action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_cancel);
+        #else
+            action_bar_layer_set_icon_animated(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_cancel, true);
+        #endif
+    }
 }
 
-void action_bar_load() {
+
+static void register_or_cancel_notification(bool register_notification) {
+
+    if (register_notification) {
+        // send app message to register notification
+    } else {
+        // send app message to cancel notification
+    }
+}
+
+static void toggle_notification() {
+
+    if (!s_notification_on) {
+        register_or_cancel_notification(s_notification_on); // false for cancel
+        s_notification_on = true;
+        set_action_bar_icon(s_notification_on); // true to show set_alert icon
+    } else {
+        register_or_cancel_notification(s_notification_on); // true for register notification
+        s_notification_on = false;
+        set_action_bar_icon(s_notification_on); // false to show cancel icon
+    }
+}
+
+void toggle_notification_click_handler(ClickRecognizerRef recognizer, void *context) {
+    toggle_notification();
+}
+
+static void action_bar_click_config_provider(void *context) {
+    window_single_click_subscribe(BUTTON_ID_SELECT, (ClickHandler) toggle_notification_click_handler);
+}
+
+static void action_bar_load() {
     s_action_bar = action_bar_layer_create();
     action_bar_layer_add_to_window(s_action_bar, s_details_window);
     action_bar_layer_set_click_config_provider(s_action_bar, action_bar_click_config_provider);
 
-    s_bitmap_set_alert = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_SET);
-
-    #ifdef PBL_PLATFORM_APLITE
-        action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_bitmap_set_alert);
-    #else
-        action_bar_layer_set_icon_animated(s_action_bar, BUTTON_ID_SELECT, s_bitmap_set_alert, true);
+    #ifdef PBL_PLATFORM_BASALT
         action_bar_layer_set_background_color(s_action_bar, COLOR_SECONDARY);
     #endif
+
+    s_bitmap_alert_set = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_SET);
+    s_bitmap_alert_cancel = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_CANCEL);
+
+
+    toggle_notification();
+    
 }
 
 static void window_load(Window *window) {
@@ -60,7 +111,6 @@ static void window_load(Window *window) {
     text_layer_set_text(s_details_text_layer, s_details_message);
     layer_add_child(window_layer, text_layer_get_layer(s_details_text_layer));
 
-
 }
 
 static void window_unload(Window *window) {
@@ -69,7 +119,8 @@ static void window_unload(Window *window) {
     s_details_window = NULL;
 
     action_bar_layer_destroy(s_action_bar);
-    gbitmap_destroy(s_bitmap_set_alert);
+    gbitmap_destroy(s_bitmap_alert_set);
+    gbitmap_destroy(s_bitmap_alert_cancel);
 
     #ifdef PBL_PLATFORM_APLITE
         snprintf(s_details_message, sizeof(s_details_message), LOADING_MESSAGE);
@@ -107,7 +158,10 @@ void details_window_set_text(char *message) {
     layer_mark_dirty(text_layer_get_layer(s_details_text_layer));
 
     if (strcmp(s_details_message,LOADING_MESSAGE) != 0 ) {
-        action_bar_load();
+
+        if (!s_action_bar) {
+            action_bar_load();
+        }
     }
 
 }
