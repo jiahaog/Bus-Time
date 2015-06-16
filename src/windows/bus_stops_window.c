@@ -13,6 +13,9 @@ static TextLayer *s_loading_text_layer;
 static int16_t s_cell_h1_height = 0;
 static int16_t s_cell_h2_height = 0;
 
+#ifdef PBL_PLATFORM_BASALT
+    static StatusBarLayer *s_status_bar_layer;
+#endif
 
 static uint16_t callback_menu_layer_get_num_rows(struct MenuLayer* menu_layer, uint16_t section_index, void *callback_context) {
     
@@ -68,8 +71,16 @@ static void menu_load() {
     s_cell_h2_height = get_font_height(s_bus_stops_window, CELL_H2_FONT);
 
     Layer *window_layer = window_get_root_layer(s_bus_stops_window);
-    s_bus_stops_menu_layer = menu_layer_create(layer_get_bounds(window_layer));
 
+    GRect window_bounds = layer_get_bounds(window_layer);
+
+    #ifdef PBL_PLATFORM_APLITE
+        GRect menu_layer_bounds = window_bounds;
+    #else
+        GRect menu_layer_bounds = menu_layer_get_bounds_with_status_bar(window_layer, s_status_bar_layer);
+    #endif
+
+    s_bus_stops_menu_layer = menu_layer_create(menu_layer_bounds);  
     menu_layer_set_callbacks(s_bus_stops_menu_layer, bus_stop_list, (MenuLayerCallbacks) {
         .get_num_rows = callback_menu_layer_get_num_rows,
         .draw_row = callback_menu_layer_draw_row,
@@ -97,17 +108,23 @@ static void window_load(Window *window) {
         layer_add_child(window_layer, text_layer_get_layer(s_loading_text_layer));
     #else
         create_loading_animation(window);
+        s_status_bar_layer = status_bar_layer_create();
+        status_bar_layer_set_up(s_status_bar_layer);
+        layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar_layer));
     #endif
 }
 
 static void window_unload(Window *window) {
     menu_layer_destroy(s_bus_stops_menu_layer);
-    window_destroy(window);
     s_bus_stops_menu_layer = NULL;
+
+    window_destroy(window);
     s_bus_stops_window = NULL;
 
     #ifdef PBL_PLATFORM_BASALT
         destroy_loading_animation();
+        status_bar_layer_destroy(s_status_bar_layer);
+        s_status_bar_layer = NULL;
     #endif
     
 }

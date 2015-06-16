@@ -10,6 +10,7 @@ static ActionBarLayer *s_action_bar;
     char s_details_message[100] = LOADING_MESSAGE;
 #else 
     char s_details_message[100];
+    static StatusBarLayer *s_status_bar_layer;
 #endif
 
 GBitmap *s_bitmap_set_alert;
@@ -47,6 +48,10 @@ static void window_load(Window *window) {
         if (strlen(s_details_message) == 0) {
             create_loading_animation(window);
         }
+
+        s_status_bar_layer = status_bar_layer_create();
+        status_bar_layer_set_up(s_status_bar_layer);
+        layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar_layer));
     #endif
 }
 

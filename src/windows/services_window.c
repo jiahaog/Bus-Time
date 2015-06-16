@@ -13,6 +13,10 @@ static MenuLayer *s_services_menu_layer;
 static TextLayer *s_loading_text_layer; 
 static char s_bus_stop_name[BUS_STOP_NAME_BUFFER_SIZE] = "<placehodler>";
 
+#ifdef PBL_PLATFORM_BASALT
+    static StatusBarLayer *s_status_bar_layer;
+#endif
+
 static uint16_t callback_menu_layer_get_num_rows(struct MenuLayer* menu_layer, uint16_t section_index, void *callback_context) {
     // int numberOfRows = numberOfServices();
     // APP_LOG(APP_LOG_LEVEL_DEBUG, "NO OF ROWS : %i", numberOfRows);
@@ -65,8 +69,16 @@ static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuI
 static void menu_load() {
     APP_LOG(APP_LOG_LEVEL_ERROR, "LOADING MENULAYER");
     Layer *window_layer = window_get_root_layer(s_services_window);
-    s_services_menu_layer = menu_layer_create(layer_get_bounds(window_layer));
 
+    GRect window_bounds = layer_get_bounds(window_layer);
+
+    #ifdef PBL_PLATFORM_APLITE
+        GRect menu_layer_bounds = window_bounds;
+    #else
+        GRect menu_layer_bounds = menu_layer_get_bounds_with_status_bar(window_layer, s_status_bar_layer);
+    #endif
+
+    s_services_menu_layer = menu_layer_create(menu_layer_bounds);  
     menu_layer_set_callbacks(s_services_menu_layer, service_list, (MenuLayerCallbacks) {
         .get_num_rows = callback_menu_layer_get_num_rows,
         .draw_row = callback_menu_layer_draw_row,
@@ -94,6 +106,9 @@ static void window_load(Window *window) {
         layer_add_child(window_layer, text_layer_get_layer(s_loading_text_layer));
     #else
         create_loading_animation(window);
+        s_status_bar_layer = status_bar_layer_create();
+        status_bar_layer_set_up(s_status_bar_layer);
+        layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar_layer));
     #endif
 
 }
@@ -109,6 +124,8 @@ static void window_unload(Window *window) {
 
     #ifdef PBL_PLATFORM_BASALT
         destroy_loading_animation();
+        status_bar_layer_destroy(s_status_bar_layer);
+        s_status_bar_layer = NULL;
     #endif
 
     // going back to the bus stop list
