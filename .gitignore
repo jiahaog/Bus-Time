@@ -1,7 +1,7 @@
 # Ignore config file with App keys
 JSWorkspace/config.js
 DataDump/src/config.py
-
+releases/
 # Ignore build generated files
 build
 
