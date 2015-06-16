@@ -75,12 +75,12 @@ static void menu_load() {
     GRect window_bounds = layer_get_bounds(window_layer);
 
     #ifdef PBL_PLATFORM_APLITE
-        GRect menu_layer_bounds = window_bounds;
+        GRect content_bounds = window_bounds;
     #else
-        GRect menu_layer_bounds = menu_layer_get_bounds_with_status_bar(window_layer, s_status_bar_layer);
+        GRect content_bounds = window_with_status_bar_content_bounds(window_layer, s_status_bar_layer);
     #endif
 
-    s_bus_stops_menu_layer = menu_layer_create(menu_layer_bounds);  
+    s_bus_stops_menu_layer = menu_layer_create(content_bounds);  
     menu_layer_set_callbacks(s_bus_stops_menu_layer, bus_stop_list, (MenuLayerCallbacks) {
         .get_num_rows = callback_menu_layer_get_num_rows,
         .draw_row = callback_menu_layer_draw_row,

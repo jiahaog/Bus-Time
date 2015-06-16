@@ -33,7 +33,7 @@ void text_layer_set_up(TextLayer *text_layer) {
             status_bar_layer_set_colors(status_bar_layer, GColorClear, COLOR_TEXT);
     }
 
-    GRect menu_layer_get_bounds_with_status_bar(Layer *window_layer, StatusBarLayer *status_bar_layer) {
+    GRect window_with_status_bar_content_bounds(Layer *window_layer, StatusBarLayer *status_bar_layer) {
         GRect window_bounds = layer_get_bounds(window_layer);
         GRect status_bar_bounds = layer_get_bounds(status_bar_layer_get_layer(status_bar_layer));
         GRect menu_layer_bounds = GRect(0, status_bar_bounds.size.h, window_bounds.size.w, window_bounds.size.h - status_bar_bounds.size.h);

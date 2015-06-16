@@ -37,22 +37,30 @@ void action_bar_load() {
 static void window_load(Window *window) {
     window_set_up(window);
     Layer *window_layer = window_get_root_layer(window);
-    GRect bounds = layer_get_bounds(window_layer);
+    GRect window_bounds = layer_get_bounds(window_layer);
 
-    s_details_text_layer = text_layer_create(bounds);
-    text_layer_set_up(s_details_text_layer);
-    text_layer_set_text(s_details_text_layer, s_details_message);
-    layer_add_child(window_layer, text_layer_get_layer(s_details_text_layer));
-
-    #ifdef PBL_PLATFORM_BASALT
+    #ifdef PBL_PLATFORM_APLITE
+        GRect content_bounds = window_bounds;
+        
+    #else
         if (strlen(s_details_message) == 0) {
             create_loading_animation(window);
         }
 
+
         s_status_bar_layer = status_bar_layer_create();
         status_bar_layer_set_up(s_status_bar_layer);
         layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar_layer));
+
+        GRect content_bounds = window_with_status_bar_content_bounds(window_layer, s_status_bar_layer);
     #endif
+
+    s_details_text_layer = text_layer_create(content_bounds);
+    text_layer_set_up(s_details_text_layer);
+    text_layer_set_text(s_details_text_layer, s_details_message);
+    layer_add_child(window_layer, text_layer_get_layer(s_details_text_layer));
+
+
 }
 
 static void window_unload(Window *window) {
@@ -68,6 +76,7 @@ static void window_unload(Window *window) {
     #else
         memset(s_details_message, 0, sizeof s_details_message);
         destroy_loading_animation();
+        status_bar_layer_destroy(s_status_bar_layer);
     #endif
 
     // going back to the services list
