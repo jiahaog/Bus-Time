@@ -119,6 +119,7 @@ static void window_unload(Window *window) {
     s_details_window = NULL;
 
     action_bar_layer_destroy(s_action_bar);
+    s_action_bar = NULL;
     gbitmap_destroy(s_bitmap_alert_set);
     gbitmap_destroy(s_bitmap_alert_cancel);
 
