@@ -11,7 +11,7 @@ static void handleError(int code) {
         error_window_push((char*)"network failure");
     } else if (code == 2) {
         // no services available
-        window_stack_pop(false);
+        window_stack_pop(false); // only pop the current window, not all
         error_window_push((char*)"No services available");
     } else if (code == 3) {
         // phone is not connected

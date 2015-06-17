@@ -85,6 +85,16 @@ static void action_bar_load() {
     
 }
 
+static void set_up_detail_layers(Window *window, GRect content_bounds) {
+    Layer *window_layer = window_get_root_layer(window);
+
+    s_details_text_layer = text_layer_create(content_bounds);
+    text_layer_set_up(s_details_text_layer);
+    text_layer_set_text(s_details_text_layer, s_details_message);
+    layer_add_child(window_layer, text_layer_get_layer(s_details_text_layer));
+
+}
+
 static void window_load(Window *window) {
     window_set_up(window);
     Layer *window_layer = window_get_root_layer(window);
@@ -98,7 +108,6 @@ static void window_load(Window *window) {
             create_loading_animation(window);
         }
 
-
         s_status_bar_layer = status_bar_layer_create();
         status_bar_layer_set_up(s_status_bar_layer);
         layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar_layer));
@@ -106,11 +115,7 @@ static void window_load(Window *window) {
         GRect content_bounds = window_with_status_bar_content_bounds(window_layer, s_status_bar_layer);
     #endif
 
-    s_details_text_layer = text_layer_create(content_bounds);
-    text_layer_set_up(s_details_text_layer);
-    text_layer_set_text(s_details_text_layer, s_details_message);
-    layer_add_child(window_layer, text_layer_get_layer(s_details_text_layer));
-
+    set_up_detail_layers(window, content_bounds);
 }
 
 static void window_unload(Window *window) {

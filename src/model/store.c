@@ -4,6 +4,7 @@
 
 char s_bus_stop_string_buffer[BUS_STOP_LIST_MAX_ELEMENTS][STRING_SIZE];
 char s_service_list_string_buffer[SERVICE_LIST_MAX_ELEMENTS][STRING_SIZE];
+char s_details_list_string_buffer[STRING_SIZE];
 
 int s_bus_stop_list_counter = 0;
 int s_service_list_counter = 0;
@@ -25,6 +26,11 @@ void service_list_reset() {
     memset(service_list, 0, sizeof service_list);
 }
 
+void details_list_reset() {
+    memset(s_details_list_string_buffer, 0, sizeof s_details_list_string_buffer);
+    memset(details_list, 0, sizeof details_list);
+}
+
 void bus_stop_list_add_string(char *string) {
     snprintf(s_bus_stop_string_buffer[s_bus_stop_list_counter], sizeof(s_bus_stop_string_buffer[s_bus_stop_list_counter]), "%s", string);
     s_bus_stop_list_counter++;
@@ -35,6 +41,9 @@ void service_list_add_string(char *string) {
     s_service_list_counter++;
 }
 
+void details_list_add_string(char *string) {
+    snprintf(s_details_list_string_buffer, sizeof(s_details_list_string_buffer), "%s", string);
+}
 
 int get_service_list_count() {
     return s_service_list_counter;
@@ -117,6 +126,37 @@ void split_service_list_data() {
                 service_list[j][delimiter_counter][current_char_counter] = currentChar;
                 current_char_counter++;
             }
+        }
+    }
+}
+
+void split_details_list_data() {
+
+    char *current_string = s_details_list_string_buffer;
+
+    int delimiters[20];
+    int delimiter_counter = 0;
+    
+    for (int i = 0; (unsigned)i < strlen(current_string); i++) {
+        
+        if (current_string[i] == MESSAGE_DELIMITER) {
+            delimiters[delimiter_counter] = i;
+            delimiter_counter++;
+        }
+    }
+
+    delimiter_counter = 0;
+    int current_char_counter = 0;
+    for (int i = 0; (unsigned)i < strlen(current_string); i++) {
+        char currentChar = current_string[i];
+        
+        if (i == delimiters[delimiter_counter]) {
+            delimiter_counter++;
+            current_char_counter = 0;
+            continue;
+        } else {
+            details_list[delimiter_counter][current_char_counter] = currentChar;
+            current_char_counter++;
         }
     }
 }
