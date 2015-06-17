@@ -112,7 +112,9 @@ static void window_load(Window *window) {
         status_bar_layer_set_up(s_status_bar_layer);
         layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar_layer));
 
-        GRect content_bounds = window_with_status_bar_content_bounds(window_layer, s_status_bar_layer);
+        GRect content_bounds_without_action_bar = window_with_status_bar_content_bounds(window_layer, s_status_bar_layer);
+        GRect content_bounds = GRect(content_bounds_without_action_bar.origin.x, content_bounds_without_action_bar.origin.y, content_bounds_without_action_bar.size.w - ACTION_BAR_WIDTH, content_bounds_without_action_bar.size.h);
+
     #endif
 
     set_up_detail_layers(window, content_bounds);
