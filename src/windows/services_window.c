@@ -4,6 +4,7 @@
 #define SERVICES_CELL_H2_TOP_MARGIN 10
 #define SERVICES_CELL_X_PADDING 5
 
+#define MENU_LAYER_HEADER_HEIGHT 30
 #define MENU_LAYER_HEADER_FONT FONT_KEY_GOTHIC_18_BOLD
 #define BUS_STOP_NAME_BUFFER_SIZE 30
 
@@ -45,7 +46,7 @@ static void callback_menu_layer_draw_row(GContext *ctx, const Layer *cell_layer,
 }
 
 static int16_t callback_menu_layer_get_header_height(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {
-    return MENU_CELL_BASIC_HEADER_HEIGHT;
+    return MENU_LAYER_HEADER_HEIGHT;
 }
 static void callback_menu_layer_draw_header(GContext *ctx, const Layer *cell_layer, uint16_t section_index, void *callback_context) {
     GRect cell_bounds = layer_get_bounds(cell_layer);
