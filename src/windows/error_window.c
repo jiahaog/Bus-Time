@@ -7,8 +7,21 @@ static TextLayer *s_error_text_layer;
 
 char s_error_message[ERROR_MESSAGE_SIZE] = "DEFAULT ERROR MESSAGE";
 
+// static void error_window_click_handler(ClickRecognizerRef recognizer, void *context) {
+//     // go back to previous window
+    
+// }
+
+// static void click_config_provider(void *context) {
+//   // Register the ClickHandlers
+//   window_single_click_subscribe(BUTTON_ID_UP, error_window_click_handler);
+//   window_single_click_subscribe(BUTTON_ID_SELECT, error_window_click_handler);
+//   window_single_click_subscribe(BUTTON_ID_DOWN, error_window_click_handler);
+// }
+
 static void window_load(Window *window) {
     window_set_up(window);
+    // window_set_click_config_provider(s_error_window, click_config_provider);
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
 
