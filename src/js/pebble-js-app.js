@@ -131,7 +131,7 @@ module.exports = {
 var config = require('./config');
 
 // change this to false for testing, which will affect polling and record live intervals
-const RELEASE_MODE = false;
+const RELEASE_MODE = true;
 
 const API_URL = 'http://datamall2.mytransport.sg/ltaodataservice/BusArrival';
 const REQUEST_HEADERS = {
@@ -293,7 +293,6 @@ function sendBusStopList() {
     })
 }
 
-
 /**
  * @param {int} code
  */
@@ -407,7 +406,6 @@ function watchBusStop(stopId) {
                     }
                 }
             });
-
         }
     }
 
@@ -2232,7 +2230,7 @@ var constants = require('./constants');
  */
 function getTimeToArrival(arrivalString) {
     if (!arrivalString) {
-        console.log('Unable to get parse arrival time: ' + arrivalString);
+        console.log('Unable to parse arrival time: ' + arrivalString);
         // assumes that the time is unavailable
         return '-';
     }

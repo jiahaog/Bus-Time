@@ -25,7 +25,7 @@ var constants = require('./constants');
  */
 function getTimeToArrival(arrivalString) {
     if (!arrivalString) {
-        console.log('Unable to get parse arrival time: ' + arrivalString);
+        console.log('Unable to parse arrival time: ' + arrivalString);
         // assumes that the time is unavailable
         return '-';
     }

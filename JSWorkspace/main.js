@@ -67,7 +67,6 @@ function sendBusStopList() {
     })
 }
 
-
 /**
  * @param {int} code
  */
@@ -181,7 +180,6 @@ function watchBusStop(stopId) {
                     }
                 }
             });
-
         }
     }
 
