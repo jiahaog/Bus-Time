@@ -16,7 +16,9 @@ enum {
     KEY_BUS_STOP_LIST_VALUE = 7,
     KEY_BUS_STOP_LIST_END = 8,
 
-    KEY_ERROR = 9
+    KEY_ERROR = 9,
+
+    KEY_BUS_NOTIFICATION_SET = 10
 };
 
 
