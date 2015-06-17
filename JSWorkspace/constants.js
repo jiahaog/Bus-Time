@@ -5,7 +5,7 @@
 var config = require('./config');
 
 // change this to false for testing, which will affect polling and record live intervals
-const RELEASE_MODE = true;
+const RELEASE_MODE = false;
 
 const API_URL = 'http://datamall2.mytransport.sg/ltaodataservice/BusArrival';
 const REQUEST_HEADERS = {
@@ -48,6 +48,7 @@ const RESPONSE_KEYS = {
     stopId: 'BusStopID',
     services: 'Services',
     serviceNo: 'ServiceNo',
+    serviceNoNumeric: 'ServiceNoNumeric',
     status: 'Status',
     operator: 'Operator',
     nextBus: 'NextBus',

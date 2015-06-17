@@ -110,12 +110,38 @@ function parseForServicesList(record) {
         if (currentService[constants.RESPONSE_KEYS.status] === constants.RESPONSE_KEYS.inOperation) {
 
             var nextBusArrivalTime = getTimeToArrival(currentService[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival]) || "Arr.";
-            result.push(currentService[constants.RESPONSE_KEYS.serviceNo] + constants.MESSAGE_DELIMITER + nextBusArrivalTime);
+
+            var resultObj = {};
+            resultObj[constants.RESPONSE_KEYS.serviceNo] = currentService[constants.RESPONSE_KEYS.serviceNo];
+            resultObj[constants.RESPONSE_KEYS.estimatedArrival] = nextBusArrivalTime;
+
+            // converts the service number to a numeric number so that we can use it for sorting
+            resultObj[constants.RESPONSE_KEYS.serviceNoNumeric] = parseInt(currentService[constants.RESPONSE_KEYS.serviceNo].replace(/\D/g,''));
+            result.push(resultObj);
 
         }
     }
 
-    return result;
+    // result[] now contains a list of objs
+
+    // now we sort it
+
+    result.sort(function (a, b) {
+        var busA = a[constants.RESPONSE_KEYS.serviceNoNumeric];
+        var busB = b[constants.RESPONSE_KEYS.serviceNoNumeric];
+
+        return busA - busB;
+    });
+
+    var resultProcessed = []; // array of strings with desired values set by delimiter
+
+    for (var j = 0; j < result.length; j++) {
+        var sortedResultObj = result[j];
+        resultProcessed.push(sortedResultObj[constants.RESPONSE_KEYS.serviceNo] + constants.MESSAGE_DELIMITER + sortedResultObj[constants.RESPONSE_KEYS.estimatedArrival]);
+    }
+
+    return resultProcessed;
+
 }
 
 module.exports = {
