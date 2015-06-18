@@ -105,6 +105,10 @@ static void details_layers_unload() {
 }
 
 static void window_load(Window *window) {
+    // always initialise to false 
+    // TODO: check from js side to see if notification is on before setting
+    s_notification_on = false;  
+
     window_set_up(window);
     Layer *window_layer = window_get_root_layer(window);
     GRect window_bounds = layer_get_bounds(window_layer);
