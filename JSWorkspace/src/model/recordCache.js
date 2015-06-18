@@ -2,9 +2,9 @@
  * Created by JiaHao on 14/6/15.
  */
 
-var constants = require('./constants');
-var recordParser = require('./recordParser');
-var pebbleHelpers = require('./pebbleHelpers');
+var constants = require('./../constants/constants');
+var recordParser = require('./../process_data/recordParser');
+var pebbleHelpers = require('./../pebbleHelpers');
 
 var store;
 

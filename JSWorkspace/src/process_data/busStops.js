@@ -2,7 +2,7 @@
  * Created by JiaHao on 11/6/15.
  */
 
-var dataSet = require('./dataSet.js');
+var dataSet = require('./../constants/dataSet.js');
 var geolib = require('geolib');
 
 DATA_SET_KEYS = {

@@ -2,10 +2,10 @@
  * Created by JiaHao on 18/6/15.
  */
 
-var recordCache = require('./recordCache');
-var recordParser = require('./recordParser');
-var pebbleHelpers = require('./pebbleHelpers');
-var constants = require('./constants');
+var recordCache = require('./../model/recordCache');
+var recordParser = require('./../process_data/recordParser');
+var pebbleHelpers = require('./../pebbleHelpers');
+var constants = require('./../constants/constants');
 
 const SLOW_UPDATE_INTERVAL = 60 * 1000;
 const FAST_UPDATE_THRESHOLD = 3 * 60 * 1000;
@@ -22,7 +22,6 @@ function nextIntervalTime(currentTime) {
         return SLOW_UPDATE_INTERVAL;
     }
 }
-
 
 var busNotificationStore = {
 

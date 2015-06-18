@@ -2,8 +2,8 @@
  * Created by JiaHao on 14/6/15.
  */
 
-var pebbleHelpers = require('./pebbleHelpers');
-var constants = require('./constants');
+var pebbleHelpers = require('./../pebbleHelpers');
+var constants = require('./../constants/constants');
 
 
 /**
