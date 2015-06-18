@@ -138,6 +138,7 @@ function sendServiceDetails(stopId, serviceNo, callback) {
             var messageString;
             if (serviceDetails) {
                 messageString =
+                    stopId + constants.MESSAGE_DELIMITER + 
                     serviceDetails[constants.RESPONSE_KEYS.serviceNo] + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival] + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.load] + constants.MESSAGE_DELIMITER +

@@ -7,7 +7,7 @@
 #define SERVICE_LIST_MESSAGE_PARTS 2
 
 // service no, next bus time, next bus load, subsequent bus time, subsequent bus load
-#define DETAILS_LIST_MESSAGE_PARTS 5
+#define DETAILS_LIST_MESSAGE_PARTS 6
 
 
 #define STRING_SIZE 50

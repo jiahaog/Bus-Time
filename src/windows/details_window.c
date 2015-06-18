@@ -47,19 +47,26 @@ static void register_or_cancel_notification(bool register_notification) {
 
 static void toggle_notification() {
 
-    if (!s_notification_on) {
-        register_or_cancel_notification(s_notification_on); // false for cancel
-        s_notification_on = true;
-        set_action_bar_icon(s_notification_on); // true to show set_alert icon
-    } else {
-        register_or_cancel_notification(s_notification_on); // true for register notification
-        s_notification_on = false;
-        set_action_bar_icon(s_notification_on); // false to show cancel icon
-    }
+    // if (!s_notification_on) {
+    //     register_or_cancel_notification(s_notification_on); // false for cancel
+    //     s_notification_on = true;
+    //     set_action_bar_icon(s_notification_on); // true to show set_alert icon
+    // } else {
+    //     register_or_cancel_notification(s_notification_on); // true for register notification
+    //     s_notification_on = false;
+    //     set_action_bar_icon(s_notification_on); // false to show cancel icon
+    // }
 }
 
 void toggle_notification_click_handler(ClickRecognizerRef recognizer, void *context) {
-    toggle_notification();
+
+    char *service_no = details_list[0];
+
+    if (!s_notification_on) {
+        send_app_message_string(KEY_BUS_NOTIFICATION, service_no);
+    } else {
+        send_app_message_string(KEY_BUS_NOTIFICATION, service_no);
+    }
 }
 
 static void action_bar_click_config_provider(void *context) {
@@ -78,7 +85,6 @@ static void action_bar_load() {
     s_bitmap_alert_set = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_SET);
     s_bitmap_alert_cancel = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_CANCEL);
 
-    toggle_notification();    
 }
 
 static void details_layers_load(Window *window, GRect content_bounds) {
