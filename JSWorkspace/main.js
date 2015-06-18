@@ -138,12 +138,10 @@ function sendServiceDetails(stopId, serviceNo, callback) {
             var messageString;
             if (serviceDetails) {
                 messageString =
-                    'Service ' + serviceDetails[constants.RESPONSE_KEYS.serviceNo] + '\n' +
-                    'Next Bus:\n' +
-                    serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival] + '\n' +
-                    serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.load] + '\n' +
-                    'Subsequent Bus:\n' +
-                    serviceDetails[constants.RESPONSE_KEYS.subsequentBus][constants.RESPONSE_KEYS.estimatedArrival] + '\n' +
+                    serviceDetails[constants.RESPONSE_KEYS.serviceNo] + constants.MESSAGE_DELIMITER +
+                    serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival] + constants.MESSAGE_DELIMITER +
+                    serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.load] + constants.MESSAGE_DELIMITER +
+                    serviceDetails[constants.RESPONSE_KEYS.subsequentBus][constants.RESPONSE_KEYS.estimatedArrival] + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.subsequentBus][constants.RESPONSE_KEYS.load];
             } else {
                 messageString = 'Service details for service ' + serviceNo + ' not found!';

@@ -1,8 +1,6 @@
 #include "view_setup_helper.h"
 
 
-
-
 void menu_layer_set_up(MenuLayer* menu_layer) {
 
     #ifdef PBL_COLOR

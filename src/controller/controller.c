@@ -39,8 +39,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     // read first item    
     Tuple *t = dict_read_first(iterator);
 
-    char message_buffer[200];
-
     while(t != NULL) {
         switch (t->key) {
             case KEY_BUS_STOP_LIST_START:
@@ -73,9 +71,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 break;
 
             case KEY_BUS_SERVICE_DETAILS_VALUE:
-
-                snprintf(message_buffer, sizeof(message_buffer), "%s", t->value->cstring);
-                details_window_set_text(message_buffer);
+                details_list_add_string(t->value->cstring);
+                details_window_reload_details();
                 break;
 
             case KEY_ERROR:

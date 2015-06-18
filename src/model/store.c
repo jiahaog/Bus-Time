@@ -41,8 +41,40 @@ void service_list_add_string(char *string) {
     s_service_list_counter++;
 }
 
+static void split_details_list_data() {
+
+    char *current_string = s_details_list_string_buffer;
+
+    int delimiters[20];
+    int delimiter_counter = 0;
+    
+    for (int i = 0; (unsigned)i < strlen(current_string); i++) {
+        
+        if (current_string[i] == MESSAGE_DELIMITER) {
+            delimiters[delimiter_counter] = i;
+            delimiter_counter++;
+        }
+    }
+
+    delimiter_counter = 0;
+    int current_char_counter = 0;
+    for (int i = 0; (unsigned)i < strlen(current_string); i++) {
+        char currentChar = current_string[i];
+        
+        if (i == delimiters[delimiter_counter]) {
+            delimiter_counter++;
+            current_char_counter = 0;
+            continue;
+        } else {
+            details_list[delimiter_counter][current_char_counter] = currentChar;
+            current_char_counter++;
+        }
+    }
+}
+
 void details_list_add_string(char *string) {
     snprintf(s_details_list_string_buffer, sizeof(s_details_list_string_buffer), "%s", string);
+    split_details_list_data();
 }
 
 int get_service_list_count() {
@@ -62,11 +94,14 @@ int get_bus_stop_list_count() {
     return s_bus_stop_list_counter;
 }
 
+int get_details_list_buffer_length() {
+    return strlen(s_details_list_string_buffer);
+}
+
 void split_bus_stop_data() {
 
     for (int j = 0; j < get_bus_stop_list_count(); j++) {
         char *currentBusStopString = s_bus_stop_string_buffer[j];
-
 
         int delimiters[BUS_STOP_LIST_MESSAGE_PARTS - 1];
         int delimiter_counter = 0;
@@ -130,33 +165,3 @@ void split_service_list_data() {
     }
 }
 
-void split_details_list_data() {
-
-    char *current_string = s_details_list_string_buffer;
-
-    int delimiters[20];
-    int delimiter_counter = 0;
-    
-    for (int i = 0; (unsigned)i < strlen(current_string); i++) {
-        
-        if (current_string[i] == MESSAGE_DELIMITER) {
-            delimiters[delimiter_counter] = i;
-            delimiter_counter++;
-        }
-    }
-
-    delimiter_counter = 0;
-    int current_char_counter = 0;
-    for (int i = 0; (unsigned)i < strlen(current_string); i++) {
-        char currentChar = current_string[i];
-        
-        if (i == delimiters[delimiter_counter]) {
-            delimiter_counter++;
-            current_char_counter = 0;
-            continue;
-        } else {
-            details_list[delimiter_counter][current_char_counter] = currentChar;
-            current_char_counter++;
-        }
-    }
-}

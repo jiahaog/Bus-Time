@@ -1,17 +1,17 @@
 #include "details_window.h"
 
 #define LOADING_MESSAGE "Loading..."
+#define CONTENT_X_PADDING 5
+// #define DETAILS_LAYER_HEIGHT 30
+#define DETAILS_LAYER_FONT FONT_KEY_GOTHIC_14_BOLD   
 
 static Window *s_details_window;
-static TextLayer *s_details_text_layer;
+static TextLayer *s_details_text_layers[DETAILS_LIST_MESSAGE_PARTS];
 static ActionBarLayer *s_action_bar;
 
 static bool s_notification_on = false;
 
-#ifdef PBL_PLATFORM_APLITE
-    char s_details_message[100] = LOADING_MESSAGE;
-#else 
-    char s_details_message[100];
+#ifdef PBL_PLATFORM_BASALT
     static StatusBarLayer *s_status_bar_layer;
 #endif
 
@@ -21,14 +21,12 @@ GBitmap *s_bitmap_alert_cancel;
 
 static void set_action_bar_icon(bool show_set_icon) {
     if (show_set_icon) {
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "Showing set icon");
         #ifdef PBL_PLATFORM_APLITE
             action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_set);
         #else
             action_bar_layer_set_icon_animated(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_set, true);
         #endif
     } else {
-         APP_LOG(APP_LOG_LEVEL_DEBUG, "Showing cancel icon");
         #ifdef PBL_PLATFORM_APLITE
             action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_cancel);
         #else
@@ -80,19 +78,30 @@ static void action_bar_load() {
     s_bitmap_alert_set = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_SET);
     s_bitmap_alert_cancel = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_CANCEL);
 
-
-    toggle_notification();
-    
+    toggle_notification();    
 }
 
-static void set_up_detail_layers(Window *window, GRect content_bounds) {
+static void details_layers_load(Window *window, GRect content_bounds) {
     Layer *window_layer = window_get_root_layer(window);
 
-    s_details_text_layer = text_layer_create(content_bounds);
-    text_layer_set_up(s_details_text_layer);
-    text_layer_set_text(s_details_text_layer, s_details_message);
-    layer_add_child(window_layer, text_layer_get_layer(s_details_text_layer));
+    int16_t content_width = content_bounds.size.w - 2*CONTENT_X_PADDING;
+    int16_t content_height = get_font_height(window, fonts_get_system_font(DETAILS_LAYER_FONT));
 
+    for (int i = 0; i < DETAILS_LIST_MESSAGE_PARTS; i++ ) {
+
+        GRect current_details_bounds = GRect(CONTENT_X_PADDING, content_bounds.origin.y + content_height * i, content_width, content_height);
+        s_details_text_layers[i] = text_layer_create(current_details_bounds);
+        text_layer_set_up(s_details_text_layers[i]);
+        text_layer_set_font(s_details_text_layers[i], fonts_get_system_font(DETAILS_LAYER_FONT));
+        text_layer_set_text(s_details_text_layers[i], details_list[i]);
+        layer_add_child(window_layer, text_layer_get_layer(s_details_text_layers[i]));
+    }
+}
+
+static void details_layers_unload() {
+    for (int i = 0; i < DETAILS_LIST_MESSAGE_PARTS; i++) {
+        text_layer_destroy(s_details_text_layers[i]);
+    }
 }
 
 static void window_load(Window *window) {
@@ -104,9 +113,8 @@ static void window_load(Window *window) {
         GRect content_bounds = window_bounds;
         
     #else
-        if (strlen(s_details_message) == 0) {
-            create_loading_animation(window);
-        }
+        
+        create_loading_animation(window);
 
         s_status_bar_layer = status_bar_layer_create();
         status_bar_layer_set_up(s_status_bar_layer);
@@ -117,11 +125,11 @@ static void window_load(Window *window) {
 
     #endif
 
-    set_up_detail_layers(window, content_bounds);
+    details_layers_load(window, content_bounds);
 }
 
 static void window_unload(Window *window) {
-    text_layer_destroy(s_details_text_layer);
+    details_layers_unload();
     window_destroy(window);
     s_details_window = NULL;
 
@@ -131,9 +139,9 @@ static void window_unload(Window *window) {
     gbitmap_destroy(s_bitmap_alert_cancel);
 
     #ifdef PBL_PLATFORM_APLITE
-        snprintf(s_details_message, sizeof(s_details_message), LOADING_MESSAGE);
+        // todo 
     #else
-        memset(s_details_message, 0, sizeof s_details_message);
+        details_list_reset();
         destroy_loading_animation();
         status_bar_layer_destroy(s_status_bar_layer);
     #endif
@@ -157,19 +165,31 @@ void details_window_push() {
 
 }
 
-void details_window_set_text(char *message) {
+void details_window_reload_details() {
     #ifdef PBL_PLATFORM_BASALT
         destroy_loading_animation();
     #endif
 
-    snprintf(s_details_message, sizeof(s_details_message), "%s", message);
-    layer_mark_dirty(text_layer_get_layer(s_details_text_layer));
-
-    if (strcmp(s_details_message,LOADING_MESSAGE) != 0 ) {
-
-        if (!s_action_bar) {
-            action_bar_load();
-        }
+    layer_mark_dirty(text_layer_get_layer(s_details_text_layers[0]));
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "HELLO: %s", details_list[0]);
+    if (!s_action_bar) {
+        action_bar_load();
     }
-
 }
+
+// void details_window_set_text(char *message) {
+//     #ifdef PBL_PLATFORM_BASALT
+//         destroy_loading_animation();
+//     #endif
+
+//     snprintf(s_details_message, sizeof(s_details_message), "%s", message);
+//     layer_mark_dirty(text_layer_get_layer(s_details_text_layer));
+
+//     if (strcmp(s_details_message,LOADING_MESSAGE) != 0 ) {
+
+//         if (!s_action_bar) {
+//             action_bar_load();
+//         }
+//     }
+
+// }

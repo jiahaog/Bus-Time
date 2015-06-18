@@ -34,7 +34,6 @@ int get_service_list_count();
 
 void split_bus_stop_data();
 void split_service_list_data();
-void split_details_list_data();
 
 
 
