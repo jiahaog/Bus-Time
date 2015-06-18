@@ -164,6 +164,29 @@ function sendServiceDetails(stopId, serviceNo, callback) {
     })
 }
 
+
+/**
+ *
+ * @param {boolean} started
+ * @param {string} stopId
+ * @param {string} serviceNo
+ */
+function sendNotificationStatus(started, stopId, serviceNo) {
+
+    const startedString = started ? '1' : '0';
+    var concatenatedMessage = startedString + constants.MESSAGE_DELIMITER +
+        stopId + constants.MESSAGE_DELIMITER +
+        serviceNo;
+
+    var dictionaryMessage = {};
+    dictionaryMessage[constants.APP_MESSAGE_KEYS.KEY_BUS_NOTIFICATION] = concatenatedMessage;
+    pebbleHelpers.sendMessage(dictionaryMessage, function (error) {
+        if (error) {
+            console.log('Error sending notification status to pebble');
+        }
+    });
+}
+
 function watchBusStop(stopId) {
 
     function sendAndManageServicesList(stopId) {
