@@ -6,7 +6,6 @@ var pebbleHelpers = require('./pebbleHelpers');
 var constants = require('./constants');
 
 
-
 /**
  * Translates the absolute arrival timing of the bus to relative time from the current moment
  *
@@ -21,13 +20,20 @@ var constants = require('./constants');
  *
  *
  * @param arrivalString utc date string
- * @returns {string} e.g. '1m 20s', null if negative, '-' if the data received from myTransport is null
+ * @param {boolean} [number] returns the timing as a utc number
+ * @returns {string|number} e.g. '1m 20s', null if negative, '-' if the data received from myTransport is null |
+ *                               timing (ms) if number parameter is true, null if the arrivalString is null
  */
-function getTimeToArrival(arrivalString) {
+function getTimeToArrival(arrivalString, number) {
     if (!arrivalString) {
         console.log('Unable to parse arrival time: ' + arrivalString);
         // assumes that the time is unavailable
-        return '-';
+
+        if (number) {
+            return null;
+        } else {
+            return '-';
+        }
     }
 
     const utcArrival = Date.parse(arrivalString);
@@ -36,17 +42,21 @@ function getTimeToArrival(arrivalString) {
 
     const differenceMs = utcArrival - utcNow;
 
-    const min = Math.floor(differenceMs/1000/60);
+    if (number) {
+        return differenceMs;
+    } else {
+        const min = Math.floor(differenceMs / 1000 / 60);
 
-    // todo round down seconds to nearest minute
-    const sec = Math.floor((differenceMs/1000) % 60);
+        // todo round down seconds to nearest minute
+        const sec = Math.floor((differenceMs / 1000) % 60);
 
-    if ((min < 0) || (sec < 0)) {
-        return null;
+        if ((min < 0) || (sec < 0)) {
+            return 'Arr.';
+        }
+
+        //return min + ':' + sec;
+        return min + 'm ' + sec + 's';
     }
-
-    //return min + ':' + sec;
-    return min + 'm ' + sec + 's';
 }
 
 /**
@@ -60,9 +70,10 @@ function getTimeToArrival(arrivalString) {
  *
  * @param record
  * @param {number} desiredServiceNo bus service number
+ * @param {boolean} [timingsAsNumber] if true, dont parse the arrival time, and return the raw utc time
  * @return {parsedServiceDetailsResult} or null if service not found
  */
-function parseForServiceDetails(record, desiredServiceNo) {
+function parseForServiceDetails(record, desiredServiceNo, timingsAsNumber) {
     const services = record[constants.RESPONSE_KEYS.services];
 
     // iterate through and find the correct service
@@ -76,9 +87,8 @@ function parseForServiceDetails(record, desiredServiceNo) {
             var nextBus = pebbleHelpers.cloneObject(currentService[constants.RESPONSE_KEYS.nextBus]);
             var subsequentBus = pebbleHelpers.cloneObject(currentService[constants.RESPONSE_KEYS.subsequentBus]);
 
-            // short circuit evaluation in case the tta is negative
-            nextBus[constants.RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(nextBus[constants.RESPONSE_KEYS.estimatedArrival]) || 'Arr.';
-            subsequentBus[constants.RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(subsequentBus[constants.RESPONSE_KEYS.estimatedArrival]) || 'Arr.';
+            nextBus[constants.RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(nextBus[constants.RESPONSE_KEYS.estimatedArrival], timingsAsNumber);
+            subsequentBus[constants.RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(subsequentBus[constants.RESPONSE_KEYS.estimatedArrival], timingsAsNumber);
 
             const serviceObject = {};
             serviceObject[constants.RESPONSE_KEYS.serviceNo] = currentService[constants.RESPONSE_KEYS.serviceNo];

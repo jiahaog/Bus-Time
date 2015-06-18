@@ -1,3 +1,3 @@
+var a = parseInt('1');
 
-
-console.log(undefined - 5);
+console.log(a == true);

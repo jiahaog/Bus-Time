@@ -79,11 +79,17 @@ function restoreCache() {
  * Checks the cache for a record, and if not found makes a request to get the record
  * @param stopId
  * @param [serviceNo]
+ * @param {boolean} useCache if true, tells it to use the cache for data
  * @param {responseCallback} callback
  */
-function getBusTimings(stopId, serviceNo, callback) {
+function getBusTimings(stopId, serviceNo, useCache, callback) {
 
-    var record = getValidRecordFromStore(stopId, serviceNo);
+    if (useCache) {
+        var record = getValidRecordFromStore(stopId, serviceNo);
+    } else {
+        record = null;
+    }
+
 
     if (record) {
         // if a valid record is found,

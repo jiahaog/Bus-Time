@@ -1,5 +1,118 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /**
+ * Created by JiaHao on 18/6/15.
+ */
+
+var recordCache = require('./recordCache');
+var recordParser = require('./recordParser');
+var pebbleHelpers = require('./pebbleHelpers');
+var constants = require('./constants');
+
+const SLOW_UPDATE_INTERVAL = 60 * 1000;
+const FAST_UPDATE_THRESHOLD = 3 * 60 * 1000;
+const FAST_UPDATE_INTERVAL = 30 * 1000;
+
+
+// threshold for the notification to be sent
+const ARRIVAL_THRESHOLD = 60 * 1000; // 1 min
+
+function nextIntervalTime(currentTime) {
+    if (currentTime < FAST_UPDATE_THRESHOLD) {
+        return FAST_UPDATE_INTERVAL;
+    } else {
+        return SLOW_UPDATE_INTERVAL;
+    }
+}
+
+
+var busNotificationStore = {
+
+    store: [],
+
+    startNotification: function(stopId, serviceNo) {
+        console.log("Starting notification for " + stopId + "|" + serviceNo);
+        var notification = this.findNotification(stopId, serviceNo);
+
+        if (!notification) {
+            notification = new BusNotification(stopId, serviceNo);
+
+            this.store.push(notification);
+        }
+
+        notification.start();
+    },
+
+    stopNotification: function(stopId, serviceNo) {
+        console.log("Stopping notification for " + stopId + "|" + serviceNo);
+        var notification = this.findNotification(stopId, serviceNo);
+
+        if (notification) {
+            notification.stop();
+        }
+    },
+
+    findNotification: function (stopId, serviceNo) {
+        var store = this.store;
+
+        for (var i = 0; i < store.length; i++) {
+            var notification = store[i];
+
+            if (notification.stopId === stopId && notification.serviceNo === serviceNo) {
+                return notification;
+            }
+        }
+        return null;
+    }
+};
+
+function BusNotification(stopId, serviceNo) {
+    this.stopId = stopId;
+    this.serviceNo = serviceNo;
+    this.notificationId = null;
+}
+
+BusNotification.prototype = {
+    constructor: BusNotification,
+    start: function () {
+        this.update();
+    },
+
+    update: function () {
+        var instance = this;
+        if (instance.notificationId) {
+            clearInterval(instance.notificationId);
+        }
+
+        recordCache.getBusTimings(instance.stopId, instance.serviceNo, false, function (error, record) {
+            if (error) {
+                console.log('Error getting bus timings');
+            } else {
+                var serviceDetails = recordParser.parseForServiceDetails(record, instance.serviceNo, true);
+
+                var timeToNextBusArrival = serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival];
+
+                if (timeToNextBusArrival < ARRIVAL_THRESHOLD) {
+                    pebbleHelpers.sendNotification('Bus Time', 'Bus ' + instance.serviceNo + " is arriving!");
+                } else {
+                    instance.notificationId = setTimeout(function() {
+                        instance.update();
+                    }, nextIntervalTime(timeToNextBusArrival))
+                }
+            }
+        });
+    },
+
+    stop: function() {
+        var notificationId = this.notificationId;
+        if (notificationId) {
+            clearTimeout(notificationId);
+        }
+    }
+};
+
+module.exports = busNotificationStore;
+},{"./constants":4,"./pebbleHelpers":8,"./recordCache":9,"./recordParser":10}],2:[function(require,module,exports){
+/**
  * Created by JiaHao on 11/6/15.
  */
 
@@ -116,14 +229,14 @@ if (require.main === module) {
     testDistance()
 
 }
-},{"./dataSet.js":4,"geolib":6}],2:[function(require,module,exports){
+},{"./dataSet.js":5,"geolib":7}],3:[function(require,module,exports){
 module.exports = {
     MY_TRANSPORT_KEYS: {
         AccountKey: 'cogWcDwIgUCTzEI06Vrfpg==',
         UniqueUserId: 'a43cd794-0683-43e2-9b42-e23a1c1bac28'
     }
 };
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 /**
  * Created by JiaHao on 14/6/15.
  */
@@ -157,7 +270,7 @@ const APP_MESSAGE_KEYS = {
 
     KEY_ERROR: 'KEY_ERROR',
 
-    KEY_BUS_NOTIFICATION_SET: 'KEY_BUS_NOTIFICATION_SET'
+    KEY_BUS_NOTIFICATION: 'KEY_BUS_NOTIFICATION'
 
 };
 
@@ -206,7 +319,7 @@ module.exports = {
     ERROR_CODES: ERROR_CODES,
     RELEASE_MODE: RELEASE_MODE
 };
-},{"./config":2}],4:[function(require,module,exports){
+},{"./config":3}],5:[function(require,module,exports){
 /**
  * Dataset generated painfully
  *
@@ -223,7 +336,7 @@ const data = {"data":[{"r":"Jurong West Ave 1","n":"28521","l":[1.35098329571603
 //const TEST_RESPONSE = '{"odata.metadata":"http://datamall2.mytransport.sg/ltaodataservice/$metadata#BusArrival/@Element","BusStopID":"83139","Services":[{"ServiceNo":"15","Status":"In Operation","Operator":"SBST","NextBus":{"EstimatedArrival":"2015-06-09T14:25:49+00:00","Load":"Standing Available","Feature":"WAB"},"SubsequentBus":{"EstimatedArrival":"2015-06-09T13:56:32+00:00","Load":"Seats Available","Feature":"WAB"}},{"ServiceNo":"155","Status":"In Operation","Operator":"SBST","NextBus":{"EstimatedArrival":"2015-06-09T13:47:03+00:00","Load":"Seats Available","Feature":"WAB"},"SubsequentBus":{"EstimatedArrival":"2015-06-09T14:01:57+00:00","Load":"Seats Available","Feature":"WAB"}}]}';
 
 module.exports = data["data"];
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /**
 * Created by JiaHao on 8/6/15.
 */
@@ -233,10 +346,10 @@ var busStops = require('./busStops');
 var recordParser = require('./recordParser');
 var constants = require('./constants');
 var recordCache = require('./recordCache');
-
+var busServiceNotifier = require('./busServiceNotifier');
 
 var lastBusStopsIDsSent = [];
-var lastStopID; // hold the last bus stop id so we know which bus stop to query for arrivals
+var lastStopID; // hold the last bus stop id so we know which bus stop to query for arrivals todo get rid of this
 var lastAppMessageTime;
 var watchBusStopIntervalId;
 var watchBusServiceIntervalId;
@@ -321,7 +434,7 @@ function sendErrorCode(code) {
  * @param {sentAppMessageCallback} callback
  */
 function sendServicesList(stopId, callback) {
-    recordCache.getBusTimings(stopId, undefined, function (error, record) {
+    recordCache.getBusTimings(stopId, undefined, true, function (error, record) {
         if (error) {
             console.log('Error getting bus timings');
             sendErrorCode(constants.ERROR_CODES.NETWORK_ERROR);
@@ -352,7 +465,7 @@ function sendServicesList(stopId, callback) {
  * @param {sentAppMessageCallback} callback
  */
 function sendServiceDetails(stopId, serviceNo, callback) {
-    recordCache.getBusTimings(stopId, serviceNo, function(error, record) {
+    recordCache.getBusTimings(stopId, serviceNo, true, function(error, record) {
         if (error) {
             console.log('Error getting bus timings');
             sendErrorCode(constants.ERROR_CODES.NETWORK_ERROR);
@@ -364,6 +477,7 @@ function sendServiceDetails(stopId, serviceNo, callback) {
             var messageString;
             if (serviceDetails) {
                 messageString =
+                    stopId + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.serviceNo] + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival] + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.load] + constants.MESSAGE_DELIMITER +
@@ -518,6 +632,20 @@ function processReceivedMessage(event) {
                 lastAppMessageTime = Date.now();
                 // stop watching the bus services list
                 clearInterval(watchBusStopIntervalId);
+            } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_NOTIFICATION) {
+                // handle notification
+
+                // message format {set_or_cancel_notification}|{stop_id}|{service_no}
+                var splitDetails = value.split(constants.MESSAGE_DELIMITER);
+                var startNotification = parseInt(splitDetails[0]);  // parseint here so we can do a if (setorcancel)
+                var stopId = splitDetails[1];
+                var serviceNo = splitDetails[2];
+
+                if (startNotification) {
+                    busServiceNotifier.startNotification(stopId, serviceNo);
+                } else {
+                    busServiceNotifier.stopNotification(stopId, serviceNo);
+                }
             }
         }
     }
@@ -539,7 +667,7 @@ pebbleHelpers.addEventListener.onReady(function () {
 pebbleHelpers.addEventListener.onAppMessage(function (event) {
     processReceivedMessage(event);
 });
-},{"./busStops":1,"./constants":3,"./pebbleHelpers":7,"./recordCache":8,"./recordParser":9}],6:[function(require,module,exports){
+},{"./busServiceNotifier":1,"./busStops":2,"./constants":4,"./pebbleHelpers":8,"./recordCache":9,"./recordParser":10}],7:[function(require,module,exports){
 /*! geolib 2.0.17 by Manuel Bieh
 * Library to provide geo functions like distance calculation,
 * conversion of decimal coordinates to sexagesimal and vice versa, etc.
@@ -1770,7 +1898,7 @@ pebbleHelpers.addEventListener.onAppMessage(function (event) {
 
 }(this));
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /**
  * Created by JiaHao on 9/6/15.
  */
@@ -2067,7 +2195,7 @@ if (require.main === module) {
 
 }
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /**
  * Created by JiaHao on 14/6/15.
  */
@@ -2149,11 +2277,17 @@ function restoreCache() {
  * Checks the cache for a record, and if not found makes a request to get the record
  * @param stopId
  * @param [serviceNo]
+ * @param {boolean} useCache if true, tells it to use the cache for data
  * @param {responseCallback} callback
  */
-function getBusTimings(stopId, serviceNo, callback) {
+function getBusTimings(stopId, serviceNo, useCache, callback) {
 
-    var record = getValidRecordFromStore(stopId, serviceNo);
+    if (useCache) {
+        var record = getValidRecordFromStore(stopId, serviceNo);
+    } else {
+        record = null;
+    }
+
 
     if (record) {
         // if a valid record is found,
@@ -2200,14 +2334,13 @@ module.exports = {
     restoreCache: restoreCache,
     getBusTimings: getBusTimings
 };
-},{"./constants":3,"./pebbleHelpers":7,"./recordParser":9}],9:[function(require,module,exports){
+},{"./constants":4,"./pebbleHelpers":8,"./recordParser":10}],10:[function(require,module,exports){
 /**
  * Created by JiaHao on 14/6/15.
  */
 
 var pebbleHelpers = require('./pebbleHelpers');
 var constants = require('./constants');
-
 
 
 /**
@@ -2224,13 +2357,20 @@ var constants = require('./constants');
  *
  *
  * @param arrivalString utc date string
- * @returns {string} e.g. '1m 20s', null if negative, '-' if the data received from myTransport is null
+ * @param {boolean} [number] returns the timing as a utc number
+ * @returns {string|number} e.g. '1m 20s', null if negative, '-' if the data received from myTransport is null |
+ *                               timing (ms) if number parameter is true, null if the arrivalString is null
  */
-function getTimeToArrival(arrivalString) {
+function getTimeToArrival(arrivalString, number) {
     if (!arrivalString) {
         console.log('Unable to parse arrival time: ' + arrivalString);
         // assumes that the time is unavailable
-        return '-';
+
+        if (number) {
+            return null;
+        } else {
+            return '-';
+        }
     }
 
     const utcArrival = Date.parse(arrivalString);
@@ -2239,17 +2379,21 @@ function getTimeToArrival(arrivalString) {
 
     const differenceMs = utcArrival - utcNow;
 
-    const min = Math.floor(differenceMs/1000/60);
+    if (number) {
+        return differenceMs;
+    } else {
+        const min = Math.floor(differenceMs / 1000 / 60);
 
-    // todo round down seconds to nearest minute
-    const sec = Math.floor((differenceMs/1000) % 60);
+        // todo round down seconds to nearest minute
+        const sec = Math.floor((differenceMs / 1000) % 60);
 
-    if ((min < 0) || (sec < 0)) {
-        return null;
+        if ((min < 0) || (sec < 0)) {
+            return 'Arr.';
+        }
+
+        //return min + ':' + sec;
+        return min + 'm ' + sec + 's';
     }
-
-    //return min + ':' + sec;
-    return min + 'm ' + sec + 's';
 }
 
 /**
@@ -2263,9 +2407,10 @@ function getTimeToArrival(arrivalString) {
  *
  * @param record
  * @param {number} desiredServiceNo bus service number
+ * @param {boolean} [timingsAsNumber] if true, dont parse the arrival time, and return the raw utc time
  * @return {parsedServiceDetailsResult} or null if service not found
  */
-function parseForServiceDetails(record, desiredServiceNo) {
+function parseForServiceDetails(record, desiredServiceNo, timingsAsNumber) {
     const services = record[constants.RESPONSE_KEYS.services];
 
     // iterate through and find the correct service
@@ -2279,9 +2424,8 @@ function parseForServiceDetails(record, desiredServiceNo) {
             var nextBus = pebbleHelpers.cloneObject(currentService[constants.RESPONSE_KEYS.nextBus]);
             var subsequentBus = pebbleHelpers.cloneObject(currentService[constants.RESPONSE_KEYS.subsequentBus]);
 
-            // short circuit evaluation in case the tta is negative
-            nextBus[constants.RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(nextBus[constants.RESPONSE_KEYS.estimatedArrival]) || 'Arr.';
-            subsequentBus[constants.RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(subsequentBus[constants.RESPONSE_KEYS.estimatedArrival]) || 'Arr.';
+            nextBus[constants.RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(nextBus[constants.RESPONSE_KEYS.estimatedArrival], timingsAsNumber);
+            subsequentBus[constants.RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(subsequentBus[constants.RESPONSE_KEYS.estimatedArrival], timingsAsNumber);
 
             const serviceObject = {};
             serviceObject[constants.RESPONSE_KEYS.serviceNo] = currentService[constants.RESPONSE_KEYS.serviceNo];
@@ -2352,4 +2496,4 @@ module.exports = {
     parseForServicesList: parseForServicesList,
     getTimeToArrival: getTimeToArrival
 };
-},{"./constants":3,"./pebbleHelpers":7}]},{},[5]);
+},{"./constants":4,"./pebbleHelpers":8}]},{},[6]);

@@ -7,10 +7,10 @@ var busStops = require('./busStops');
 var recordParser = require('./recordParser');
 var constants = require('./constants');
 var recordCache = require('./recordCache');
-
+var busServiceNotifier = require('./busServiceNotifier');
 
 var lastBusStopsIDsSent = [];
-var lastStopID; // hold the last bus stop id so we know which bus stop to query for arrivals
+var lastStopID; // hold the last bus stop id so we know which bus stop to query for arrivals todo get rid of this
 var lastAppMessageTime;
 var watchBusStopIntervalId;
 var watchBusServiceIntervalId;
@@ -22,7 +22,7 @@ if (constants.RELEASE_MODE) {
 }
 
 //const REFRESH_TIMEOUT = 10*60*1000; // 10 min
-const REFRESH_TIMEOUT = 10*60*1000; // 10 min
+const REFRESH_TIMEOUT = 15*60*1000; // 10 min
 
 /**
  * Gets the location of the watch and sends nearby bus stops to the watch
@@ -95,7 +95,7 @@ function sendErrorCode(code) {
  * @param {sentAppMessageCallback} callback
  */
 function sendServicesList(stopId, callback) {
-    recordCache.getBusTimings(stopId, undefined, function (error, record) {
+    recordCache.getBusTimings(stopId, undefined, true, function (error, record) {
         if (error) {
             console.log('Error getting bus timings');
             sendErrorCode(constants.ERROR_CODES.NETWORK_ERROR);
@@ -126,7 +126,7 @@ function sendServicesList(stopId, callback) {
  * @param {sentAppMessageCallback} callback
  */
 function sendServiceDetails(stopId, serviceNo, callback) {
-    recordCache.getBusTimings(stopId, serviceNo, function(error, record) {
+    recordCache.getBusTimings(stopId, serviceNo, true, function(error, record) {
         if (error) {
             console.log('Error getting bus timings');
             sendErrorCode(constants.ERROR_CODES.NETWORK_ERROR);
@@ -138,7 +138,7 @@ function sendServiceDetails(stopId, serviceNo, callback) {
             var messageString;
             if (serviceDetails) {
                 messageString =
-                    stopId + constants.MESSAGE_DELIMITER + 
+                    stopId + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.serviceNo] + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival] + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.load] + constants.MESSAGE_DELIMITER +
@@ -293,6 +293,20 @@ function processReceivedMessage(event) {
                 lastAppMessageTime = Date.now();
                 // stop watching the bus services list
                 clearInterval(watchBusStopIntervalId);
+            } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_NOTIFICATION) {
+                // handle notification
+
+                // message format {set_or_cancel_notification}|{stop_id}|{service_no}
+                var splitDetails = value.split(constants.MESSAGE_DELIMITER);
+                var startNotification = parseInt(splitDetails[0]);  // parseint here so we can do a if (setorcancel)
+                var stopId = splitDetails[1];
+                var serviceNo = splitDetails[2];
+
+                if (startNotification) {
+                    busServiceNotifier.startNotification(stopId, serviceNo);
+                } else {
+                    busServiceNotifier.stopNotification(stopId, serviceNo);
+                }
             }
         }
     }
