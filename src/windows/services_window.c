@@ -67,7 +67,6 @@ static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuI
 }
 
 static void menu_load() {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "LOADING MENULAYER");
     Layer *window_layer = window_get_root_layer(s_services_window);
 
     GRect window_bounds = layer_get_bounds(window_layer);
