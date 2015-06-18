@@ -45,7 +45,7 @@ static void split_details_list_data() {
 
     char *current_string = s_details_list_string_buffer;
 
-    int delimiters[20];
+    int delimiters[DETAILS_LIST_MESSAGE_PARTS - 1] = {};
     int delimiter_counter = 0;
     
     for (int i = 0; (unsigned)i < strlen(current_string); i++) {
@@ -103,7 +103,7 @@ void split_bus_stop_data() {
     for (int j = 0; j < get_bus_stop_list_count(); j++) {
         char *currentBusStopString = s_bus_stop_string_buffer[j];
 
-        int delimiters[BUS_STOP_LIST_MESSAGE_PARTS - 1];
+        int delimiters[BUS_STOP_LIST_MESSAGE_PARTS - 1] = {};
         int delimiter_counter = 0;
         
         for (int i = 0; (unsigned)i < strlen(currentBusStopString); i++) {
@@ -137,7 +137,7 @@ void split_service_list_data() {
     for (int j = 0; j < get_service_list_count(); j++) {
         char *current_string = s_service_list_string_buffer[j];
 
-        int delimiters[20];
+        int delimiters[SERVICE_LIST_MESSAGE_PARTS - 1] = {};
         int delimiter_counter = 0;
         
         for (int i = 0; (unsigned)i < strlen(current_string); i++) {
