@@ -5,6 +5,8 @@
 // #define DETAILS_LAYER_HEIGHT 30
 #define DETAILS_LAYER_FONT FONT_KEY_GOTHIC_14_BOLD   
 
+#define NOTIFICATION_MESSAGE_BUFFER_SIZE 16
+
 static Window *s_details_window;
 static TextLayer *s_details_text_layers[DETAILS_LIST_MESSAGE_PARTS];
 static ActionBarLayer *s_action_bar;
@@ -59,14 +61,33 @@ static void toggle_notification() {
 }
 
 void toggle_notification_click_handler(ClickRecognizerRef recognizer, void *context) {
-
-    char *service_no = details_list[0];
-
+    // message format {set_or_cancel_notification}|{stop_id}|{service_no}
+    
+    // size 1 because string elements are simply chars
+    char delimiter_buffer[1] = {MESSAGE_DELIMITER};
+    char set_notification_token[2];  // need size 2 here somehow because of string terminator when doing snprintf
+    
     if (!s_notification_on) {
-        send_app_message_string(KEY_BUS_NOTIFICATION, service_no);
+        // set token to 1
+        snprintf(set_notification_token, sizeof(set_notification_token), "%c", '1');
     } else {
-        send_app_message_string(KEY_BUS_NOTIFICATION, service_no);
+        // set token to 0
+        snprintf(set_notification_token, sizeof(set_notification_token), "%c", '0');
     }
+
+    // gets these details from the store
+    char *stop_id = details_list[0];
+    char *service_no = details_list[1];
+
+    // create a buffer and concatenate the details together
+    char notification_message_buffer[NOTIFICATION_MESSAGE_BUFFER_SIZE]; 
+    strcpy(notification_message_buffer, set_notification_token);
+    strcat(notification_message_buffer, delimiter_buffer);
+    strcat(notification_message_buffer, stop_id);
+    strcat(notification_message_buffer, delimiter_buffer);
+    strcat(notification_message_buffer, service_no);
+
+    send_app_message_string(KEY_BUS_NOTIFICATION, notification_message_buffer);
 }
 
 static void action_bar_click_config_provider(void *context) {
@@ -181,7 +202,6 @@ void details_window_reload_details() {
     #endif
 
     layer_mark_dirty(text_layer_get_layer(s_details_text_layers[0]));
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "HELLO: %s", details_list[0]);
     if (!s_action_bar) {
         action_bar_load();
     }

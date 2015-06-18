@@ -10,6 +10,8 @@
 #define DETAILS_LIST_MESSAGE_PARTS 6
 
 
+#define MESSAGE_DELIMITER '|'
+
 #define STRING_SIZE 50
 
 
