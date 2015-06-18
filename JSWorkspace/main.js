@@ -1,6 +1,6 @@
 /**
-* Created by JiaHao on 8/6/15.
-*/
+ * Created by JiaHao on 8/6/15.
+ */
 
 var pebbleHelpers = require('./pebbleHelpers');
 var busStops = require('./busStops');
@@ -9,20 +9,19 @@ var constants = require('./constants');
 var recordCache = require('./recordCache');
 var busServiceNotifier = require('./busServiceNotifier');
 
-var lastBusStopsIDsSent = [];
 var lastStopID; // hold the last bus stop id so we know which bus stop to query for arrivals todo get rid of this
 var lastAppMessageTime;
 var watchBusStopIntervalId;
 var watchBusServiceIntervalId;
 
 if (constants.RELEASE_MODE) {
-    var REFRESH_INTERVAL = 60*1000; // 1 min
+    var REFRESH_INTERVAL = 60 * 1000; // 1 min
 } else {
-    REFRESH_INTERVAL = 10*1000; // 10 sec
+    REFRESH_INTERVAL = 10 * 1000; // 10 sec
 }
 
 //const REFRESH_TIMEOUT = 10*60*1000; // 10 min
-const REFRESH_TIMEOUT = 15*60*1000; // 10 min
+const REFRESH_TIMEOUT = 15 * 60 * 1000; // 10 min
 
 /**
  * Gets the location of the watch and sends nearby bus stops to the watch
@@ -59,10 +58,6 @@ function sendBusStopList() {
                 constants.APP_MESSAGE_KEYS.KEY_BUS_STOP_LIST_END,
                 descriptions
             );
-
-            // save the last stop ids sent to the watch, so that when the user chooses the item on the menu,
-            // the index will be sent back and we can get the corresponding stopId
-            lastBusStopsIDsSent = stopIds;
         }
     })
 }
@@ -126,7 +121,7 @@ function sendServicesList(stopId, callback) {
  * @param {sentAppMessageCallback} callback
  */
 function sendServiceDetails(stopId, serviceNo, callback) {
-    recordCache.getBusTimings(stopId, serviceNo, true, function(error, record) {
+    recordCache.getBusTimings(stopId, serviceNo, true, function (error, record) {
         if (error) {
             console.log('Error getting bus timings');
             sendErrorCode(constants.ERROR_CODES.NETWORK_ERROR);
@@ -243,7 +238,6 @@ function watchBusServiceDetails(stopId, serviceNo) {
 
     console.log('Watching bus service: ' + stopId + ', ' + serviceNo);
 
-
     sendAndManageServiceDetails(stopId, serviceNo);
 
     watchBusServiceIntervalId = setInterval(function () {
@@ -272,7 +266,6 @@ function checkIfAppTimeout() {
     }
 }
 
-
 function processReceivedMessage(event) {
 
     const payload = event[constants.MISC_KEYS.payload];
@@ -285,8 +278,7 @@ function processReceivedMessage(event) {
 
             if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START) {
                 lastAppMessageTime = Date.now();
-                var stopId = lastBusStopsIDsSent[value];
-                watchBusStop(stopId);
+                watchBusStop(value);
 
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
                 // enter the services details page from services list
@@ -342,9 +334,6 @@ pebbleHelpers.addEventListener.onReady(function () {
     recordCache.restoreCache();
 
     sendBusStopList();
-    //setTimeout(function () {
-    //    pebbleHelpers.sendNotification('message title', 'message text');
-    //}, 10000);
 
 });
 

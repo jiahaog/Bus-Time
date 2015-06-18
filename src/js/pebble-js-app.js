@@ -361,7 +361,7 @@ if (constants.RELEASE_MODE) {
 }
 
 //const REFRESH_TIMEOUT = 10*60*1000; // 10 min
-const REFRESH_TIMEOUT = 10*60*1000; // 10 min
+const REFRESH_TIMEOUT = 15*60*1000; // 10 min
 
 /**
  * Gets the location of the watch and sends nearby bus stops to the watch
@@ -401,7 +401,7 @@ function sendBusStopList() {
 
             // save the last stop ids sent to the watch, so that when the user chooses the item on the menu,
             // the index will be sent back and we can get the corresponding stopId
-            lastBusStopsIDsSent = stopIds;
+            //lastBusStopsIDsSent = stopIds;
         }
     })
 }
@@ -503,6 +503,29 @@ function sendServiceDetails(stopId, serviceNo, callback) {
     })
 }
 
+
+/**
+ *
+ * @param {boolean} started
+ * @param {string} stopId
+ * @param {string} serviceNo
+ */
+function sendNotificationStatus(started, stopId, serviceNo) {
+
+    const startedString = started ? '1' : '0';
+    var concatenatedMessage = startedString + constants.MESSAGE_DELIMITER +
+        stopId + constants.MESSAGE_DELIMITER +
+        serviceNo;
+
+    var dictionaryMessage = {};
+    dictionaryMessage[constants.APP_MESSAGE_KEYS.KEY_BUS_NOTIFICATION] = concatenatedMessage;
+    pebbleHelpers.sendMessage(dictionaryMessage, function (error) {
+        if (error) {
+            console.log('Error sending notification status to pebble');
+        }
+    });
+}
+
 function watchBusStop(stopId) {
 
     function sendAndManageServicesList(stopId) {
@@ -601,8 +624,8 @@ function processReceivedMessage(event) {
 
             if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START) {
                 lastAppMessageTime = Date.now();
-                var stopId = lastBusStopsIDsSent[value];
-                watchBusStop(stopId);
+                console.log("The bus stop : " + value);
+                watchBusStop(value);
 
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
                 // enter the services details page from services list
