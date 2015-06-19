@@ -1,7 +1,7 @@
 /**
  * Created by JiaHao on 18/6/15.
  */
-    
+
 var stateTracker = require('./../model/stateTracker');
 var busServiceObserver = require('./../service/busServiceObserver');
 var busServiceNotifier = require('./../service/busServiceNotifier');

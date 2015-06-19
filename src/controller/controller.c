@@ -75,8 +75,12 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 details_window_reload_details();
                 break;
 
-            case KEY_ERROR:
+            case KEY_BUS_NOTIFICATION:
+                notifications_list_add_string(t->value->cstring);
+                details_window_reload_details();
+                break;
 
+            case KEY_ERROR:
                 handleError(t->value->int32);
                 break;
 

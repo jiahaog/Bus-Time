@@ -11,8 +11,6 @@ static Window *s_details_window;
 static TextLayer *s_details_text_layers[DETAILS_LIST_MESSAGE_PARTS];
 static ActionBarLayer *s_action_bar;
 
-static bool s_notification_on = false;
-
 #ifdef PBL_PLATFORM_BASALT
     static StatusBarLayer *s_status_bar_layer;
 #endif
@@ -21,7 +19,8 @@ GBitmap *s_bitmap_alert_set;
 GBitmap *s_bitmap_alert_cancel;
 
 
-static void set_action_bar_icon(bool show_set_icon) {
+static void set_action_bar_notification_icon(bool show_set_icon) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "SETTING NOTIFICAITON ICON %s", show_set_icon ? "true" : "false");
     if (show_set_icon) {
         #ifdef PBL_PLATFORM_APLITE
             action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_set);
@@ -67,12 +66,16 @@ void toggle_notification_click_handler(ClickRecognizerRef recognizer, void *cont
     char delimiter_buffer[1] = {MESSAGE_DELIMITER};
     char set_notification_token[2];  // need size 2 here somehow because of string terminator when doing snprintf
     
-    if (!s_notification_on) {
-        // set token to 1
-        snprintf(set_notification_token, sizeof(set_notification_token), "%c", '1');
-    } else {
+    bool current_notification_state = notification_list_get_status(details_list[0], details_list[1]);
+
+    if (current_notification_state) {
+        // notification is alreadyset
         // set token to 0
         snprintf(set_notification_token, sizeof(set_notification_token), "%c", '0');
+    } else {
+        // notification is not already set
+        // set token to 1
+        snprintf(set_notification_token, sizeof(set_notification_token), "%c", '1');
     }
 
     // gets these details from the store
@@ -134,7 +137,6 @@ static void details_layers_unload() {
 static void window_load(Window *window) {
     // always initialise to false 
     // TODO: check from js side to see if notification is on before setting
-    s_notification_on = false;  
 
     window_set_up(window);
     Layer *window_layer = window_get_root_layer(window);
@@ -201,10 +203,16 @@ void details_window_reload_details() {
         destroy_loading_animation();
     #endif
 
-    layer_mark_dirty(text_layer_get_layer(s_details_text_layers[0]));
+    for (int i = 0; i < DETAILS_LIST_MESSAGE_PARTS; i++) {
+        layer_mark_dirty(text_layer_get_layer(s_details_text_layers[i]));
+    }
+
     if (!s_action_bar) {
         action_bar_load();
     }
+
+    bool current_notification_state = notification_list_get_status(details_list[0], details_list[1]);
+    set_action_bar_notification_icon(!current_notification_state);
 }
 
 // void details_window_set_text(char *message) {

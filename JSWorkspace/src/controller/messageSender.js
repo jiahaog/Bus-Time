@@ -8,7 +8,6 @@ var recordParser = require('./../process_data/recordParser');
 var constants = require('./../constants/constants');
 var recordCache = require('./../model/recordCache');
 
-
 /**
  * Gets the location of the watch and sends nearby bus stops to the watch
  */
@@ -144,7 +143,6 @@ function sendServiceDetails(stopId, serviceNo, callback) {
         }
     })
 }
-
 
 /**
  *

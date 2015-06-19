@@ -5,12 +5,12 @@
 var recordCache = require('./../model/recordCache');
 var recordParser = require('./../process_data/recordParser');
 var pebbleHelpers = require('./../pebbleHelpers');
+var messageSender = require('./../controller/messageSender');
 var constants = require('./../constants/constants');
 
 const SLOW_UPDATE_INTERVAL = 60 * 1000;
 const FAST_UPDATE_THRESHOLD = 3 * 60 * 1000;
 const FAST_UPDATE_INTERVAL = 30 * 1000;
-
 
 // threshold for the notification to be sent
 const ARRIVAL_THRESHOLD = 60 * 1000; // 1 min
@@ -72,7 +72,9 @@ function BusNotification(stopId, serviceNo) {
 BusNotification.prototype = {
     constructor: BusNotification,
     start: function () {
-        this.update();
+        var instance = this;
+        instance.update();
+        messageSender.sendNotificationStatus(true, instance.stopId, instance.serviceNo);
     },
 
     update: function () {
@@ -101,10 +103,12 @@ BusNotification.prototype = {
     },
 
     stop: function() {
-        var notificationId = this.notificationId;
+        var instance = this;
+        var notificationId = instance.notificationId;
         if (notificationId) {
             clearTimeout(notificationId);
         }
+        messageSender.sendNotificationStatus(false, instance.stopId, instance.serviceNo);
     }
 };
 

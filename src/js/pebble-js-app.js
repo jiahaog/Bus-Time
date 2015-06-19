@@ -1340,7 +1340,7 @@ module.exports = data["data"];
 /**
  * Created by JiaHao on 18/6/15.
  */
-    
+
 var stateTracker = require('./../model/stateTracker');
 var busServiceObserver = require('./../service/busServiceObserver');
 var busServiceNotifier = require('./../service/busServiceNotifier');
@@ -1423,7 +1423,6 @@ var busStops = require('./../process_data/busStops');
 var recordParser = require('./../process_data/recordParser');
 var constants = require('./../constants/constants');
 var recordCache = require('./../model/recordCache');
-
 
 /**
  * Gets the location of the watch and sends nearby bus stops to the watch
@@ -1560,7 +1559,6 @@ function sendServiceDetails(stopId, serviceNo, callback) {
         }
     })
 }
-
 
 /**
  *
@@ -2350,12 +2348,12 @@ module.exports = {
 var recordCache = require('./../model/recordCache');
 var recordParser = require('./../process_data/recordParser');
 var pebbleHelpers = require('./../pebbleHelpers');
+var messageSender = require('./../controller/messageSender');
 var constants = require('./../constants/constants');
 
 const SLOW_UPDATE_INTERVAL = 60 * 1000;
 const FAST_UPDATE_THRESHOLD = 3 * 60 * 1000;
 const FAST_UPDATE_INTERVAL = 30 * 1000;
-
 
 // threshold for the notification to be sent
 const ARRIVAL_THRESHOLD = 60 * 1000; // 1 min
@@ -2417,7 +2415,9 @@ function BusNotification(stopId, serviceNo) {
 BusNotification.prototype = {
     constructor: BusNotification,
     start: function () {
-        this.update();
+        var instance = this;
+        instance.update();
+        messageSender.sendNotificationStatus(true, instance.stopId, instance.serviceNo);
     },
 
     update: function () {
@@ -2446,15 +2446,17 @@ BusNotification.prototype = {
     },
 
     stop: function() {
-        var notificationId = this.notificationId;
+        var instance = this;
+        var notificationId = instance.notificationId;
         if (notificationId) {
             clearTimeout(notificationId);
         }
+        messageSender.sendNotificationStatus(false, instance.stopId, instance.serviceNo);
     }
 };
 
 module.exports = busNotificationStore;
-},{"./../constants/constants":3,"./../model/recordCache":8,"./../pebbleHelpers":10,"./../process_data/recordParser":12}],14:[function(require,module,exports){
+},{"./../constants/constants":3,"./../controller/messageSender":6,"./../model/recordCache":8,"./../pebbleHelpers":10,"./../process_data/recordParser":12}],14:[function(require,module,exports){
 /**
  * Created by JiaHao on 18/6/15.
  */
