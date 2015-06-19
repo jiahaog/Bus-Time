@@ -32,7 +32,6 @@ static void set_action_bar_notification_icon(bool show_set_icon) {
     }
 }
 
-
 static void register_or_cancel_notification(bool register_notification) {
 
     if (register_notification) {
@@ -42,20 +41,7 @@ static void register_or_cancel_notification(bool register_notification) {
     }
 }
 
-static void toggle_notification() {
-
-    // if (!s_notification_on) {
-    //     register_or_cancel_notification(s_notification_on); // false for cancel
-    //     s_notification_on = true;
-    //     set_action_bar_icon(s_notification_on); // true to show set_alert icon
-    // } else {
-    //     register_or_cancel_notification(s_notification_on); // true for register notification
-    //     s_notification_on = false;
-    //     set_action_bar_icon(s_notification_on); // false to show cancel icon
-    // }
-}
-
-void toggle_notification_click_handler(ClickRecognizerRef recognizer, void *context) {
+static void toggle_notification_click_handler(ClickRecognizerRef recognizer, void *context) {
     // message format {set_or_cancel_notification}|{stop_id}|{service_no}
     
     // size 1 because string elements are simply chars
@@ -93,25 +79,20 @@ static void action_bar_click_config_provider(void *context) {
     window_single_click_subscribe(BUTTON_ID_SELECT, (ClickHandler) toggle_notification_click_handler);
 }
 
-static void action_bar_load() {
-    s_action_bar = action_bar_layer_create();
-    action_bar_layer_add_to_window(s_action_bar, s_details_window);
-    action_bar_layer_set_click_config_provider(s_action_bar, action_bar_click_config_provider);
+static void details_layers_load() {
 
-    #ifdef PBL_PLATFORM_BASALT
-        action_bar_layer_set_background_color(s_action_bar, COLOR_SECONDARY);
+    Layer *window_layer = window_get_root_layer(s_details_window);
+    GRect window_bounds = layer_get_bounds(window_layer);
+
+    #ifdef PBL_PLATFORM_APLITE
+        GRect content_bounds = window_bounds;
+    #else
+        // subtract the width of the action bar away
+        GRect content_bounds = GRect(window_bounds.origin.x, window_bounds.origin.y, window_bounds.size.w - ACTION_BAR_WIDTH, window_bounds.size.h);
     #endif
 
-    s_bitmap_alert_set = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_SET);
-    s_bitmap_alert_cancel = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_CANCEL);
-
-}
-
-static void details_layers_load(Window *window, GRect content_bounds) {
-    Layer *window_layer = window_get_root_layer(window);
-
     int16_t content_width = content_bounds.size.w - 2*CONTENT_X_PADDING;
-    int16_t content_height = get_font_height(window, fonts_get_system_font(DETAILS_LAYER_FONT));
+    int16_t content_height = get_font_height(s_details_window, fonts_get_system_font(DETAILS_LAYER_FONT));
 
     for (int i = 0; i < DETAILS_LIST_MESSAGE_PARTS; i++ ) {
 
@@ -130,25 +111,44 @@ static void details_layers_unload() {
     }
 }
 
+static void action_bar_load() {
+    s_action_bar = action_bar_layer_create();
+    action_bar_layer_add_to_window(s_action_bar, s_details_window);
+    action_bar_layer_set_click_config_provider(s_action_bar, action_bar_click_config_provider);
+
+    #ifdef PBL_PLATFORM_BASALT
+        action_bar_layer_set_background_color(s_action_bar, COLOR_SECONDARY);
+    #endif
+
+    s_bitmap_alert_set = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_SET);
+    s_bitmap_alert_cancel = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_CANCEL);
+}
+
+static void content_load() {
+    action_bar_load();
+    details_layers_load();
+
+}
+
 static void window_load(Window *window) {
     // always initialise to false 
     // TODO: check from js side to see if notification is on before setting
 
     window_set_up(window);
-    Layer *window_layer = window_get_root_layer(window);
-    GRect window_bounds = layer_get_bounds(window_layer);
+    // Layer *window_layer = window_get_root_layer(window);
+    // GRect window_bounds = layer_get_bounds(window_layer);
 
     #ifdef PBL_PLATFORM_APLITE
-        GRect content_bounds = window_bounds;
+        // GRect content_bounds = window_bounds;
         
     #else
         
         create_loading_animation(window);        
-        GRect content_bounds = GRect(window_bounds.origin.x, window_bounds.origin.y, window_bounds.size.w - ACTION_BAR_WIDTH, window_bounds.size.h);
+        // GRect content_bounds = GRect(window_bounds.origin.x, window_bounds.origin.y, window_bounds.size.w - ACTION_BAR_WIDTH, window_bounds.size.h);
 
     #endif
 
-    details_layers_load(window, content_bounds);
+    // details_layers_load(window, content_bounds);
 }
 
 static void window_unload(Window *window) {
@@ -158,6 +158,7 @@ static void window_unload(Window *window) {
 
     action_bar_layer_destroy(s_action_bar);
     s_action_bar = NULL;
+
     gbitmap_destroy(s_bitmap_alert_set);
     gbitmap_destroy(s_bitmap_alert_cancel);
 
@@ -191,12 +192,16 @@ void details_window_reload_details() {
         destroy_loading_animation();
     #endif
 
-    for (int i = 0; i < DETAILS_LIST_MESSAGE_PARTS; i++) {
-        layer_mark_dirty(text_layer_get_layer(s_details_text_layers[i]));
-    }
-
     if (!s_action_bar) {
-        action_bar_load();
+        // first load of content & action bar
+        // content will load together with action
+        // action_bar_load();
+        content_load();
+    } else {
+        // not first load of content, so layers are initialized and we can execute functions on them
+        for (int i = 0; i < DETAILS_LIST_MESSAGE_PARTS; i++) {
+            layer_mark_dirty(text_layer_get_layer(s_details_text_layers[i]));
+        }        
     }
 
     bool current_notification_state = notification_list_get_status(details_list[0], details_list[1]);
