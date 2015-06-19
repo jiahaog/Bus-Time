@@ -149,6 +149,9 @@ bool notification_list_get_status(char *stop_id, char *service_no) {
 
 static void split_details_list_data() {
 
+    // reset the details list
+    memset(details_list, 0, sizeof details_list);
+
     char *current_string = s_details_list_string_buffer;
 
     int delimiters[DETAILS_LIST_MESSAGE_PARTS - 1] = {};
@@ -189,15 +192,6 @@ int get_service_list_count() {
 }
 
 int get_bus_stop_list_count() {
-    // int arraySize = sizeof(bus_stop_string_buffer) / sizeof(bus_stop_string_buffer[0]);
-    // int counter = 0;
-    // for (int index = 0; index < arraySize; index++) {
-    //     char *currentElement = bus_stop_string_buffer[index];
-    //     if ((int)strlen(currentElement) > 0) {
-    //         counter++;
-    //     }
-    // }
-    // return counter;
     return s_bus_stop_list_counter;
 }
 
