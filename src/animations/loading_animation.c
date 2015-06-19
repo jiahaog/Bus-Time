@@ -56,8 +56,6 @@ void create_loading_animation(Window *window) {
     
     layer_add_child(window_layer, bitmap_layer_get_layer(s_bitmap_layer));
 
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "created loading");
-
     load_sequence();
 }
 
