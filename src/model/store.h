@@ -18,6 +18,7 @@
 
 
 #include <pebble.h>
+// #include <ctype.h>
 
 
 char bus_stop_list[BUS_STOP_LIST_MAX_ELEMENTS][BUS_STOP_LIST_MESSAGE_PARTS][STRING_SIZE];

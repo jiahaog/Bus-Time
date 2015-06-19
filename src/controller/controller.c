@@ -125,10 +125,8 @@ bool controller_init() {
         bluetooth_connection_service_subscribe(bluetooth_event_callback);
         APP_LOG(APP_LOG_LEVEL_DEBUG, "Watch inbox opened and callbacks registered");
 
-        psleep(400);  // we need to sleep before messages can be sent, as outbox takes some time to open
+        // psleep(400);  // we need to sleep before messages can be sent, as outbox takes some time to open
         start_app_alive_service();
         return true;
     }
-
-
 }
