@@ -20,4 +20,4 @@ void text_layer_set_up(TextLayer* text_layer);
     GRect window_with_status_bar_content_bounds(Layer *window_layer, StatusBarLayer *status_bar_layer);
 #endif
 
-int16_t get_font_height(const Window* window, const char* font);
+int16_t get_font_height(Window* window, const char* font);

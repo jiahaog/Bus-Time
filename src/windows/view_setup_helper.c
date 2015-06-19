@@ -40,7 +40,7 @@ void text_layer_set_up(TextLayer *text_layer) {
 #endif
 
 // helper method to get the height of a specific font
-int16_t get_font_height(const Window* window, const char* font ) {
+int16_t get_font_height(Window* window, const char* font ) {
     
     // creates a text layer, gets the height, and destroys it
     TextLayer *text_layer = text_layer_create(layer_get_bounds(window_get_root_layer(window)));
