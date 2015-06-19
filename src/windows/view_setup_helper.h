@@ -6,6 +6,11 @@
 #define COLOR_BACKGROUND GColorBlack
 #define COLOR_SECONDARY GColorDarkCandyAppleRed
 #define COLOR_TEXT GColorWhite
+
+#define NO_COLOR_BACKGROUND GColorBlack
+#define NO_COLOR_SECONDARY GColorClear
+#define NO_COLOR_TEXT GColorWhite
+
 #define FONT_BASIC_TEXT FONT_KEY_GOTHIC_24
 
 #define CELL_H1_FONT FONT_KEY_GOTHIC_24_BOLD
