@@ -11,10 +11,6 @@ static Window *s_details_window;
 static TextLayer *s_details_text_layers[DETAILS_LIST_MESSAGE_PARTS];
 static ActionBarLayer *s_action_bar;
 
-#ifdef PBL_PLATFORM_BASALT
-    static StatusBarLayer *s_status_bar_layer;
-#endif
-
 GBitmap *s_bitmap_alert_set;
 GBitmap *s_bitmap_alert_cancel;
 
@@ -147,14 +143,8 @@ static void window_load(Window *window) {
         
     #else
         
-        create_loading_animation(window);
-
-        s_status_bar_layer = status_bar_layer_create();
-        status_bar_layer_set_up(s_status_bar_layer);
-        layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar_layer));
-
-        GRect content_bounds_without_action_bar = window_with_status_bar_content_bounds(window_layer, s_status_bar_layer);
-        GRect content_bounds = GRect(content_bounds_without_action_bar.origin.x, content_bounds_without_action_bar.origin.y, content_bounds_without_action_bar.size.w - ACTION_BAR_WIDTH, content_bounds_without_action_bar.size.h);
+        create_loading_animation(window);        
+        GRect content_bounds = GRect(window_bounds.origin.x, window_bounds.origin.y, window_bounds.size.w - ACTION_BAR_WIDTH, window_bounds.size.h);
 
     #endif
 
@@ -176,7 +166,6 @@ static void window_unload(Window *window) {
     #else
         details_list_reset();
         destroy_loading_animation();
-        status_bar_layer_destroy(s_status_bar_layer);
     #endif
 
     // going back to the services list
@@ -195,7 +184,6 @@ void details_window_push() {
     }
 
     window_stack_push(s_details_window, true);
-
 }
 
 void details_window_reload_details() {
@@ -214,20 +202,3 @@ void details_window_reload_details() {
     bool current_notification_state = notification_list_get_status(details_list[0], details_list[1]);
     set_action_bar_notification_icon(!current_notification_state);
 }
-
-// void details_window_set_text(char *message) {
-//     #ifdef PBL_PLATFORM_BASALT
-//         destroy_loading_animation();
-//     #endif
-
-//     snprintf(s_details_message, sizeof(s_details_message), "%s", message);
-//     layer_mark_dirty(text_layer_get_layer(s_details_text_layer));
-
-//     if (strcmp(s_details_message,LOADING_MESSAGE) != 0 ) {
-
-//         if (!s_action_bar) {
-//             action_bar_load();
-//         }
-//     }
-
-// }
