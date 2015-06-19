@@ -9,9 +9,11 @@ int s_bus_stop_list_counter = 0;
 int s_service_list_counter = 0;
 int s_notifications_list_counter = 0;
 
+time_t s_last_app_alive_message_time;
+
 // Sets up default variables for store
 void store_init() {
-    // strcpy(bus_stops_list[0], "Stop 1");
+    s_last_app_alive_message_time = time(NULL);
 }
 
 void bus_stop_list_reset() {
@@ -270,3 +272,12 @@ void split_service_list_data() {
     }
 }
 
+void save_last_app_alive_message_time() {
+    s_last_app_alive_message_time = time(NULL);  // seconds
+}
+
+// returns in seconds
+time_t get_time_since_last_app_alive_message() {
+    time_t current_time = time(NULL);
+    return current_time - s_last_app_alive_message_time;
+}

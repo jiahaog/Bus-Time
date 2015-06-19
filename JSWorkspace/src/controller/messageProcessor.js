@@ -6,6 +6,7 @@ var stateTracker = require('./../model/stateTracker');
 var busServiceObserver = require('./../service/busServiceObserver');
 var busServiceNotifier = require('./../service/busServiceNotifier');
 var constants = require('./../constants/constants');
+var pebbleHelpers = require('./../pebbleHelpers.js');
 
 function processAppMessage(event) {
 
@@ -65,6 +66,17 @@ function processAppMessage(event) {
                     busServiceNotifier.startNotification(stopId, serviceNo);
                 } else {
                     busServiceNotifier.stopNotification(stopId, serviceNo);
+                }
+            } else if (key == constants.APP_MESSAGE_KEYS.KEY_APP_ALIVE) {
+                // we dont save the last app message time because this is sent automatically by the watch as a service
+                if (value === 1) {
+                    var dictionaryMessage = {};
+                    dictionaryMessage[constants.APP_MESSAGE_KEYS.KEY_APP_ALIVE] = 1;
+                    pebbleHelpers.sendMessage(dictionaryMessage, function (error) {
+                        if (error) {
+                            console.log('Error sending keep alive message to pebble');
+                        }
+                    });
                 }
             }
         }

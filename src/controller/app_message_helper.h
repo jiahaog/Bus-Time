@@ -18,7 +18,8 @@ enum {
 
     KEY_ERROR = 9,
 
-    KEY_BUS_NOTIFICATION = 10
+    KEY_BUS_NOTIFICATION = 10,
+    KEY_APP_ALIVE =  11
 };
 
 

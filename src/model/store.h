@@ -25,6 +25,8 @@ char service_list[SERVICE_LIST_MAX_ELEMENTS][SERVICE_LIST_MESSAGE_PARTS][STRING_
 char details_list[DETAILS_LIST_MESSAGE_PARTS][STRING_SIZE];
 char notifications_list[NOTIFICATION_LIST_MAX_ELEMENTS][NOTIFICATION_LIST_MESSAGE_PARTS][STRING_SIZE];
 
+
+
 void store_init();
 void service_list_reset();
 void bus_stop_list_reset();
@@ -42,3 +44,6 @@ void split_bus_stop_data();
 void split_service_list_data();
 
 bool notification_list_get_status(char *stop_id, char *service_no);
+
+void save_last_app_alive_message_time();
+time_t get_time_since_last_app_alive_message();

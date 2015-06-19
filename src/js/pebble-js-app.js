@@ -1270,8 +1270,9 @@ const APP_MESSAGE_KEYS = {
 
     KEY_ERROR: 'KEY_ERROR',
 
-    KEY_BUS_NOTIFICATION: 'KEY_BUS_NOTIFICATION'
+    KEY_BUS_NOTIFICATION: 'KEY_BUS_NOTIFICATION',
 
+    KEY_APP_ALIVE: 'KEY_APP_ALIVE'
 };
 
 // misc keys to access received appmessage
@@ -1345,6 +1346,7 @@ var stateTracker = require('./../model/stateTracker');
 var busServiceObserver = require('./../service/busServiceObserver');
 var busServiceNotifier = require('./../service/busServiceNotifier');
 var constants = require('./../constants/constants');
+var pebbleHelpers = require('./../pebbleHelpers.js');
 
 function processAppMessage(event) {
 
@@ -1405,6 +1407,17 @@ function processAppMessage(event) {
                 } else {
                     busServiceNotifier.stopNotification(stopId, serviceNo);
                 }
+            } else if (key == constants.APP_MESSAGE_KEYS.KEY_APP_ALIVE) {
+                // we dont save the last app message time because this is sent automatically by the watch as a service
+                if (value === 1) {
+                    var dictionaryMessage = {};
+                    dictionaryMessage[constants.APP_MESSAGE_KEYS.KEY_APP_ALIVE] = 1;
+                    pebbleHelpers.sendMessage(dictionaryMessage, function (error) {
+                        if (error) {
+                            console.log('Error sending keep alive message to pebble');
+                        }
+                    });
+                }
             }
         }
     }
@@ -1413,7 +1426,7 @@ function processAppMessage(event) {
 module.exports = {
     processAppMessage: processAppMessage
 };
-},{"./../constants/constants":3,"./../model/stateTracker":9,"./../service/busServiceNotifier":13,"./../service/busServiceObserver":14}],6:[function(require,module,exports){
+},{"./../constants/constants":3,"./../model/stateTracker":9,"./../pebbleHelpers.js":10,"./../service/busServiceNotifier":13,"./../service/busServiceObserver":14}],6:[function(require,module,exports){
 /**
  * Created by JiaHao on 18/6/15.
  */

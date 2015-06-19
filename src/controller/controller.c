@@ -84,6 +84,10 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 handleError(t->value->int32);
                 break;
 
+            case KEY_APP_ALIVE:
+                save_last_app_alive_message_time();
+                break;
+
             default:
                 APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
                 break;
@@ -120,6 +124,9 @@ bool controller_init() {
 
         bluetooth_connection_service_subscribe(bluetooth_event_callback);
         APP_LOG(APP_LOG_LEVEL_DEBUG, "Watch inbox opened and callbacks registered");
+
+        psleep(400);  // we need to sleep before messages can be sent, as outbox takes some time to open
+        start_app_alive_service();
         return true;
     }
 
