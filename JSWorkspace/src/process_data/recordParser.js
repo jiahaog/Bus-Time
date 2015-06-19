@@ -21,7 +21,7 @@ var constants = require('./../constants/constants');
  *
  * @param arrivalString utc date string
  * @param {boolean} [number] returns the timing as a utc number
- * @returns {string|number} e.g. '1m 20s', null if negative, '-' if the data received from myTransport is null |
+ * @returns {string|number} e.g. '1m', null if negative, '-' if the data received from myTransport is null |
  *                               timing (ms) if number parameter is true, null if the arrivalString is null
  */
 function getTimeToArrival(arrivalString, number) {
@@ -42,20 +42,24 @@ function getTimeToArrival(arrivalString, number) {
 
     const differenceMs = utcArrival - utcNow;
 
+    const min = Math.floor(differenceMs / 1000 / 60);
     if (number) {
-        return differenceMs;
+        //return differenceMs;
+        return min*60*1000;  // convert minutes to ms
     } else {
-        const min = Math.floor(differenceMs / 1000 / 60);
 
-        // todo round down seconds to nearest minute
-        const sec = Math.floor((differenceMs / 1000) % 60);
-
-        if ((min < 0) || (sec < 0)) {
+        if (min <= 0 ) {
             return 'Arr.';
+        } else {
+            return min + 'm';
         }
+        //const sec = Math.floor((differenceMs / 1000) % 60);
+        //if ((min < 0) || (sec < 0)) {
+        //    return 'Arr.';
+        //}
 
         //return min + ':' + sec;
-        return min + 'm ' + sec + 's';
+        //return min + 'm ' + sec + 's';
     }
 }
 

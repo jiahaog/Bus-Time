@@ -1,6 +1,7 @@
 #include "bus_stops_window.h"
 
 #define BUS_STOP_CELL_H1_TOP_MARGIN -5
+#define BUS_STOP_CELL_H2_FONT FONT_KEY_GOTHIC_18
 #define BUS_STOP_CELL_HEIGHT 60
 
 #define BUS_STOP_CELL_X_PADDING 5
@@ -47,10 +48,10 @@ static void callback_menu_layer_draw_row(GContext *ctx, const Layer *cell_layer,
         graphics_draw_text(ctx, title, fonts_get_system_font(CELL_H1_FONT), title_bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
         
         GRect subtitle_bounds = GRect(cell_bounds.origin.x + BUS_STOP_CELL_X_PADDING, title_bounds.origin.y + title_bounds.size.h, cell_layer_width, s_cell_h2_height);
-        graphics_draw_text(ctx, subtitle, fonts_get_system_font(CELL_H2_FONT), subtitle_bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
+        graphics_draw_text(ctx, subtitle, fonts_get_system_font(BUS_STOP_CELL_H2_FONT), subtitle_bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
         
         GRect stop_id_bounds = GRect(cell_bounds.origin.x + BUS_STOP_CELL_X_PADDING, subtitle_bounds.origin.y + subtitle_bounds.size.h, cell_layer_width, s_cell_h2_height);
-        graphics_draw_text(ctx, stop_id, fonts_get_system_font(CELL_H2_FONT), stop_id_bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
+        graphics_draw_text(ctx, stop_id, fonts_get_system_font(BUS_STOP_CELL_H2_FONT), stop_id_bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
     }
 }
 
@@ -69,7 +70,7 @@ static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuI
 
 static void menu_load() {
     s_cell_h1_height = get_font_height(s_bus_stops_window, CELL_H1_FONT);
-    s_cell_h2_height = get_font_height(s_bus_stops_window, CELL_H2_FONT);
+    s_cell_h2_height = get_font_height(s_bus_stops_window, BUS_STOP_CELL_H2_FONT);
 
     Layer *window_layer = window_get_root_layer(s_bus_stops_window);
 

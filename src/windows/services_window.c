@@ -1,7 +1,8 @@
 #include "services_window.h"
 
 #define SERVICES_CELL_H1_TOP_MARGIN 5
-#define SERVICES_CELL_H2_TOP_MARGIN 10
+#define SERVICES_CELL_H2_TOP_MARGIN 5
+#define SERVICES_CELL_H2_FONT FONT_KEY_GOTHIC_24
 #define SERVICES_CELL_X_PADDING 5
 
 #define MENU_LAYER_HEADER_HEIGHT 30
@@ -41,7 +42,7 @@ static void callback_menu_layer_draw_row(GContext *ctx, const Layer *cell_layer,
         graphics_draw_text(ctx, service_no, fonts_get_system_font(CELL_H1_FONT), title_bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
         
         GRect arrival_time_bounds = GRect(cell_bounds.origin.x, cell_bounds.origin.y + SERVICES_CELL_H2_TOP_MARGIN, cell_layer_width, cell_bounds.size.h);
-        graphics_draw_text(ctx, arrival_time, fonts_get_system_font(CELL_H2_FONT), arrival_time_bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentRight, NULL);
+        graphics_draw_text(ctx, arrival_time, fonts_get_system_font(SERVICES_CELL_H2_FONT), arrival_time_bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentRight, NULL);
     }
 }
 
