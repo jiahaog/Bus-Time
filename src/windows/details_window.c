@@ -1,19 +1,38 @@
 #include "details_window.h"
 
-#define LOADING_MESSAGE "Loading..."
+#define PLACEHOLDER_TIME_STRING "00:00"
 #define CONTENT_X_PADDING 5
 // #define DETAILS_LAYER_HEIGHT 30
 #define DETAILS_LAYER_FONT FONT_KEY_GOTHIC_14_BOLD   
-
+#define TIME_LAYER_FONT FONT_KEY_GOTHIC_28
 #define NOTIFICATION_MESSAGE_BUFFER_SIZE 16
 
 static Window *s_details_window;
+static TextLayer *s_time_text_layer;
 static TextLayer *s_details_text_layers[DETAILS_LIST_MESSAGE_PARTS];
 static ActionBarLayer *s_action_bar;
 
 GBitmap *s_bitmap_alert_set;
 GBitmap *s_bitmap_alert_cancel;
 
+static void update_time() {
+    time_t time_now = time(NULL);
+    struct tm *tick_time = localtime(&time_now);
+
+    static char time_string_buffer[] = PLACEHOLDER_TIME_STRING;
+
+    if (clock_is_24h_style() == true) {
+        strftime(time_string_buffer, sizeof(PLACEHOLDER_TIME_STRING), "%H:%M", tick_time);
+    } else {
+        strftime(time_string_buffer, sizeof(PLACEHOLDER_TIME_STRING), "%I:%M", tick_time);
+    }
+
+    text_layer_set_text(s_time_text_layer, time_string_buffer);
+}
+
+static void time_tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+    update_time();
+}
 
 static void set_action_bar_notification_icon(bool show_set_icon) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "SETTING NOTIFICAITON ICON %s", show_set_icon ? "true" : "false");
@@ -79,24 +98,18 @@ static void action_bar_click_config_provider(void *context) {
     window_single_click_subscribe(BUTTON_ID_SELECT, (ClickHandler) toggle_notification_click_handler);
 }
 
-static void details_layers_load() {
+
+static void details_layers_load(GRect content_bounds) {
 
     Layer *window_layer = window_get_root_layer(s_details_window);
-    GRect window_bounds = layer_get_bounds(window_layer);
-
-    #ifdef PBL_PLATFORM_APLITE
-        GRect content_bounds = window_bounds;
-    #else
-        // subtract the width of the action bar away
-        GRect content_bounds = GRect(window_bounds.origin.x, window_bounds.origin.y, window_bounds.size.w - ACTION_BAR_WIDTH, window_bounds.size.h);
-    #endif
-
+   
     int16_t content_width = content_bounds.size.w - 2*CONTENT_X_PADDING;
-    int16_t content_height = get_font_height(s_details_window, fonts_get_system_font(DETAILS_LAYER_FONT));
+    int16_t content_height = get_font_height(s_details_window, DETAILS_LAYER_FONT);
+    int16_t details_top_margin = 50;
 
     for (int i = 0; i < DETAILS_LIST_MESSAGE_PARTS; i++ ) {
 
-        GRect current_details_bounds = GRect(CONTENT_X_PADDING, content_bounds.origin.y + content_height * i, content_width, content_height);
+        GRect current_details_bounds = GRect(CONTENT_X_PADDING, details_top_margin + content_bounds.origin.y + content_height * i, content_width, content_height);
         s_details_text_layers[i] = text_layer_create(current_details_bounds);
         text_layer_set_up(s_details_text_layers[i]);
         text_layer_set_font(s_details_text_layers[i], fonts_get_system_font(DETAILS_LAYER_FONT));
@@ -105,10 +118,27 @@ static void details_layers_load() {
     }
 }
 
+static void time_layer_load(GRect content_bounds) {
+    Layer *window_layer = window_get_root_layer(s_details_window);
+
+    int16_t time_layer_height = get_font_height(s_details_window, TIME_LAYER_FONT);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Time layer height: %i", time_layer_height);
+    GRect time_layer_bounds = GRect(content_bounds.origin.x, content_bounds.origin.y, content_bounds.size.w, time_layer_height);
+
+    s_time_text_layer = text_layer_create(time_layer_bounds);
+    text_layer_set_up(s_time_text_layer);
+    text_layer_set_font(s_time_text_layer, fonts_get_system_font(TIME_LAYER_FONT));
+
+    layer_add_child(window_layer, text_layer_get_layer(s_time_text_layer));
+    update_time();
+    tick_timer_service_subscribe(MINUTE_UNIT, time_tick_handler);
+}
+
 static void details_layers_unload() {
     for (int i = 0; i < DETAILS_LIST_MESSAGE_PARTS; i++) {
         text_layer_destroy(s_details_text_layers[i]);
     }
+    text_layer_destroy(s_time_text_layer);
 }
 
 static void action_bar_load() {
@@ -125,9 +155,20 @@ static void action_bar_load() {
 }
 
 static void content_load() {
-    action_bar_load();
-    details_layers_load();
 
+    Layer *window_layer = window_get_root_layer(s_details_window);
+    GRect window_bounds = layer_get_bounds(window_layer);
+
+    #ifdef PBL_PLATFORM_APLITE
+        GRect content_bounds = window_bounds;
+    #else
+        // subtract the width of the action bar away
+        GRect content_bounds = GRect(window_bounds.origin.x, window_bounds.origin.y, window_bounds.size.w - ACTION_BAR_WIDTH, window_bounds.size.h);
+    #endif
+
+    action_bar_load();
+    details_layers_load(content_bounds);
+    time_layer_load(content_bounds);
 }
 
 static void window_load(Window *window) {
