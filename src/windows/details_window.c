@@ -4,12 +4,14 @@
 #define CONTENT_X_PADDING 5
 // #define DETAILS_LAYER_HEIGHT 30
 #define DETAILS_LAYER_FONT FONT_KEY_GOTHIC_14_BOLD   
-#define TIME_LAYER_FONT FONT_KEY_GOTHIC_28
+#define TIME_LAYER_FONT FONT_KEY_BITHAM_42_LIGHT
+#define TIME_LAYER_Y_MARGIN 5
 #define NOTIFICATION_MESSAGE_BUFFER_SIZE 16
+#define NO_OF_DETAILS_TEXT_LAYERS 4
 
 static Window *s_details_window;
 static TextLayer *s_time_text_layer;
-static TextLayer *s_details_text_layers[DETAILS_LIST_MESSAGE_PARTS];
+static TextLayer *s_details_text_layers[NO_OF_DETAILS_TEXT_LAYERS];
 static ActionBarLayer *s_action_bar;
 
 GBitmap *s_bitmap_alert_set;
@@ -107,23 +109,96 @@ static void details_layers_load(GRect content_bounds) {
     int16_t content_height = get_font_height(s_details_window, fonts_get_system_font(DETAILS_LAYER_FONT));
     int16_t details_top_margin = 50;
 
-    for (int i = 0; i < DETAILS_LIST_MESSAGE_PARTS; i++ ) {
+    // data store index
+    // 0 - stop id
+    // 1 - service no
+    // 2 - next bus est. time
+    // 3 - next bus seating
+    // 4 - subsequent bus est. time
+    // 5 - subsequent bus seating
 
-        GRect current_details_bounds = GRect(CONTENT_X_PADDING, details_top_margin + content_bounds.origin.y + content_height * i, content_width, content_height);
-        s_details_text_layers[i] = text_layer_create(current_details_bounds);
-        text_layer_set_up(s_details_text_layers[i]);
-        text_layer_set_font(s_details_text_layers[i], fonts_get_system_font(DETAILS_LAYER_FONT));
-        text_layer_set_text(s_details_text_layers[i], details_list[i]);
+    // text_layers
+    // 0 - service_no
+    // 1 - next bus est. time
+    // 2 - sub bus est. time
+    // 3 - stop id
+
+    // TODO: put bus stop name as well
+
+    // SERVICE NO
+
+    GFont service_no_font = fonts_get_system_font(FONT_KEY_GOTHIC_28);
+
+    static int16_t service_no_margin_x = 5;
+    static int16_t service_no_origin_y = 55;
+    int16_t service_no_height = get_font_height(s_details_window, service_no_font);
+
+    GRect service_no_bounds = GRect(content_bounds.origin.x + service_no_margin_x, content_bounds.origin.y + service_no_origin_y, content_bounds.size.w - 2 * service_no_margin_x, service_no_height);
+    s_details_text_layers[0] = text_layer_create(service_no_bounds);
+
+    text_layer_set_text(s_details_text_layers[0], details_list[1]);
+
+    text_layer_set_font(s_details_text_layers[0], service_no_font);
+    text_layer_set_text_alignment(s_details_text_layers[0], GTextAlignmentRight);
+
+
+    // EST TIME
+
+    GFont est_time_font = fonts_get_system_font(FONT_KEY_GOTHIC_24);
+    static int16_t est_time_origin_y = 90;
+    static int16_t est_time_margin_x = 20;
+    int16_t est_time_width = content_bounds.size.w - 2*est_time_margin_x;
+    int16_t est_time_height = get_font_height(s_details_window, est_time_font);
+
+    GRect next_bus_est_time_bounds = GRect(content_bounds.origin.x + est_time_margin_x, content_bounds.origin.y + est_time_origin_y, est_time_width, est_time_height);
+    GRect sub_bus_est_time_bounds = GRect(content_bounds.origin.x + est_time_margin_x, content_bounds.origin.y + est_time_origin_y, est_time_width, est_time_height);
+
+    s_details_text_layers[1] = text_layer_create(next_bus_est_time_bounds);
+    s_details_text_layers[2] = text_layer_create(sub_bus_est_time_bounds);
+
+    text_layer_set_text(s_details_text_layers[1], details_list[2]);
+    text_layer_set_text(s_details_text_layers[2], details_list[4]);
+
+    text_layer_set_font(s_details_text_layers[1], est_time_font);
+    text_layer_set_font(s_details_text_layers[2], est_time_font);
+    text_layer_set_text_alignment(s_details_text_layers[1], GTextAlignmentLeft);
+    text_layer_set_text_alignment(s_details_text_layers[2], GTextAlignmentRight);
+
+
+    // STOP ID
+
+    GFont stop_id_font = fonts_get_system_font(FONT_KEY_GOTHIC_18);
+    static int16_t stop_id_origin_y = 130;
+    int16_t stop_id_height = get_font_height(s_details_window, stop_id_font);
+
+    GRect stop_id_bounds = GRect(content_bounds.origin.x, content_bounds.origin.y + stop_id_origin_y, content_bounds.size.w, stop_id_height);
+    s_details_text_layers[3] = text_layer_create(stop_id_bounds);
+
+    text_layer_set_text(s_details_text_layers[3], details_list[0]);
+
+    text_layer_set_font(s_details_text_layers[3], stop_id_font);
+    text_layer_set_text_alignment(s_details_text_layers[3], GTextAlignmentCenter);
+
+
+    for (int i = 0; i < NO_OF_DETAILS_TEXT_LAYERS; i++ ) {
+    
+        #ifdef PBL_COLOR
+            text_layer_set_text_color(s_details_text_layers[i], COLOR_TEXT);
+        #else
+            text_layer_set_text_color(s_details_text_layers[i], NO_COLOR_TEXT);
+        #endif
+
+        text_layer_set_background_color(s_details_text_layers[i], GColorClear);
         layer_add_child(window_layer, text_layer_get_layer(s_details_text_layers[i]));
     }
 }
 
 static void time_layer_load(GRect content_bounds) {
+
     Layer *window_layer = window_get_root_layer(s_details_window);
 
-    int16_t time_layer_height = get_font_height(s_details_window, fonts_get_system_font(TIME_LAYER_FONT));
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Time layer height: %i", time_layer_height);
-    GRect time_layer_bounds = GRect(content_bounds.origin.x, content_bounds.origin.y, content_bounds.size.w, time_layer_height);
+    int16_t time_layer_height = get_font_height(s_details_window, fonts_get_system_font(TIME_LAYER_FONT)) + 10;  // add 10 here because somehow this function doesnt work for large fonts
+    GRect time_layer_bounds = GRect(content_bounds.origin.x, content_bounds.origin.y + TIME_LAYER_Y_MARGIN, content_bounds.size.w, time_layer_height);
 
     s_time_text_layer = text_layer_create(time_layer_bounds);
     text_layer_set_up(s_time_text_layer);
@@ -135,7 +210,7 @@ static void time_layer_load(GRect content_bounds) {
 }
 
 static void details_layers_unload() {
-    for (int i = 0; i < DETAILS_LIST_MESSAGE_PARTS; i++) {
+    for (int i = 0; i < NO_OF_DETAILS_TEXT_LAYERS; i++) {
         text_layer_destroy(s_details_text_layers[i]);
     }
     text_layer_destroy(s_time_text_layer);
@@ -240,7 +315,7 @@ void details_window_reload_details() {
         content_load();
     } else {
         // not first load of content, so layers are initialized and we can execute functions on them
-        for (int i = 0; i < DETAILS_LIST_MESSAGE_PARTS; i++) {
+        for (int i = 0; i < NO_OF_DETAILS_TEXT_LAYERS; i++) {
             layer_mark_dirty(text_layer_get_layer(s_details_text_layers[i]));
         }        
     }
