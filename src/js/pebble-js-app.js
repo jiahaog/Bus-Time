@@ -2257,6 +2257,32 @@ function getTimeToArrival(arrivalString, number) {
     }
 }
 
+const REDUCED_SERVICE_LOAD_STRING = {
+    seatsAvailable: '3',
+    standingAvailable: '2',
+    limitedStanding: '1',
+    error: '0'
+};
+
+
+/**
+ * Reduces the service load string to a value that can be easily parsed on the watch
+ * @param {string} serviceStatus
+ * @returns {string} a value inside {REDUCED_SERVICE_LOAD_STRING} or null if parameter not recognised
+ */
+function reduceServiceLoadString(serviceStatus) {
+    if (serviceStatus === 'Seats Available') {
+        return REDUCED_SERVICE_LOAD_STRING.seatsAvailable;
+    } else if (serviceStatus === 'Standing Available') {
+        return REDUCED_SERVICE_LOAD_STRING.standingAvailable;
+    } else if (serviceStatus === 'Limited Standing') {
+        return REDUCED_SERVICE_LOAD_STRING.limitedStanding;
+    } else {
+        console.log('INVALID SERVICE LOAD');
+        return REDUCED_SERVICE_LOAD_STRING.error;
+    }
+}
+
 /**
  * @typedef {Object} parsedServiceDetailsResult
  * @property {string} serviceNo
@@ -2282,11 +2308,16 @@ function parseForServiceDetails(record, desiredServiceNo, timingsAsNumber) {
         if (currentService[constants.RESPONSE_KEYS.serviceNo] === desiredServiceNo.toString()) {
 
             // copies the next buses
-            var nextBus = pebbleHelpers.cloneObject(currentService[constants.RESPONSE_KEYS.nextBus]);
-            var subsequentBus = pebbleHelpers.cloneObject(currentService[constants.RESPONSE_KEYS.subsequentBus]);
+            var recordNextBus = currentService[constants.RESPONSE_KEYS.nextBus];
+            var recordSubsequentBus = currentService[constants.RESPONSE_KEYS.subsequentBus];
 
-            nextBus[constants.RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(nextBus[constants.RESPONSE_KEYS.estimatedArrival], timingsAsNumber);
-            subsequentBus[constants.RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(subsequentBus[constants.RESPONSE_KEYS.estimatedArrival], timingsAsNumber);
+            var nextBus = {};
+            var subsequentBus = {};
+            nextBus[constants.RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(recordNextBus[constants.RESPONSE_KEYS.estimatedArrival], timingsAsNumber);
+            subsequentBus[constants.RESPONSE_KEYS.estimatedArrival] = getTimeToArrival(recordSubsequentBus[constants.RESPONSE_KEYS.estimatedArrival], timingsAsNumber);
+
+            nextBus[constants.RESPONSE_KEYS.load] = reduceServiceLoadString(recordNextBus[constants.RESPONSE_KEYS.load]);
+            subsequentBus[constants.RESPONSE_KEYS.load] = reduceServiceLoadString(recordSubsequentBus[constants.RESPONSE_KEYS.load]);
 
             const serviceObject = {};
             serviceObject[constants.RESPONSE_KEYS.serviceNo] = currentService[constants.RESPONSE_KEYS.serviceNo];
