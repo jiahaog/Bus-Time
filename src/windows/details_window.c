@@ -121,7 +121,7 @@ static void details_layers_load(GRect content_bounds) {
 static void time_layer_load(GRect content_bounds) {
     Layer *window_layer = window_get_root_layer(s_details_window);
 
-    int16_t time_layer_height = get_font_height(s_details_window, TIME_LAYER_FONT);
+    int16_t time_layer_height = get_font_height(s_details_window, fonts_get_system_font(TIME_LAYER_FONT));
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Time layer height: %i", time_layer_height);
     GRect time_layer_bounds = GRect(content_bounds.origin.x, content_bounds.origin.y, content_bounds.size.w, time_layer_height);
 

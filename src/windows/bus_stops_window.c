@@ -69,8 +69,8 @@ static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuI
 }
 
 static void menu_load() {
-    s_cell_h1_height = get_font_height(s_bus_stops_window, CELL_H1_FONT);
-    s_cell_h2_height = get_font_height(s_bus_stops_window, BUS_STOP_CELL_H2_FONT);
+    s_cell_h1_height = get_font_height(s_bus_stops_window, fonts_get_system_font(CELL_H1_FONT));
+    s_cell_h2_height = get_font_height(s_bus_stops_window, fonts_get_system_font(BUS_STOP_CELL_H2_FONT));
 
     Layer *window_layer = window_get_root_layer(s_bus_stops_window);
 
