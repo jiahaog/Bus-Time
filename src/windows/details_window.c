@@ -104,7 +104,7 @@ static void details_layers_load(GRect content_bounds) {
     Layer *window_layer = window_get_root_layer(s_details_window);
    
     int16_t content_width = content_bounds.size.w - 2*CONTENT_X_PADDING;
-    int16_t content_height = get_font_height(s_details_window, DETAILS_LAYER_FONT);
+    int16_t content_height = get_font_height(s_details_window, fonts_get_system_font(DETAILS_LAYER_FONT));
     int16_t details_top_margin = 50;
 
     for (int i = 0; i < DETAILS_LIST_MESSAGE_PARTS; i++ ) {
