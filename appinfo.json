@@ -36,6 +36,11 @@
         "file": "images/alert_cancel.png"
       },
       {
+        "type": "png",
+        "name": "IMAGE_BUS_ICON",
+        "file": "images/bus_icon.png"
+      },
+      {
         "type": "raw",
         "name": "ANIMATION_LOADING",
         "file": "animation/loading.png"  ,

@@ -5,7 +5,7 @@
 // #define DETAILS_LAYER_HEIGHT 30
 #define DETAILS_LAYER_FONT FONT_KEY_GOTHIC_14_BOLD   
 #define TIME_LAYER_FONT FONT_KEY_BITHAM_42_LIGHT
-#define TIME_LAYER_Y_MARGIN 5
+#define TIME_LAYER_Y_MARGIN -5
 #define NOTIFICATION_MESSAGE_BUFFER_SIZE 16
 #define NO_OF_DETAILS_TEXT_LAYERS 4
 
@@ -24,6 +24,9 @@ static ActionBarLayer *s_action_bar;
 
 GBitmap *s_bitmap_alert_set;
 GBitmap *s_bitmap_alert_cancel;
+GBitmap *s_bitmap_bus_icon;
+
+BitmapLayer *s_layer_bus_icon;
 
 static void update_time() {
     time_t time_now = time(NULL);
@@ -127,10 +130,6 @@ static void set_text_layer_color_for_load(TextLayer *text_layer, char load_char)
 static void details_layers_load(GRect content_bounds) {
 
     Layer *window_layer = window_get_root_layer(s_details_window);
-   
-    int16_t content_width = content_bounds.size.w - 2*CONTENT_X_PADDING;
-    int16_t content_height = get_font_height(s_details_window, fonts_get_system_font(DETAILS_LAYER_FONT));
-    int16_t details_top_margin = 50;
 
     // data store index
     // 0 - stop id
@@ -160,7 +159,7 @@ static void details_layers_load(GRect content_bounds) {
     GFont service_no_font = fonts_get_system_font(FONT_KEY_GOTHIC_28);
 
     static int16_t service_no_margin_x = 5;
-    static int16_t service_no_origin_y = 55;
+    static int16_t service_no_origin_y = 60;
     int16_t service_no_height = get_font_height(s_details_window, service_no_font);
 
     GRect service_no_bounds = GRect(content_bounds.origin.x + service_no_margin_x, content_bounds.origin.y + service_no_origin_y, content_bounds.size.w - 2 * service_no_margin_x, service_no_height);
@@ -174,8 +173,8 @@ static void details_layers_load(GRect content_bounds) {
 
     // EST TIME
 
-    GFont est_time_font = fonts_get_system_font(FONT_KEY_GOTHIC_24);
-    static int16_t est_time_origin_y = 90;
+    GFont est_time_font = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
+    static int16_t est_time_origin_y = 95;
     static int16_t est_time_margin_x = 20;
     int16_t est_time_width = content_bounds.size.w - 2*est_time_margin_x;
     int16_t est_time_height = get_font_height(s_details_window, est_time_font);
@@ -220,13 +219,25 @@ static void details_layers_load(GRect content_bounds) {
         text_layer_set_background_color(s_details_text_layers[i], GColorClear);
         layer_add_child(window_layer, text_layer_get_layer(s_details_text_layers[i]));
     }
+
+    s_bitmap_bus_icon = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BUS_ICON);
+    static int16_t bus_icon_origin_x = 0;
+    static int16_t bus_icon_origin_y = 60;
+    static int16_t bus_icon_size_w = 100;
+    static int16_t bus_icon_size_h = 100;
+    GRect bus_icon_bounds = GRect(content_bounds.origin.x + bus_icon_origin_x, content_bounds.origin.y + bus_icon_origin_y, bus_icon_size_w, bus_icon_size_h);
+    s_layer_bus_icon = bitmap_layer_create(bus_icon_bounds);
+    bitmap_layer_set_bitmap(s_layer_bus_icon, s_bitmap_bus_icon);
+    bitmap_layer_set_alignment(s_layer_bus_icon, GAlignTopLeft);
+    layer_add_child(window_layer, bitmap_layer_get_layer(s_layer_bus_icon));
+
 }
 
 static void time_layer_load(GRect content_bounds) {
 
     Layer *window_layer = window_get_root_layer(s_details_window);
 
-    int16_t time_layer_height = get_font_height(s_details_window, fonts_get_system_font(TIME_LAYER_FONT)) + 10;  // add 10 here because somehow this function doesnt work for large fonts
+    int16_t time_layer_height = get_font_height(s_details_window, fonts_get_system_font(TIME_LAYER_FONT)) + 3;  // add 3 here because somehow this function doesnt work for large fonts
     GRect time_layer_bounds = GRect(content_bounds.origin.x, content_bounds.origin.y + TIME_LAYER_Y_MARGIN, content_bounds.size.w, time_layer_height);
 
     s_time_text_layer = text_layer_create(time_layer_bounds);
@@ -243,6 +254,9 @@ static void details_layers_unload() {
         text_layer_destroy(s_details_text_layers[i]);
     }
     text_layer_destroy(s_time_text_layer);
+
+    gbitmap_destroy(s_bitmap_bus_icon);
+    bitmap_layer_destroy(s_layer_bus_icon);
 }
 
 static void action_bar_load() {
