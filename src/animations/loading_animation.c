@@ -53,6 +53,7 @@ void create_loading_animation(Window *window) {
     GRect bounds = layer_get_bounds(window_layer);
 
     s_bitmap_layer = bitmap_layer_create(bounds);
+    // bitmap_layer_set_compositing_mode(s_bitmap_layer, GCompOpSet);
     
     layer_add_child(window_layer, bitmap_layer_get_layer(s_bitmap_layer));
 

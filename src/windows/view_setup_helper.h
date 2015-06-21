@@ -3,8 +3,8 @@
 #include <pebble.h>
 
 
-#define COLOR_BACKGROUND GColorBlack
-#define COLOR_SECONDARY GColorDarkCandyAppleRed
+#define COLOR_BACKGROUND GColorCobaltBlue
+#define COLOR_SECONDARY GColorBulgarianRose
 #define COLOR_TEXT GColorWhite
 
 #define NO_COLOR_BACKGROUND GColorBlack
