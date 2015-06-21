@@ -90,9 +90,9 @@ BusNotification.prototype = {
                 var serviceDetails = recordParser.parseForServiceDetails(record, instance.serviceNo, true);
 
                 var timeToNextBusArrival = serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival];
-                messageSender.sendNotificationStatus(false, instance.stopId, instance.serviceNo);
                 if (timeToNextBusArrival < ARRIVAL_THRESHOLD) {
                     pebbleHelpers.sendNotification('Bus Time', 'Bus ' + instance.serviceNo + " is arriving!");
+                    messageSender.sendNotificationStatus(false, instance.stopId, instance.serviceNo);
 
                 } else {
                     instance.notificationId = setTimeout(function() {
