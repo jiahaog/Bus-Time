@@ -1,6 +1,6 @@
 #include "details_window.h"
 
-#define PLACEHOLDER_TIME_STRING "00:00"
+#define PLACEHOLDER_TIME_STRING "99:99"
 #define CONTENT_X_PADDING 5
 // #define DETAILS_LAYER_HEIGHT 30
 #define DETAILS_LAYER_FONT FONT_KEY_GOTHIC_14_BOLD   
@@ -11,9 +11,9 @@
 
 #ifdef PBL_COLOR
 
-    #define SEAT_AVAIL_COLOR GColorBrightGreen
-    #define STAND_AVAIL_COLOR GColorRajah
-    #define STAND_LIMITED_COLOR GColorSunsetOrange
+    #define SEAT_AVAIL_COLOR GColorMediumAquamarine
+    #define STAND_AVAIL_COLOR GColorIcterine
+    #define STAND_LIMITED_COLOR GColorMelon
 
 #endif
 
@@ -48,7 +48,7 @@ static void time_tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 static void set_action_bar_notification_icon(bool show_set_icon) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "SETTING NOTIFICAITON ICON %s", show_set_icon ? "true" : "false");
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "SETTING NOTIFICAITON ICON %s", show_set_icon ? "SET" : "UNSET");
     if (show_set_icon) {
         #ifdef PBL_PLATFORM_APLITE
             action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_set);
@@ -173,9 +173,9 @@ static void details_layers_load(GRect content_bounds) {
 
     // EST TIME
 
-    GFont est_time_font = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
+    GFont est_time_font = fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD);
     static int16_t est_time_origin_y = 95;
-    static int16_t est_time_margin_x = 20;
+    static int16_t est_time_margin_x = 15;
     int16_t est_time_width = content_bounds.size.w - 2*est_time_margin_x;
     int16_t est_time_height = get_font_height(s_details_window, est_time_font);
 
@@ -227,7 +227,7 @@ static void details_layers_load(GRect content_bounds) {
     static int16_t bus_icon_size_h = 100;
     GRect bus_icon_bounds = GRect(content_bounds.origin.x + bus_icon_origin_x, content_bounds.origin.y + bus_icon_origin_y, bus_icon_size_w, bus_icon_size_h);
     s_layer_bus_icon = bitmap_layer_create(bus_icon_bounds);
-    bitmap_layer_set_bitmap(s_layer_bus_icon, s_bitmap_bus_icon);
+    // bitmap_layer_set_bitmap(s_layer_bus_icon, s_bitmap_bus_icon);
     bitmap_layer_set_alignment(s_layer_bus_icon, GAlignTopLeft);
     layer_add_child(window_layer, bitmap_layer_get_layer(s_layer_bus_icon));
 
