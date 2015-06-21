@@ -9,6 +9,14 @@
 #define NOTIFICATION_MESSAGE_BUFFER_SIZE 16
 #define NO_OF_DETAILS_TEXT_LAYERS 4
 
+#ifdef PBL_COLOR
+
+    #define SEAT_AVAIL_COLOR GColorBrightGreen
+    #define STAND_AVAIL_COLOR GColorRajah
+    #define STAND_LIMITED_COLOR GColorSunsetOrange
+
+#endif
+
 static Window *s_details_window;
 static TextLayer *s_time_text_layer;
 static TextLayer *s_details_text_layers[NO_OF_DETAILS_TEXT_LAYERS];
@@ -100,6 +108,21 @@ static void action_bar_click_config_provider(void *context) {
     window_single_click_subscribe(BUTTON_ID_SELECT, (ClickHandler) toggle_notification_click_handler);
 }
 
+#ifdef PBL_COLOR
+static void set_text_layer_color_for_load(TextLayer *text_layer, char load_char) {
+    GColor load_color;
+    if (load_char == '3') {
+        load_color = SEAT_AVAIL_COLOR;
+    } else if (load_char == '2') {
+        load_color = STAND_AVAIL_COLOR;
+    } else if (load_char == '1') {
+        load_color = STAND_LIMITED_COLOR;
+    } else {
+        // ignore 
+    }
+    text_layer_set_text_color(text_layer, load_color);
+}
+#endif 
 
 static void details_layers_load(GRect content_bounds) {
 
@@ -127,6 +150,13 @@ static void details_layers_load(GRect content_bounds) {
 
     // SERVICE NO
 
+    GColor default_text_color;
+    #ifdef PBL_COLOR
+        default_text_color = COLOR_TEXT;
+    #else
+        default_text_color = NO_COLOR_TEXT;
+    #endif
+
     GFont service_no_font = fonts_get_system_font(FONT_KEY_GOTHIC_28);
 
     static int16_t service_no_margin_x = 5;
@@ -137,7 +167,7 @@ static void details_layers_load(GRect content_bounds) {
     s_details_text_layers[0] = text_layer_create(service_no_bounds);
 
     text_layer_set_text(s_details_text_layers[0], details_list[1]);
-
+    text_layer_set_text_color(s_details_text_layers[0], default_text_color);
     text_layer_set_font(s_details_text_layers[0], service_no_font);
     text_layer_set_text_alignment(s_details_text_layers[0], GTextAlignmentRight);
 
@@ -164,6 +194,12 @@ static void details_layers_load(GRect content_bounds) {
     text_layer_set_text_alignment(s_details_text_layers[1], GTextAlignmentLeft);
     text_layer_set_text_alignment(s_details_text_layers[2], GTextAlignmentRight);
 
+    #ifdef PBL_COLOR
+        char next_bus_load = details_list[3][0];
+        char sub_bus_load = details_list[5][0];
+        set_text_layer_color_for_load(s_details_text_layers[1], next_bus_load);
+        set_text_layer_color_for_load(s_details_text_layers[2], sub_bus_load);
+    #endif
 
     // STOP ID
 
@@ -175,18 +211,11 @@ static void details_layers_load(GRect content_bounds) {
     s_details_text_layers[3] = text_layer_create(stop_id_bounds);
 
     text_layer_set_text(s_details_text_layers[3], details_list[0]);
-
+    text_layer_set_text_color(s_details_text_layers[3], default_text_color);
     text_layer_set_font(s_details_text_layers[3], stop_id_font);
     text_layer_set_text_alignment(s_details_text_layers[3], GTextAlignmentCenter);
 
-
     for (int i = 0; i < NO_OF_DETAILS_TEXT_LAYERS; i++ ) {
-    
-        #ifdef PBL_COLOR
-            text_layer_set_text_color(s_details_text_layers[i], COLOR_TEXT);
-        #else
-            text_layer_set_text_color(s_details_text_layers[i], NO_COLOR_TEXT);
-        #endif
 
         text_layer_set_background_color(s_details_text_layers[i], GColorClear);
         layer_add_child(window_layer, text_layer_get_layer(s_details_text_layers[i]));

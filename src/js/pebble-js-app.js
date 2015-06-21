@@ -2195,10 +2195,15 @@ if (require.main === module) {
 /**
  * Created by JiaHao on 14/6/15.
  */
-
-var pebbleHelpers = require('./../pebbleHelpers');
+    
 var constants = require('./../constants/constants');
 
+const REDUCED_SERVICE_LOAD_STRING = {
+    seatsAvailable: '3',
+    standingAvailable: '2',
+    limitedStanding: '1',
+    error: '0'
+};
 
 /**
  * Translates the absolute arrival timing of the bus to relative time from the current moment
@@ -2256,14 +2261,6 @@ function getTimeToArrival(arrivalString, number) {
         //return min + 'm ' + sec + 's';
     }
 }
-
-const REDUCED_SERVICE_LOAD_STRING = {
-    seatsAvailable: '3',
-    standingAvailable: '2',
-    limitedStanding: '1',
-    error: '0'
-};
-
 
 /**
  * Reduces the service load string to a value that can be easily parsed on the watch
@@ -2388,7 +2385,7 @@ module.exports = {
     parseForServicesList: parseForServicesList,
     getTimeToArrival: getTimeToArrival
 };
-},{"./../constants/constants":3,"./../pebbleHelpers":10}],13:[function(require,module,exports){
+},{"./../constants/constants":3}],13:[function(require,module,exports){
 /**
  * Created by JiaHao on 18/6/15.
  */
