@@ -36,6 +36,8 @@ static void window_load(Window *window) {
     #endif
 
     layer_add_child(window_layer, text_layer_get_layer(s_error_text_layer));
+
+    vibes_short_pulse();
 }
 
 static void window_unload(Window *window) {
