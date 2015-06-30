@@ -14,7 +14,7 @@ static MenuLayer *s_services_menu_layer;
 static TextLayer *s_loading_text_layer; 
 static char s_bus_stop_name[BUS_STOP_NAME_BUFFER_SIZE] = "<placehodler>";
 
-#ifdef PBL_PLATFORM_BASALT
+#ifdef PBL_SDK_3
     static StatusBarLayer *s_status_bar_layer;
 #endif
 
@@ -106,6 +106,9 @@ static void window_load(Window *window) {
         layer_add_child(window_layer, text_layer_get_layer(s_loading_text_layer));
     #else
         create_loading_animation(window);
+    #endif
+
+    #ifdef PBL_SDK_3
         s_status_bar_layer = status_bar_layer_create();
         status_bar_layer_set_up(s_status_bar_layer);
         layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar_layer));
@@ -124,6 +127,9 @@ static void window_unload(Window *window) {
 
     #ifdef PBL_PLATFORM_BASALT
         destroy_loading_animation();
+    #endif
+
+    #ifdef PBL_SDK_3
         status_bar_layer_destroy(s_status_bar_layer);
         s_status_bar_layer = NULL;
     #endif

@@ -30,7 +30,7 @@ void text_layer_set_up(TextLayer *text_layer) {
     text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
 }
 
-#ifdef PBL_PLATFORM_BASALT
+#ifdef PBL_SDK_3
     void status_bar_layer_set_up(StatusBarLayer *status_bar_layer) {
             status_bar_layer_set_separator_mode(status_bar_layer, StatusBarLayerSeparatorModeDotted);
             status_bar_layer_set_colors(status_bar_layer, GColorClear, COLOR_TEXT);

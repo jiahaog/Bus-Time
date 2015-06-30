@@ -14,7 +14,7 @@ static TextLayer *s_loading_text_layer;
 static int16_t s_cell_h1_height = 0;
 static int16_t s_cell_h2_height = 0;
 
-#ifdef PBL_PLATFORM_BASALT
+#ifdef PBL_SDK_3
     static StatusBarLayer *s_status_bar_layer;
 #endif
 
@@ -110,6 +110,9 @@ static void window_load(Window *window) {
         layer_add_child(window_layer, text_layer_get_layer(s_loading_text_layer));
     #else
         create_loading_animation(window);
+    #endif
+
+    #ifdef PBL_SDK_3
         s_status_bar_layer = status_bar_layer_create();
         status_bar_layer_set_up(s_status_bar_layer);
         layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar_layer));
@@ -125,10 +128,13 @@ static void window_unload(Window *window) {
 
     #ifdef PBL_PLATFORM_BASALT
         destroy_loading_animation();
+    #endif
+
+    #ifdef PBL_SDK_3
         status_bar_layer_destroy(s_status_bar_layer);
         s_status_bar_layer = NULL;
     #endif
-    
+        
 }
 
 void bus_stops_window_push() {

@@ -20,7 +20,7 @@ void menu_layer_set_up(MenuLayer* menu);
 void window_set_up(Window* window);
 void text_layer_set_up(TextLayer* text_layer);
 
-#ifdef PBL_PLATFORM_BASALT
+#ifdef PBL_SDK_3
     void status_bar_layer_set_up(StatusBarLayer *status_bar_layer);
     GRect window_with_status_bar_content_bounds(Layer *window_layer, StatusBarLayer *status_bar_layer);
 #endif
