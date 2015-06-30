@@ -208,7 +208,7 @@ static void details_layers_load(GRect content_bounds) {
 
     s_bitmap_bus_icon = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BUS_ICON);
     static int16_t bus_icon_origin_x = 34;
-    static int16_t bus_icon_origin_y = 61;
+    static int16_t bus_icon_origin_y = 45;
     static int16_t bus_icon_size_w = 80;
     static int16_t bus_icon_size_h = 43;
     GRect bus_icon_bounds = GRect(content_bounds.origin.x + bus_icon_origin_x, content_bounds.origin.y + bus_icon_origin_y, bus_icon_size_w, bus_icon_size_h);
@@ -342,6 +342,6 @@ void details_window_reload_details() {
         }        
     }
 
-    bool current_notification_state = notification_list_get_status(details_list[0], details_list[1]);
-    set_action_bar_notification_icon(!current_notification_state);
+    // bool current_notification_state = notification_list_get_status(details_list[0], details_list[1]);
+    // set_action_bar_notification_icon(!current_notification_state);
 }
