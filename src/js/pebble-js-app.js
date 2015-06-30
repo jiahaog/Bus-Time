@@ -1529,6 +1529,30 @@ function sendServicesList(stopId, callback) {
 }
 
 /**
+ * Transforms the bus arrival time, from '10m|Arr.|-' to '10|a|-'
+ * For use with sending the service details to the watch, as the details requires special formats of string
+ * @param {string} inp
+ * @param {string} [append] if an argument is provided here, if the inp string contains a number, the append string will
+ *                          be appended to the tail
+ * @returns {string}
+ */
+function transformArrivalsForServiceDetails(inp, append) {
+    const NUMBER_REGEX = /\d+/;
+
+    if (inp === 'Arr.') {
+        return 'a';
+    } else if (inp === '-') {
+        return '-'
+    } else {
+        var result = inp.match(NUMBER_REGEX).toString();
+        if (append) {
+            return result + append;
+        } else {
+            return result;
+        }
+    }
+}
+/**
  *
  * @param stopId
  * @param serviceNo
@@ -1546,12 +1570,18 @@ function sendServiceDetails(stopId, serviceNo, callback) {
 
             var messageString;
             if (serviceDetails) {
+
+                var nextBusArrivalTimeString = transformArrivalsForServiceDetails(serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival]);
+                var subsequentBusArrivalTimeString = transformArrivalsForServiceDetails(serviceDetails[constants.RESPONSE_KEYS.subsequentBus][constants.RESPONSE_KEYS.estimatedArrival],' min');
+
+                console.log("NB|" + nextBusArrivalTimeString + "|");
+                console.log("SB|" + subsequentBusArrivalTimeString + "|");
                 messageString =
                     stopId + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.serviceNo] + constants.MESSAGE_DELIMITER +
-                    serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival] + constants.MESSAGE_DELIMITER +
+                    nextBusArrivalTimeString + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.load] + constants.MESSAGE_DELIMITER +
-                    serviceDetails[constants.RESPONSE_KEYS.subsequentBus][constants.RESPONSE_KEYS.estimatedArrival] + constants.MESSAGE_DELIMITER +
+                    subsequentBusArrivalTimeString + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.subsequentBus][constants.RESPONSE_KEYS.load];
             } else {
                 messageString = 'Service details for service ' + serviceNo + ' not found!';
@@ -2220,8 +2250,8 @@ const REDUCED_SERVICE_LOAD_STRING = {
  *
  * @param arrivalString utc date string
  * @param {boolean} [number] returns the timing as a utc number
- * @returns {string|number} e.g. '1m', null if negative, '-' if the data received from myTransport is null |
- *                               timing (ms) if number parameter is true, null if the arrivalString is null
+ * @returns {string|number} e.g. if number parameter false: '1m', 'Arr.' if negative, '-' if the data received from myTransport is null |
+ *                               if number parameter is true: timing (ms), null if the arrivalString is null
  */
 function getTimeToArrival(arrivalString, number) {
     if (!arrivalString) {

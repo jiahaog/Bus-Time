@@ -100,6 +100,30 @@ function sendServicesList(stopId, callback) {
 }
 
 /**
+ * Transforms the bus arrival time, from '10m|Arr.|-' to '10|a|-'
+ * For use with sending the service details to the watch, as the details requires special formats of string
+ * @param {string} inp
+ * @param {string} [append] if an argument is provided here, if the inp string contains a number, the append string will
+ *                          be appended to the tail
+ * @returns {string}
+ */
+function transformArrivalsForServiceDetails(inp, append) {
+    const NUMBER_REGEX = /\d+/;
+
+    if (inp === 'Arr.') {
+        return 'a';
+    } else if (inp === '-') {
+        return '-'
+    } else {
+        var result = inp.match(NUMBER_REGEX).toString();
+        if (append) {
+            return result + append;
+        } else {
+            return result;
+        }
+    }
+}
+/**
  *
  * @param stopId
  * @param serviceNo
@@ -117,12 +141,16 @@ function sendServiceDetails(stopId, serviceNo, callback) {
 
             var messageString;
             if (serviceDetails) {
+
+                var nextBusArrivalTimeString = transformArrivalsForServiceDetails(serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival]);
+                var subsequentBusArrivalTimeString = transformArrivalsForServiceDetails(serviceDetails[constants.RESPONSE_KEYS.subsequentBus][constants.RESPONSE_KEYS.estimatedArrival],' min');
+
                 messageString =
                     stopId + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.serviceNo] + constants.MESSAGE_DELIMITER +
-                    serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival] + constants.MESSAGE_DELIMITER +
+                    nextBusArrivalTimeString + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.load] + constants.MESSAGE_DELIMITER +
-                    serviceDetails[constants.RESPONSE_KEYS.subsequentBus][constants.RESPONSE_KEYS.estimatedArrival] + constants.MESSAGE_DELIMITER +
+                    subsequentBusArrivalTimeString + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.subsequentBus][constants.RESPONSE_KEYS.load];
             } else {
                 messageString = 'Service details for service ' + serviceNo + ' not found!';

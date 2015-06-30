@@ -129,7 +129,7 @@ static void details_layers_load(GRect content_bounds) {
     // 0 - service_no
     // 1 - next bus est. time
     // 2 - sub bus est. time
-    // 3 - stop id
+    // 3 - next bus minute string text layer
 
     // TODO: put bus stop name as well
 
@@ -144,8 +144,8 @@ static void details_layers_load(GRect content_bounds) {
 
     GFont service_no_font = fonts_get_system_font(FONT_KEY_GOTHIC_28);
 
-    static int16_t service_no_margin_x = 5;
-    static int16_t service_no_origin_y = 60;
+    static int16_t service_no_margin_x = 50;
+    static int16_t service_no_origin_y = 11;
     int16_t service_no_height = get_font_height(s_details_window, service_no_font);
 
     GRect service_no_bounds = GRect(content_bounds.origin.x + service_no_margin_x, content_bounds.origin.y + service_no_origin_y, content_bounds.size.w - 2 * service_no_margin_x, service_no_height);

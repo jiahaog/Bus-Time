@@ -26,8 +26,8 @@ const REDUCED_SERVICE_LOAD_STRING = {
  *
  * @param arrivalString utc date string
  * @param {boolean} [number] returns the timing as a utc number
- * @returns {string|number} e.g. '1m', null if negative, '-' if the data received from myTransport is null |
- *                               timing (ms) if number parameter is true, null if the arrivalString is null
+ * @returns {string|number} e.g. if number parameter false: '1m', 'Arr.' if negative, '-' if the data received from myTransport is null |
+ *                               if number parameter is true: timing (ms), null if the arrivalString is null
  */
 function getTimeToArrival(arrivalString, number) {
     if (!arrivalString) {
