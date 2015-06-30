@@ -4,8 +4,7 @@
 #define CONTENT_X_PADDING 5
 // #define DETAILS_LAYER_HEIGHT 30
 #define DETAILS_LAYER_FONT FONT_KEY_GOTHIC_14_BOLD   
-#define TIME_LAYER_FONT FONT_KEY_BITHAM_42_LIGHT
-#define TIME_LAYER_Y_MARGIN -5
+
 #define NOTIFICATION_MESSAGE_BUFFER_SIZE 16
 #define NO_OF_DETAILS_TEXT_LAYERS 4
 
@@ -14,6 +13,12 @@
     #define SEAT_AVAIL_COLOR GColorMediumAquamarine
     #define STAND_AVAIL_COLOR GColorIcterine
     #define STAND_LIMITED_COLOR GColorMelon
+
+#endif
+
+#ifdef PBL_SDK_3
+
+    static StatusBarLayer *s_status_bar;
 
 #endif
 
@@ -27,25 +32,6 @@ GBitmap *s_bitmap_alert_cancel;
 GBitmap *s_bitmap_bus_icon;
 
 BitmapLayer *s_layer_bus_icon;
-
-static void update_time() {
-    time_t time_now = time(NULL);
-    struct tm *tick_time = localtime(&time_now);
-
-    static char time_string_buffer[] = PLACEHOLDER_TIME_STRING;
-
-    if (clock_is_24h_style() == true) {
-        strftime(time_string_buffer, sizeof(PLACEHOLDER_TIME_STRING), "%H:%M", tick_time);
-    } else {
-        strftime(time_string_buffer, sizeof(PLACEHOLDER_TIME_STRING), "%I:%M", tick_time);
-    }
-
-    text_layer_set_text(s_time_text_layer, time_string_buffer);
-}
-
-static void time_tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-    update_time();
-}
 
 static void set_action_bar_notification_icon(bool show_set_icon) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "SETTING NOTIFICAITON ICON %s", show_set_icon ? "SET" : "UNSET");
@@ -234,27 +220,10 @@ static void details_layers_load(GRect content_bounds) {
 
 }
 
-static void time_layer_load(GRect content_bounds) {
-
-    Layer *window_layer = window_get_root_layer(s_details_window);
-
-    int16_t time_layer_height = get_font_height(s_details_window, fonts_get_system_font(TIME_LAYER_FONT)) + 3;  // add 3 here because somehow this function doesnt work for large fonts
-    GRect time_layer_bounds = GRect(content_bounds.origin.x, content_bounds.origin.y + TIME_LAYER_Y_MARGIN, content_bounds.size.w, time_layer_height);
-
-    s_time_text_layer = text_layer_create(time_layer_bounds);
-    text_layer_set_up(s_time_text_layer);
-    text_layer_set_font(s_time_text_layer, fonts_get_system_font(TIME_LAYER_FONT));
-
-    layer_add_child(window_layer, text_layer_get_layer(s_time_text_layer));
-    update_time();
-    tick_timer_service_subscribe(MINUTE_UNIT, time_tick_handler);
-}
-
 static void details_layers_unload() {
     for (int i = 0; i < NO_OF_DETAILS_TEXT_LAYERS; i++) {
         text_layer_destroy(s_details_text_layers[i]);
     }
-    text_layer_destroy(s_time_text_layer);
 
     gbitmap_destroy(s_bitmap_bus_icon);
     bitmap_layer_destroy(s_layer_bus_icon);
@@ -287,7 +256,6 @@ static void content_load() {
 
     action_bar_load();
     details_layers_load(content_bounds);
-    time_layer_load(content_bounds);
 }
 
 static void window_load(Window *window) {
@@ -302,13 +270,18 @@ static void window_load(Window *window) {
         // GRect content_bounds = window_bounds;
         
     #else
-        
         create_loading_animation(window);        
         // GRect content_bounds = GRect(window_bounds.origin.x, window_bounds.origin.y, window_bounds.size.w - ACTION_BAR_WIDTH, window_bounds.size.h);
 
     #endif
 
-    // details_layers_load(window, content_bounds);
+
+    #ifdef PBL_SDK_3
+        Layer *window_layer = window_get_root_layer(s_details_window);
+        s_status_bar = status_bar_layer_create();
+        status_bar_layer_set_up(s_status_bar);
+        layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar));
+    #endif
 }
 
 static void window_unload(Window *window) {
@@ -329,9 +302,14 @@ static void window_unload(Window *window) {
         destroy_loading_animation();
     #endif
 
+    #ifdef PBL_SDK_3
+        status_bar_layer_destroy(s_status_bar);
+        s_status_bar = NULL;
+    #endif
     // going back to the services list
     // tell js that we are done with the service details
     send_app_message_int(KEY_BUS_SERVICE_DETAILS_END, 1);
+
 }
 
 void details_window_push() {
