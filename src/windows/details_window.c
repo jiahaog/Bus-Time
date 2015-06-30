@@ -221,13 +221,14 @@ static void details_layers_load(GRect content_bounds) {
     }
 
     s_bitmap_bus_icon = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BUS_ICON);
-    static int16_t bus_icon_origin_x = 0;
-    static int16_t bus_icon_origin_y = 60;
-    static int16_t bus_icon_size_w = 100;
-    static int16_t bus_icon_size_h = 100;
+    static int16_t bus_icon_origin_x = 34;
+    static int16_t bus_icon_origin_y = 61;
+    static int16_t bus_icon_size_w = 80;
+    static int16_t bus_icon_size_h = 43;
     GRect bus_icon_bounds = GRect(content_bounds.origin.x + bus_icon_origin_x, content_bounds.origin.y + bus_icon_origin_y, bus_icon_size_w, bus_icon_size_h);
     s_layer_bus_icon = bitmap_layer_create(bus_icon_bounds);
-    // bitmap_layer_set_bitmap(s_layer_bus_icon, s_bitmap_bus_icon);
+    bitmap_layer_set_bitmap(s_layer_bus_icon, s_bitmap_bus_icon);
+    bitmap_layer_set_compositing_mode(s_layer_bus_icon, GCompOpSet);
     bitmap_layer_set_alignment(s_layer_bus_icon, GAlignTopLeft);
     layer_add_child(window_layer, bitmap_layer_get_layer(s_layer_bus_icon));
 
@@ -260,16 +261,16 @@ static void details_layers_unload() {
 }
 
 static void action_bar_load() {
-    s_action_bar = action_bar_layer_create();
-    action_bar_layer_add_to_window(s_action_bar, s_details_window);
-    action_bar_layer_set_click_config_provider(s_action_bar, action_bar_click_config_provider);
+    // s_action_bar = action_bar_layer_create();
+    // action_bar_layer_add_to_window(s_action_bar, s_details_window);
+    // action_bar_layer_set_click_config_provider(s_action_bar, action_bar_click_config_provider);
 
-    #ifdef PBL_PLATFORM_BASALT
-        action_bar_layer_set_background_color(s_action_bar, COLOR_SECONDARY);
-    #endif
+    // #ifdef PBL_PLATFORM_BASALT
+    //     action_bar_layer_set_background_color(s_action_bar, COLOR_SECONDARY);
+    // #endif
 
-    s_bitmap_alert_set = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_SET);
-    s_bitmap_alert_cancel = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_CANCEL);
+    // s_bitmap_alert_set = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_SET);
+    // s_bitmap_alert_cancel = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_CANCEL);
 }
 
 static void content_load() {
@@ -315,8 +316,8 @@ static void window_unload(Window *window) {
     window_destroy(window);
     s_details_window = NULL;
 
-    action_bar_layer_destroy(s_action_bar);
-    s_action_bar = NULL;
+    // action_bar_layer_destroy(s_action_bar);
+    // s_action_bar = NULL;
 
     gbitmap_destroy(s_bitmap_alert_set);
     gbitmap_destroy(s_bitmap_alert_cancel);
