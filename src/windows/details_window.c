@@ -6,7 +6,7 @@
 #define DETAILS_LAYER_FONT FONT_KEY_GOTHIC_14_BOLD   
 
 #define NOTIFICATION_MESSAGE_BUFFER_SIZE 16
-#define NO_OF_DETAILS_TEXT_LAYERS 4
+#define NO_OF_DETAILS_TEXT_LAYERS 3
 
 #ifdef PBL_COLOR
 
@@ -129,7 +129,6 @@ static void details_layers_load(GRect content_bounds) {
     // 0 - service_no
     // 1 - next bus est. time
     // 2 - sub bus est. time
-    // 3 - next bus minute string text layer
 
     // TODO: put bus stop name as well
 
@@ -142,43 +141,38 @@ static void details_layers_load(GRect content_bounds) {
         default_text_color = NO_COLOR_TEXT;
     #endif
 
-    GFont service_no_font = fonts_get_system_font(FONT_KEY_GOTHIC_28);
-
-    static int16_t service_no_margin_x = 50;
-    static int16_t service_no_origin_y = 11;
+    GFont service_no_font = fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK);
     int16_t service_no_height = get_font_height(s_details_window, service_no_font);
 
-    GRect service_no_bounds = GRect(content_bounds.origin.x + service_no_margin_x, content_bounds.origin.y + service_no_origin_y, content_bounds.size.w - 2 * service_no_margin_x, service_no_height);
+    GRect service_no_bounds = GRect(0, 16, content_bounds.size.w, service_no_height);
     s_details_text_layers[0] = text_layer_create(service_no_bounds);
 
     text_layer_set_text(s_details_text_layers[0], details_list[1]);
     text_layer_set_text_color(s_details_text_layers[0], default_text_color);
     text_layer_set_font(s_details_text_layers[0], service_no_font);
-    text_layer_set_text_alignment(s_details_text_layers[0], GTextAlignmentRight);
+    text_layer_set_text_alignment(s_details_text_layers[0], GTextAlignmentCenter);
 
 
-    // EST TIME
+    // NEXT BUS EST TIME
+    
+    GFont next_bus_time_font = fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK);
 
-    GFont est_time_font = fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD);
-    static int16_t est_time_origin_y = 95;
-    static int16_t est_time_margin_x = 15;
-    int16_t est_time_width = content_bounds.size.w - 2*est_time_margin_x;
-    int16_t est_time_height = get_font_height(s_details_window, est_time_font);
-
-    GRect next_bus_est_time_bounds = GRect(content_bounds.origin.x + est_time_margin_x, content_bounds.origin.y + est_time_origin_y, est_time_width, est_time_height);
-    GRect sub_bus_est_time_bounds = GRect(content_bounds.origin.x + est_time_margin_x, content_bounds.origin.y + est_time_origin_y, est_time_width, est_time_height);
-
-    s_details_text_layers[1] = text_layer_create(next_bus_est_time_bounds);
-    s_details_text_layers[2] = text_layer_create(sub_bus_est_time_bounds);
-
+    int16_t next_bus_time_height = get_font_height(s_details_window, next_bus_time_font);
+    GRect next_bus_time_bounds = GRect(0, 108, content_bounds.size.w, next_bus_time_height);
+    s_details_text_layers[1] = text_layer_create(next_bus_time_bounds);
     text_layer_set_text(s_details_text_layers[1], details_list[2]);
+    text_layer_set_font(s_details_text_layers[1], next_bus_time_font);
+    text_layer_set_text_alignment(s_details_text_layers[1], GTextAlignmentCenter);
+
+    // SUB BUS EST TIME
+    GFont sub_bus_time_font = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
+    int16_t sub_bus_time_height = get_font_height(s_details_window, sub_bus_time_font);
+    GRect sub_bus_time_bounds = GRect(0, 149, content_bounds.size.w, sub_bus_time_height);
+    s_details_text_layers[2] = text_layer_create(sub_bus_time_bounds);
     text_layer_set_text(s_details_text_layers[2], details_list[4]);
-
-    text_layer_set_font(s_details_text_layers[1], est_time_font);
-    text_layer_set_font(s_details_text_layers[2], est_time_font);
-    text_layer_set_text_alignment(s_details_text_layers[1], GTextAlignmentLeft);
-    text_layer_set_text_alignment(s_details_text_layers[2], GTextAlignmentRight);
-
+    text_layer_set_font(s_details_text_layers[2], sub_bus_time_font);
+    text_layer_set_text_alignment(s_details_text_layers[2], GTextAlignmentCenter);
+    
     #ifdef PBL_COLOR
         char next_bus_load = details_list[3][0];
         char sub_bus_load = details_list[5][0];
@@ -186,19 +180,6 @@ static void details_layers_load(GRect content_bounds) {
         set_text_layer_color_for_load(s_details_text_layers[2], sub_bus_load);
     #endif
 
-    // STOP ID
-
-    GFont stop_id_font = fonts_get_system_font(FONT_KEY_GOTHIC_18);
-    static int16_t stop_id_origin_y = 130;
-    int16_t stop_id_height = get_font_height(s_details_window, stop_id_font);
-
-    GRect stop_id_bounds = GRect(content_bounds.origin.x, content_bounds.origin.y + stop_id_origin_y, content_bounds.size.w, stop_id_height);
-    s_details_text_layers[3] = text_layer_create(stop_id_bounds);
-
-    text_layer_set_text(s_details_text_layers[3], details_list[0]);
-    text_layer_set_text_color(s_details_text_layers[3], default_text_color);
-    text_layer_set_font(s_details_text_layers[3], stop_id_font);
-    text_layer_set_text_alignment(s_details_text_layers[3], GTextAlignmentCenter);
 
     for (int i = 0; i < NO_OF_DETAILS_TEXT_LAYERS; i++ ) {
 
@@ -206,12 +187,15 @@ static void details_layers_load(GRect content_bounds) {
         layer_add_child(window_layer, text_layer_get_layer(s_details_text_layers[i]));
     }
 
+    // Icon
+
     s_bitmap_bus_icon = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BUS_ICON);
     static int16_t bus_icon_origin_x = 34;
     static int16_t bus_icon_origin_y = 45;
     static int16_t bus_icon_size_w = 80;
     static int16_t bus_icon_size_h = 43;
-    GRect bus_icon_bounds = GRect(content_bounds.origin.x + bus_icon_origin_x, content_bounds.origin.y + bus_icon_origin_y, bus_icon_size_w, bus_icon_size_h);
+    // GRect bus_icon_bounds = GRect(content_bounds.origin.x + bus_icon_origin_x, content_bounds.origin.y + bus_icon_origin_y, bus_icon_size_w, bus_icon_size_h);
+    GRect bus_icon_bounds = GRect(34, 61, 80, 43);
     s_layer_bus_icon = bitmap_layer_create(bus_icon_bounds);
     bitmap_layer_set_bitmap(s_layer_bus_icon, s_bitmap_bus_icon);
     bitmap_layer_set_compositing_mode(s_layer_bus_icon, GCompOpSet);
@@ -229,7 +213,7 @@ static void details_layers_unload() {
     bitmap_layer_destroy(s_layer_bus_icon);
 }
 
-static void action_bar_load() {
+// static void action_bar_load() {
     // s_action_bar = action_bar_layer_create();
     // action_bar_layer_add_to_window(s_action_bar, s_details_window);
     // action_bar_layer_set_click_config_provider(s_action_bar, action_bar_click_config_provider);
@@ -240,21 +224,22 @@ static void action_bar_load() {
 
     // s_bitmap_alert_set = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_SET);
     // s_bitmap_alert_cancel = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_CANCEL);
-}
+// }
 
 static void content_load() {
 
     Layer *window_layer = window_get_root_layer(s_details_window);
     GRect window_bounds = layer_get_bounds(window_layer);
 
-    #ifdef PBL_PLATFORM_APLITE
-        GRect content_bounds = window_bounds;
+    #ifdef PBL_SDK_3
+        // subtract the height of the Status bar 
+        GRect content_bounds = GRect(window_bounds.origin.x, window_bounds.origin.y + STATUS_BAR_LAYER_HEIGHT, window_bounds.size.w, window_bounds.size.h - STATUS_BAR_LAYER_HEIGHT);
     #else
-        // subtract the width of the action bar away
-        GRect content_bounds = GRect(window_bounds.origin.x, window_bounds.origin.y, window_bounds.size.w - ACTION_BAR_WIDTH, window_bounds.size.h);
+        GRect content_bounds = window_bounds;
     #endif
 
-    action_bar_load();
+    // action_bar_load();
+    
     details_layers_load(content_bounds);
 }
 

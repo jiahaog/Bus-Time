@@ -1529,7 +1529,7 @@ function sendServicesList(stopId, callback) {
 }
 
 /**
- * Transforms the bus arrival time, from '10m|Arr.|-' to '10|a|-'
+ * Transforms the bus arrival time, from '10m|Arr.|-' to '10|Arr.|-'
  * For use with sending the service details to the watch, as the details requires special formats of string
  * @param {string} inp
  * @param {string} [append] if an argument is provided here, if the inp string contains a number, the append string will
@@ -1540,7 +1540,7 @@ function transformArrivalsForServiceDetails(inp, append) {
     const NUMBER_REGEX = /\d+/;
 
     if (inp === 'Arr.') {
-        return 'a';
+        return 'Arr.';
     } else if (inp === '-') {
         return '-'
     } else {
@@ -1571,11 +1571,9 @@ function sendServiceDetails(stopId, serviceNo, callback) {
             var messageString;
             if (serviceDetails) {
 
-                var nextBusArrivalTimeString = transformArrivalsForServiceDetails(serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival]);
+                var nextBusArrivalTimeString = transformArrivalsForServiceDetails(serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival], ' min');
                 var subsequentBusArrivalTimeString = transformArrivalsForServiceDetails(serviceDetails[constants.RESPONSE_KEYS.subsequentBus][constants.RESPONSE_KEYS.estimatedArrival],' min');
 
-                console.log("NB|" + nextBusArrivalTimeString + "|");
-                console.log("SB|" + subsequentBusArrivalTimeString + "|");
                 messageString =
                     stopId + constants.MESSAGE_DELIMITER +
                     serviceDetails[constants.RESPONSE_KEYS.serviceNo] + constants.MESSAGE_DELIMITER +
