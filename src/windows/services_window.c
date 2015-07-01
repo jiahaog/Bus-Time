@@ -13,6 +13,7 @@ static Window *s_services_window;
 static MenuLayer *s_services_menu_layer;
 static TextLayer *s_loading_text_layer; 
 static char s_bus_stop_name[BUS_STOP_NAME_BUFFER_SIZE] = "<placehodler>";
+static char *s_bus_stop_id;
 
 #ifdef PBL_SDK_3
     static StatusBarLayer *s_status_bar_layer;
@@ -63,7 +64,7 @@ static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuI
     if (get_service_list_count() > 0) {
         char *currentService = service_list[cell_index->row][0];
         send_app_message_string(KEY_BUS_SERVICE_DETAILS_START, currentService);
-        details_window_push();
+        details_window_push(currentService);
     }
 }
 
@@ -115,6 +116,9 @@ static void window_load(Window *window) {
     #endif
 
 }
+static void window_appear(Window *window) {
+    watch_bus_services_list(s_bus_stop_id);
+}
 
 static void window_unload(Window *window) {
     // reset the service list on unload so the wrong service list won't be displayed then changed immediately on load
@@ -140,13 +144,16 @@ static void window_unload(Window *window) {
 
 }
 
-void services_window_push(char *bus_stop_name) {
+void services_window_push(char *bus_stop_name, char *bus_stop_id) {
+    s_bus_stop_id = bus_stop_id;
+
     snprintf(s_bus_stop_name, sizeof(s_bus_stop_name), "%s", bus_stop_name);
     if (!s_services_window) {
         s_services_window = window_create();
         window_set_window_handlers(s_services_window, (WindowHandlers) {
             .load = window_load,
             .unload = window_unload,
+            .appear = window_appear
         });
     }
 

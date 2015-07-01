@@ -126,7 +126,6 @@ bool controller_init() {
         APP_LOG(APP_LOG_LEVEL_DEBUG, "Watch inbox opened and callbacks registered");
 
         // psleep(400);  // we need to sleep before messages can be sent, as outbox takes some time to open
-        start_app_alive_service();
         return true;
     }
 }

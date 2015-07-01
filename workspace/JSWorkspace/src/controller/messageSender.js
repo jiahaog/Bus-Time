@@ -7,6 +7,7 @@ var busStops = require('./../process_data/busStops');
 var recordParser = require('./../process_data/recordParser');
 var constants = require('./../constants/constants');
 var recordCache = require('./../model/recordCache');
+var stateTracker = require('./../model/stateTracker');
 
 /**
  * Gets the location of the watch and sends nearby bus stops to the watch
@@ -72,9 +73,11 @@ function sendErrorCode(code) {
 /**
  * Sends a list of the services available at the current bus stop
  * @param stopId
- * @param {sentAppMessageCallback} callback
- */
+ * @param {sentAppMessageCallback} [callback]
+ * */
 function sendServicesList(stopId, callback) {
+    stateTracker.lastStopID = stopId;
+
     recordCache.getBusTimings(stopId, undefined, true, function (error, record) {
         if (error) {
             console.log('Error getting bus timings');
@@ -127,9 +130,10 @@ function transformArrivalsForServiceDetails(inp, append) {
  *
  * @param stopId
  * @param serviceNo
- * @param {sentAppMessageCallback} callback
+ * @param {sentAppMessageCallback} [callback]
  */
 function sendServiceDetails(stopId, serviceNo, callback) {
+
     recordCache.getBusTimings(stopId, serviceNo, true, function (error, record) {
         if (error) {
             console.log('Error getting bus timings');

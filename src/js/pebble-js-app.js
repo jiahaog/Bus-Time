@@ -1510,6 +1510,8 @@ function sendErrorCode(code) {
  * @param {sentAppMessageCallback} [callback]
  * */
 function sendServicesList(stopId, callback) {
+    stateTracker.lastStopID = stopId;
+
     recordCache.getBusTimings(stopId, undefined, true, function (error, record) {
         if (error) {
             console.log('Error getting bus timings');
@@ -1565,7 +1567,6 @@ function transformArrivalsForServiceDetails(inp, append) {
  * @param {sentAppMessageCallback} [callback]
  */
 function sendServiceDetails(stopId, serviceNo, callback) {
-    stateTracker.lastStopID = stopId;
 
     recordCache.getBusTimings(stopId, serviceNo, true, function (error, record) {
         if (error) {
@@ -1691,8 +1692,6 @@ function getValidRecordFromStore(stopId, serviceNo) {
         var storeRecord = store[i];
 
         var sameStopId = storeRecord[constants.RESPONSE_KEYS.stopId] === stopId.toString();
-        console.log('Live duration: ' + RECORD_LIVE_DURATION);
-        console.log("RECORD LIFE: " + (Date.now() - storeRecord[constants.RESPONSE_KEYS.time]).toString());
         var recordWithinUpdateThreshold = (Date.now() - storeRecord[constants.RESPONSE_KEYS.time]) < RECORD_LIVE_DURATION;
         var serviceNeedsRefresh = false;
 

@@ -26,6 +26,7 @@ static Window *s_details_window;
 static TextLayer *s_time_text_layer;
 static TextLayer *s_details_text_layers[NO_OF_DETAILS_TEXT_LAYERS];
 static ActionBarLayer *s_action_bar;
+static char *s_current_service;
 
 GBitmap *s_bitmap_alert_set;
 GBitmap *s_bitmap_alert_cancel;
@@ -269,6 +270,10 @@ static void window_load(Window *window) {
     #endif
 }
 
+static void window_appear(Window *window) {
+    watch_bus_service_details(s_current_service);
+}
+
 static void window_unload(Window *window) {
     details_layers_unload();
     window_destroy(window);
@@ -297,13 +302,15 @@ static void window_unload(Window *window) {
 
 }
 
-void details_window_push() {
+void details_window_push(char *current_service) {
+    s_current_service = current_service;
 
     if (!s_details_window) {
         s_details_window = window_create();
         window_set_window_handlers(s_details_window, (WindowHandlers) {
             .load = window_load,
             .unload = window_unload,
+            .appear = window_appear
         });
     }
 

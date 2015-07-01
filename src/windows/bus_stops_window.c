@@ -63,8 +63,7 @@ static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuI
         uint16_t row_index = cell_index->row;
         char* bus_stop_name = bus_stop_list[row_index][0];
         char* bus_stop_id = bus_stop_list[row_index][2];
-        services_window_push(bus_stop_name);
-        send_app_message_string(KEY_BUS_SERVICE_LIST_START, bus_stop_id);
+        services_window_push(bus_stop_name, bus_stop_id);
     }
 }
 
