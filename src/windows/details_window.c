@@ -28,11 +28,11 @@ static TextLayer *s_details_text_layers[NO_OF_DETAILS_TEXT_LAYERS];
 static char *s_current_service;
 static bool content_loaded = false;
 
-GBitmap *s_bitmap_alert_set;
-GBitmap *s_bitmap_alert_cancel;
-GBitmap *s_bitmap_bus_icon;
-
 BitmapLayer *s_layer_bus_icon;
+static GBitmap *s_bitmap_bus_icon;
+
+// static GBitmap *s_bitmap_alert_set;
+// static GBitmap *s_bitmap_alert_cancel;
 
 // static void set_action_bar_notification_icon(bool show_set_icon) {
 //     APP_LOG(APP_LOG_LEVEL_DEBUG, "SETTING NOTIFICAITON ICON %s", show_set_icon ? "SET" : "UNSET");
@@ -93,7 +93,6 @@ BitmapLayer *s_layer_bus_icon;
 
 //     send_app_message_string(KEY_BUS_NOTIFICATION, notification_message_buffer);
 // }
-
 
 #ifdef PBL_COLOR
 static void set_text_layer_color_for_load(TextLayer *text_layer, char load_char) {
@@ -257,7 +256,6 @@ static void content_load() {
     window_set_click_config_provider(s_details_window, click_config_provider);
 
     content_loaded = true;
-
 }
 
 static void content_unload() {
@@ -303,8 +301,8 @@ static void window_unload(Window *window) {
     // action_bar_layer_destroy(s_action_bar);
     // s_action_bar = NULL;
 
-    gbitmap_destroy(s_bitmap_alert_set);
-    gbitmap_destroy(s_bitmap_alert_cancel);
+    // gbitmap_destroy(s_bitmap_alert_set);
+    // gbitmap_destroy(s_bitmap_alert_cancel);
 
     #ifdef PBL_PLATFORM_APLITE
         // todo 
@@ -320,7 +318,6 @@ static void window_unload(Window *window) {
     // going back to the services list
     // tell js that we are done with the service details
     send_app_message_int(KEY_BUS_SERVICE_DETAILS_END, 1);
-
 }
 
 void details_window_push(char *current_service) {
