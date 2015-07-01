@@ -26,8 +26,8 @@ static Window *s_details_window;
 static TextLayer *s_time_text_layer;
 static TextLayer *s_details_text_layers[NO_OF_DETAILS_TEXT_LAYERS];
 static char *s_current_service;
+static bool content_loaded = false;
 
-bool content_loaded = false;
 GBitmap *s_bitmap_alert_set;
 GBitmap *s_bitmap_alert_cancel;
 GBitmap *s_bitmap_bus_icon;
@@ -257,6 +257,12 @@ static void content_load() {
     window_set_click_config_provider(s_details_window, click_config_provider);
 
     content_loaded = true;
+
+}
+
+static void content_unload() {
+    details_layers_unload();
+    content_loaded = false;
 }
 
 static void window_load(Window *window) {
@@ -290,7 +296,7 @@ static void window_appear(Window *window) {
 }
 
 static void window_unload(Window *window) {
-    details_layers_unload();
+    content_unload();
     window_destroy(window);
     s_details_window = NULL;
 
