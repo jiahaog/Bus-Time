@@ -10,7 +10,7 @@ var store;
 
 // time the record is alive
 if (constants.RELEASE_MODE) {
-    var RECORD_LIVE_DURATION = 25*60*1000; // 25 sec
+    var RECORD_LIVE_DURATION = 30*1000; // 30 sec
 } else {
     RECORD_LIVE_DURATION = 60*60*1000; // 1 hours
 }

@@ -1343,10 +1343,11 @@ module.exports = data["data"];
  */
 
 var stateTracker = require('./../model/stateTracker');
-var busServiceObserver = require('./../service/busServiceObserver');
+//var busServiceObserver = require('./../service/busServiceObserver');
 var busServiceNotifier = require('./../service/busServiceNotifier');
 var constants = require('./../constants/constants');
 var pebbleHelpers = require('./../pebbleHelpers.js');
+var messageSender = require('./../controller/messageSender');
 
 function processAppMessage(event) {
 
@@ -1359,7 +1360,8 @@ function processAppMessage(event) {
 
             if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_START) {
                 stateTracker.lastAppMessageTime = Date.now();
-                busServiceObserver.watchBusStop(value);
+                //busServiceObserver.watchBusStop(value);
+                messageSender.sendServicesList(value);
 
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_START) {
                 // enter the services details page from services list
@@ -1367,11 +1369,13 @@ function processAppMessage(event) {
                 stateTracker.lastAppMessageTime = Date.now();
                 console.log('Received request for service: ' + value);
 
-                // stop watching the bus services list
-                busServiceObserver.stopWatchingBusStop();
+                //// stop watching the bus services list
+                //busServiceObserver.stopWatchingBusStop();
 
                 // watch the service details
-                busServiceObserver.watchBusServiceDetails(stateTracker.lastStopID, value);
+                messageSender.sendServiceDetails(stateTracker.lastStopID, value);
+
+                //busServiceObserver.watchBusServiceDetails(stateTracker.lastStopID, value);
 
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_END) {
                 // going back to services list from details window
@@ -1379,17 +1383,18 @@ function processAppMessage(event) {
                 stateTracker.lastAppMessageTime = Date.now();
 
                 // stop watching the service details
-                busServiceObserver.stopWatchingBusServiceDetails();
+                //busServiceObserver.stopWatchingBusServiceDetails();
 
                 // start watching the bus services list
-                busServiceObserver.watchBusStop(stateTracker.lastStopID);
+                //busServiceObserver.watchBusStop(stateTracker.lastStopID);
+
 
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_LIST_END) {
                 // going back to bus stop list from bus services list
                 stateTracker.lastAppMessageTime = Date.now();
 
                 // stop watching the bus services list
-                busServiceObserver.stopWatchingBusStop();
+                //busServiceObserver.stopWatchingBusStop();
 
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_NOTIFICATION) {
                 stateTracker.lastAppMessageTime = Date.now();
@@ -1426,7 +1431,7 @@ function processAppMessage(event) {
 module.exports = {
     processAppMessage: processAppMessage
 };
-},{"./../constants/constants":3,"./../model/stateTracker":9,"./../pebbleHelpers.js":10,"./../service/busServiceNotifier":13,"./../service/busServiceObserver":14}],6:[function(require,module,exports){
+},{"./../constants/constants":3,"./../controller/messageSender":6,"./../model/stateTracker":9,"./../pebbleHelpers.js":10,"./../service/busServiceNotifier":13}],6:[function(require,module,exports){
 /**
  * Created by JiaHao on 18/6/15.
  */
@@ -1436,6 +1441,7 @@ var busStops = require('./../process_data/busStops');
 var recordParser = require('./../process_data/recordParser');
 var constants = require('./../constants/constants');
 var recordCache = require('./../model/recordCache');
+var stateTracker = require('./../model/stateTracker');
 
 /**
  * Gets the location of the watch and sends nearby bus stops to the watch
@@ -1501,8 +1507,8 @@ function sendErrorCode(code) {
 /**
  * Sends a list of the services available at the current bus stop
  * @param stopId
- * @param {sentAppMessageCallback} callback
- */
+ * @param {sentAppMessageCallback} [callback]
+ * */
 function sendServicesList(stopId, callback) {
     recordCache.getBusTimings(stopId, undefined, true, function (error, record) {
         if (error) {
@@ -1556,9 +1562,11 @@ function transformArrivalsForServiceDetails(inp, append) {
  *
  * @param stopId
  * @param serviceNo
- * @param {sentAppMessageCallback} callback
+ * @param {sentAppMessageCallback} [callback]
  */
 function sendServiceDetails(stopId, serviceNo, callback) {
+    stateTracker.lastStopID = stopId;
+
     recordCache.getBusTimings(stopId, serviceNo, true, function (error, record) {
         if (error) {
             console.log('Error getting bus timings');
@@ -1630,7 +1638,7 @@ module.exports = {
     sendServiceDetails: sendServiceDetails,
     sendNotificationStatus: sendNotificationStatus
 };
-},{"./../constants/constants":3,"./../model/recordCache":8,"./../pebbleHelpers":10,"./../process_data/busStops":11,"./../process_data/recordParser":12}],7:[function(require,module,exports){
+},{"./../constants/constants":3,"./../model/recordCache":8,"./../model/stateTracker":9,"./../pebbleHelpers":10,"./../process_data/busStops":11,"./../process_data/recordParser":12}],7:[function(require,module,exports){
 /**
  * Created by JiaHao on 8/6/15.
  */
@@ -1665,7 +1673,7 @@ var store;
 
 // time the record is alive
 if (constants.RELEASE_MODE) {
-    var RECORD_LIVE_DURATION = 25*60*1000; // 25 sec
+    var RECORD_LIVE_DURATION = 30*1000; // 30 sec
 } else {
     RECORD_LIVE_DURATION = 60*60*1000; // 1 hours
 }
@@ -1683,6 +1691,8 @@ function getValidRecordFromStore(stopId, serviceNo) {
         var storeRecord = store[i];
 
         var sameStopId = storeRecord[constants.RESPONSE_KEYS.stopId] === stopId.toString();
+        console.log('Live duration: ' + RECORD_LIVE_DURATION);
+        console.log("RECORD LIFE: " + (Date.now() - storeRecord[constants.RESPONSE_KEYS.time]).toString());
         var recordWithinUpdateThreshold = (Date.now() - storeRecord[constants.RESPONSE_KEYS.time]) < RECORD_LIVE_DURATION;
         var serviceNeedsRefresh = false;
 
@@ -2530,125 +2540,4 @@ BusNotification.prototype = {
 };
 
 module.exports = busNotificationStore;
-},{"./../constants/constants":3,"./../controller/messageSender":6,"./../model/recordCache":8,"./../pebbleHelpers":10,"./../process_data/recordParser":12}],14:[function(require,module,exports){
-/**
- * Created by JiaHao on 18/6/15.
- */
-
-var messageSender = require('./../controller/messageSender');
-var statTracker = require('./../model/stateTracker');
-var constants = require('./../constants/constants');
-
-var watchBusStopIntervalId;
-var watchBusServiceIntervalId;
-
-
-if (constants.RELEASE_MODE) {
-    var REFRESH_INTERVAL = 60 * 1000; // 1 min
-} else {
-    REFRESH_INTERVAL = 10 * 1000; // 10 sec
-}
-
-//const REFRESH_TIMEOUT = 10*60*1000; // 10 min
-const REFRESH_TIMEOUT = 15 * 60 * 1000; // 10 min
-
-
-function watchBusStop(stopId) {
-
-    function sendAndManageServicesList(stopId) {
-        // if app has not timed out
-        if (!checkIfAppTimeout()) {
-            messageSender.sendServicesList(stopId, function (error) {
-
-                if (error) {
-                    // if the interval has been set
-                    if (watchBusStopIntervalId) {
-                        console.log('Clearing interval for bus stop');
-                        clearInterval(watchBusStopIntervalId);
-                    }
-                }
-            });
-        }
-    }
-
-    if (watchBusStopIntervalId) {
-        clearInterval(watchBusStopIntervalId);
-    }
-
-    console.log('Watching bus stop id: ' + stopId);
-
-    statTracker.lastStopID = stopId;
-
-    sendAndManageServicesList(stopId);
-    watchBusStopIntervalId = setInterval(function () {
-        console.log('Updating services list');
-        sendAndManageServicesList(stopId);
-    }, REFRESH_INTERVAL);
-}
-
-function watchBusServiceDetails(stopId, serviceNo) {
-
-    function sendAndManageServiceDetails(stopId, serviceNo) {
-        // if app has not timed out
-        if (!checkIfAppTimeout()) {
-            messageSender.sendServiceDetails(stopId, serviceNo, function (error) {
-                if (error) {
-                    // if the interval has been set
-                    if (watchBusStopIntervalId) {
-                        console.log('Clearing interval for bus service details');
-                        clearInterval(watchBusServiceIntervalId);
-                    }
-                }
-            });
-        }
-    }
-
-    if (watchBusServiceIntervalId) {
-        clearInterval(watchBusServiceIntervalId);
-    }
-
-    console.log('Watching bus service: ' + stopId + ', ' + serviceNo);
-
-    sendAndManageServiceDetails(stopId, serviceNo);
-
-    watchBusServiceIntervalId = setInterval(function () {
-        console.log('Updating service details');
-        sendAndManageServiceDetails(stopId, serviceNo);
-    }, REFRESH_INTERVAL);
-
-}
-
-/**
- * Checks if the last app message is within the REFRESH_TIMEOUT, and clears intervals if so
- */
-function checkIfAppTimeout() {
-
-    const currentTime = Date.now();
-
-    if (currentTime - statTracker.lastAppMessageTime > REFRESH_TIMEOUT) {
-        clearInterval(watchBusStopIntervalId);
-        clearInterval(watchBusServiceIntervalId);
-        messageSender.sendErrorCode(constants.ERROR_CODES.APP_TIMEOUT);
-
-        console.log('App timeout. Cleared poll intervals');
-        return true;
-    } else {
-        return false;
-    }
-}
-
-function stopWatchingBusStop() {
-    clearInterval(watchBusStopIntervalId);
-}
-
-function stopWatchingBusServiceDetails() {
-    clearInterval(watchBusServiceIntervalId);
-}
-
-module.exports = {
-    watchBusStop: watchBusStop,
-    watchBusServiceDetails: watchBusServiceDetails,
-    stopWatchingBusStop: stopWatchingBusStop,
-    stopWatchingBusServiceDetails: stopWatchingBusServiceDetails
-};
-},{"./../constants/constants":3,"./../controller/messageSender":6,"./../model/stateTracker":9}]},{},[7]);
+},{"./../constants/constants":3,"./../controller/messageSender":6,"./../model/recordCache":8,"./../pebbleHelpers":10,"./../process_data/recordParser":12}]},{},[7]);
