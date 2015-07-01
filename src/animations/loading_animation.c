@@ -5,7 +5,7 @@
 static GBitmap *s_bitmap = NULL;
 static BitmapLayer *s_bitmap_layer = NULL;
 static GBitmapSequence *s_sequence = NULL;
-static AppTimer *s_animation_timer;
+static AppTimer *s_animation_timer = NULL;
 
 static void timer_handler(void *context) {
     if (s_bitmap_layer) {
@@ -67,6 +67,9 @@ void destroy_loading_animation() {
         layer_remove_from_parent(bitmap_layer_get_layer(s_bitmap_layer));
         bitmap_layer_destroy(s_bitmap_layer);
         s_bitmap_layer = NULL;
+    }
+    if (s_animation_timer) {
+        app_timer_cancel(s_animation_timer);
     }
 }
 
