@@ -15,6 +15,7 @@ void watch_bus_services_list(char *bus_stop_id) {
 
     if (s_observer_timer) {
         app_timer_cancel(s_observer_timer);
+        s_observer_timer = NULL;
     }
     send_app_message_string(KEY_BUS_SERVICE_LIST_START, bus_stop_id);
 
@@ -31,6 +32,7 @@ static void watch_bus_service_details_callback(void *data) {
 void watch_bus_service_details(char *service_no) {
     if (s_observer_timer) {
         app_timer_cancel(s_observer_timer);
+        s_observer_timer = NULL;
     }
     send_app_message_string(KEY_BUS_SERVICE_DETAILS_START, service_no);
 

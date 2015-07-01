@@ -70,6 +70,7 @@ void destroy_loading_animation() {
     }
     if (s_animation_timer) {
         app_timer_cancel(s_animation_timer);
+        s_animation_timer = NULL;
     }
 }
 
