@@ -1,0 +1,7 @@
+#pragma once
+
+#include <pebble.h>
+
+#include "view_setup_helper.h"
+
+void action_menu_window_push();

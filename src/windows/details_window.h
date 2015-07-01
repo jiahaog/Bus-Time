@@ -6,6 +6,7 @@
 #include "../controller/app_message_helper.h"
 #include "../model/store.h"
 #include "../service/observer.h"
+#include "windows/action_menu_window.h"
 
 void details_window_push(char *current_service);
 void details_window_set_text(char *message);

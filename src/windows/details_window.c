@@ -25,78 +25,75 @@
 static Window *s_details_window;
 static TextLayer *s_time_text_layer;
 static TextLayer *s_details_text_layers[NO_OF_DETAILS_TEXT_LAYERS];
-static ActionBarLayer *s_action_bar;
 static char *s_current_service;
 
+bool content_loaded = false;
 GBitmap *s_bitmap_alert_set;
 GBitmap *s_bitmap_alert_cancel;
 GBitmap *s_bitmap_bus_icon;
 
 BitmapLayer *s_layer_bus_icon;
 
-static void set_action_bar_notification_icon(bool show_set_icon) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "SETTING NOTIFICAITON ICON %s", show_set_icon ? "SET" : "UNSET");
-    if (show_set_icon) {
-        #ifdef PBL_PLATFORM_APLITE
-            action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_set);
-        #else
-            action_bar_layer_set_icon_animated(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_set, true);
-        #endif
-    } else {
-        #ifdef PBL_PLATFORM_APLITE
-            action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_cancel);
-        #else
-            action_bar_layer_set_icon_animated(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_cancel, true);
-        #endif
-    }
-}
+// static void set_action_bar_notification_icon(bool show_set_icon) {
+//     APP_LOG(APP_LOG_LEVEL_DEBUG, "SETTING NOTIFICAITON ICON %s", show_set_icon ? "SET" : "UNSET");
+//     if (show_set_icon) {
+//         #ifdef PBL_PLATFORM_APLITE
+//             action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_set);
+//         #else
+//             action_bar_layer_set_icon_animated(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_set, true);
+//         #endif
+//     } else {
+//         #ifdef PBL_PLATFORM_APLITE
+//             action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_cancel);
+//         #else
+//             action_bar_layer_set_icon_animated(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_cancel, true);
+//         #endif
+//     }
+// }
 
-static void register_or_cancel_notification(bool register_notification) {
+// static void register_or_cancel_notification(bool register_notification) {
 
-    if (register_notification) {
-        // send app message to register notification
-    } else {
-        // send app message to cancel notification
-    }
-}
+//     if (register_notification) {
+//         // send app message to register notification
+//     } else {
+//         // send app message to cancel notification
+//     }
+// }
 
-static void toggle_notification_click_handler(ClickRecognizerRef recognizer, void *context) {
-    // message format {set_or_cancel_notification}|{stop_id}|{service_no}
+// static void toggle_notification_click_handler(ClickRecognizerRef recognizer, void *context) {
+//     // message format {set_or_cancel_notification}|{stop_id}|{service_no}
     
-    // size 1 because string elements are simply chars
-    char delimiter_buffer[1] = {MESSAGE_DELIMITER};
-    char set_notification_token[2];  // need size 2 here somehow because of string terminator when doing snprintf
+//     // size 1 because string elements are simply chars
+//     char delimiter_buffer[1] = {MESSAGE_DELIMITER};
+//     char set_notification_token[2];  // need size 2 here somehow because of string terminator when doing snprintf
     
-    bool current_notification_state = notification_list_get_status(details_list[0], details_list[1]);
+//     bool current_notification_state = notification_list_get_status(details_list[0], details_list[1]);
 
-    if (current_notification_state) {
-        // notification is alreadyset
-        // set token to 0
-        snprintf(set_notification_token, sizeof(set_notification_token), "%c", '0');
-    } else {
-        // notification is not already set
-        // set token to 1
-        snprintf(set_notification_token, sizeof(set_notification_token), "%c", '1');
-    }
+//     if (current_notification_state) {
+//         // notification is alreadyset
+//         // set token to 0
+//         snprintf(set_notification_token, sizeof(set_notification_token), "%c", '0');
+//     } else {
+//         // notification is not already set
+//         // set token to 1
+//         snprintf(set_notification_token, sizeof(set_notification_token), "%c", '1');
+//     }
 
-    // gets these details from the store
-    char *stop_id = details_list[0];
-    char *service_no = details_list[1];
+//     // gets these details from the store
+//     char *stop_id = details_list[0];
+//     char *service_no = details_list[1];
 
-    // create a buffer and concatenate the details together
-    char notification_message_buffer[NOTIFICATION_MESSAGE_BUFFER_SIZE]; 
-    strcpy(notification_message_buffer, set_notification_token);
-    strcat(notification_message_buffer, delimiter_buffer);
-    strcat(notification_message_buffer, stop_id);
-    strcat(notification_message_buffer, delimiter_buffer);
-    strcat(notification_message_buffer, service_no);
+//     // create a buffer and concatenate the details together
+//     char notification_message_buffer[NOTIFICATION_MESSAGE_BUFFER_SIZE]; 
+//     strcpy(notification_message_buffer, set_notification_token);
+//     strcat(notification_message_buffer, delimiter_buffer);
+//     strcat(notification_message_buffer, stop_id);
+//     strcat(notification_message_buffer, delimiter_buffer);
+//     strcat(notification_message_buffer, service_no);
 
-    send_app_message_string(KEY_BUS_NOTIFICATION, notification_message_buffer);
-}
+//     send_app_message_string(KEY_BUS_NOTIFICATION, notification_message_buffer);
+// }
 
-static void action_bar_click_config_provider(void *context) {
-    window_single_click_subscribe(BUTTON_ID_SELECT, (ClickHandler) toggle_notification_click_handler);
-}
 
 #ifdef PBL_COLOR
 static void set_text_layer_color_for_load(TextLayer *text_layer, char load_char) {
@@ -227,6 +224,19 @@ static void details_layers_unload() {
     // s_bitmap_alert_cancel = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_CANCEL);
 // }
 
+// static void action_bar_click_config_provider(void *context) {
+//     window_single_click_subscribe(BUTTON_ID_SELECT, (ClickHandler) toggle_notification_click_handler);
+// }
+
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+    action_menu_window_push();
+}
+
+static void click_config_provider(void *context) {
+    window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
+}
+
+
 static void content_load() {
 
     Layer *window_layer = window_get_root_layer(s_details_window);
@@ -242,6 +252,11 @@ static void content_load() {
     // action_bar_load();
     
     details_layers_load(content_bounds);
+
+    // only allow the menu to be called when the details have been loaded
+    window_set_click_config_provider(s_details_window, click_config_provider);
+
+    content_loaded = true;
 }
 
 static void window_load(Window *window) {
@@ -322,11 +337,12 @@ void details_window_reload_details() {
         destroy_loading_animation();
     #endif
 
-    if (!s_action_bar) {
+    if (!content_loaded) {
         // first load of content & action bar
         // content will load together with action
         // action_bar_load();
         content_load();
+
     } else {
         // not first load of content, so layers are initialized and we can execute functions on them
         for (int i = 0; i < NO_OF_DETAILS_TEXT_LAYERS; i++) {
