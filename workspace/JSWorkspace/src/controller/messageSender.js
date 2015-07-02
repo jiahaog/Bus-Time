@@ -82,7 +82,10 @@ function sendServicesList(stopId, callback) {
         if (error) {
             console.log('Error getting bus timings');
             sendErrorCode(constants.ERROR_CODES.NETWORK_ERROR);
-            callback(error);
+
+            if (callback) {
+                callback(error);
+            }
         } else {
 
             const serviceList = recordParser.parseForServicesList(record);
@@ -96,6 +99,9 @@ function sendServicesList(stopId, callback) {
                 );
             } else {
                 sendErrorCode(constants.ERROR_CODES.NO_SERVICES_OPERATIONAL);
+            }
+
+            if (callback) {
                 callback('No Services Operational');
             }
         }
@@ -138,7 +144,11 @@ function sendServiceDetails(stopId, serviceNo, callback) {
         if (error) {
             console.log('Error getting bus timings');
             sendErrorCode(constants.ERROR_CODES.NETWORK_ERROR);
-            callback(error);
+
+            if (callback) {
+                callback(error);
+            }
+
         } else {
             //console.log(JSON.stringify(record));
             const serviceDetails = recordParser.parseForServiceDetails(record, serviceNo);
@@ -159,17 +169,19 @@ function sendServiceDetails(stopId, serviceNo, callback) {
             } else {
                 messageString = 'Service details for service ' + serviceNo + ' not found!';
                 console.log(messageString);
-                callback(messageString);
             }
 
             var dictionaryMessage = {};
             dictionaryMessage[constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_VALUE] = messageString;
 
             pebbleHelpers.sendMessage(dictionaryMessage, function (error) {
+                var errorString = null;
                 if (error) {
-                    console.log('Error sending message!' + error);
-                } else {
-                    // callback
+                    errorString = 'Error sending message!' + error;
+                    console.log(errorString);
+                }
+                if (callback) {
+                    callback(errorString);
                 }
             });
         }
