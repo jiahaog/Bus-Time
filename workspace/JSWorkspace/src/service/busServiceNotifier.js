@@ -1,6 +1,6 @@
 /**
- * Created by JiaHao on 18/6/15.
- */
+* Created by JiaHao on 18/6/15.
+*/
 
 var recordCache = require('./../model/recordCache');
 var recordParser = require('./../process_data/recordParser');

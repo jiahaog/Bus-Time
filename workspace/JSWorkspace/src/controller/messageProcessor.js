@@ -4,10 +4,10 @@
 
 var stateTracker = require('./../model/stateTracker');
 //var busServiceObserver = require('./../service/busServiceObserver');
-var busServiceNotifier = require('./../service/busServiceNotifier');
 var constants = require('./../constants/constants');
 var pebbleHelpers = require('./../pebbleHelpers.js');
 var messageSender = require('./../controller/messageSender');
+var hasBusArrived = require('./../service/hasBusArrived');
 
 function processAppMessage(event) {
 
@@ -59,19 +59,13 @@ function processAppMessage(event) {
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_NOTIFICATION) {
                 stateTracker.lastAppMessageTime = Date.now();
 
-                // handle notification
-
-                // message format {set_or_cancel_notification}|{stop_id}|{service_no}
+                // message format {stop_id}|{service_no}
                 var splitDetails = value.split(constants.MESSAGE_DELIMITER);
-                var startNotification = parseInt(splitDetails[0]);  // parseint here so we can do a if (setorcancel)
-                var stopId = splitDetails[1];
-                var serviceNo = splitDetails[2];
+                var stopId = splitDetails[0];
+                var serviceNo = splitDetails[1];
 
-                if (startNotification) {
-                    busServiceNotifier.startNotification(stopId, serviceNo);
-                } else {
-                    busServiceNotifier.stopNotification(stopId, serviceNo);
-                }
+                hasBusArrived(stopId, serviceNo);
+
             } else if (key == constants.APP_MESSAGE_KEYS.KEY_APP_ALIVE) {
                 // we dont save the last app message time because this is sent automatically by the watch as a service
                 if (value === 1) {

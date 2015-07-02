@@ -1,6 +1,6 @@
 /**
- * Created by JiaHao on 18/6/15.
- */
+* Created by JiaHao on 18/6/15.
+*/
 
 var messageSender = require('./../controller/messageSender');
 var statTracker = require('./../model/stateTracker');
@@ -86,8 +86,8 @@ function watchBusServiceDetails(stopId, serviceNo) {
 }
 
 /**
- * Checks if the last app message is within the REFRESH_TIMEOUT, and clears intervals if so
- */
+* Checks if the last app message is within the REFRESH_TIMEOUT, and clears intervals if so
+*/
 function checkIfAppTimeout() {
 
     const currentTime = Date.now();

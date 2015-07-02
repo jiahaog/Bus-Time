@@ -28,8 +28,12 @@ static void notification_list_callback(void *data) {
     char *stop_id = callback_context[0];
     char *service_no = callback_context[1];
 
-    request_for_notification(stop_id, service_no);
+    notification_store_remove(stop_id, service_no);
 
+    AppTimer *timer = app_timer_register(NOTIFICATION_POLL_INTERVAL, notification_list_callback, callback_context);
+    notification_store_add(stop_id, service_no, timer);
+
+    request_for_notification(stop_id, service_no);
 }
 
 

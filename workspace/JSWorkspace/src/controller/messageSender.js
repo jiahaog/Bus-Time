@@ -177,16 +177,14 @@ function sendServiceDetails(stopId, serviceNo, callback) {
 }
 
 /**
- *
- * @param {boolean} started
+ * Sends an app message saying that the current notification has been triggered
+ * so that the watch can stop the app timer
  * @param {string} stopId
  * @param {string} serviceNo
  */
-function sendNotificationStatus(started, stopId, serviceNo) {
+function sendNotificationStatus(stopId, serviceNo) {
 
-    const startedString = started ? '1' : '0';
-    var concatenatedMessage = startedString + constants.MESSAGE_DELIMITER +
-        stopId + constants.MESSAGE_DELIMITER +
+    var concatenatedMessage = stopId + constants.MESSAGE_DELIMITER +
         serviceNo;
 
     var dictionaryMessage = {};

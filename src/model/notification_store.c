@@ -1,10 +1,12 @@
 #include "notification_store.h"
 
 #define NOTIFICATION_STORE_MAX_ELEMENTS 5
+#define NOTIFICATION_APP_MESSAGE_PARTS 2
 
 static char s_notification_store[NOTIFICATION_STORE_MAX_ELEMENTS][2][NOTIFICATION_STORE_STRING_SIZE];
 static AppTimer *s_notification_app_timer_store[NOTIFICATION_STORE_MAX_ELEMENTS];
 static int s_notifications_counter = -1;
+
 
 void notification_store_add(char *stop_id, char *service_no, AppTimer *timer) {
 
@@ -19,7 +21,7 @@ void notification_store_add(char *stop_id, char *service_no, AppTimer *timer) {
         AppTimer *timer_to_override = s_notification_app_timer_store[s_notifications_counter];
         if (timer_to_override) {
             app_timer_cancel(timer_to_override);
-            timer_to_override = NULL;
+            s_notification_app_timer_store[s_notifications_counter] = NULL;
         }
     }
 
@@ -41,6 +43,7 @@ void notification_store_remove(char *stop_id, char *service_no) {
             snprintf(s_notification_store[i][0], sizeof(s_notification_store[i][0]), "111");
             snprintf(s_notification_store[i][1], sizeof(s_notification_store[i][1]), "aaa");
             app_timer_cancel(s_notification_app_timer_store[i]);
+            s_notification_app_timer_store[i] = NULL;
         }
     }
 }
@@ -70,3 +73,42 @@ void print_notification_store() {
     }
 }
 
+
+void process_notification_app_message(char *message) {
+    // normal splitting of data by delimiter into a buffer 
+    char splitted_buffer[NOTIFICATION_APP_MESSAGE_PARTS][NOTIFICATION_STORE_STRING_SIZE];
+    memset(splitted_buffer, 0, sizeof splitted_buffer);  // SOMEHOW THIS IS THE SOLUTION TO RANDOM CHARACTERS APPEARING IN THE BUFFER
+
+
+    // APP_LOG(APP_LOG_LEVEL_DEBUG, "SPLITTING STIRNG: %s", current_string);
+    int delimiters[NOTIFICATION_APP_MESSAGE_PARTS - 1] = {};
+    int delimiter_counter = 0;
+    
+    for (int i = 0; (unsigned)i < strlen(message); i++) {
+        
+        if (message[i] == MESSAGE_DELIMITER) {
+            delimiters[delimiter_counter] = i;
+            delimiter_counter++;
+        }
+    }
+
+    delimiter_counter = 0;
+    int current_char_counter = 0;
+    for (int i = 0; (unsigned)i < strlen(message); i++) {
+        char currentChar = message[i];
+        
+        if (i == delimiters[delimiter_counter]) {
+            delimiter_counter++;
+            current_char_counter = 0;
+            continue;
+        } else {
+            splitted_buffer[delimiter_counter][current_char_counter] = currentChar;
+            current_char_counter++;
+        }
+    }
+
+    char *stop_id = splitted_buffer[0];
+    char *service_no = splitted_buffer[1];
+
+    notification_store_remove(stop_id, service_no);
+}

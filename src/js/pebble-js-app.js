@@ -1344,10 +1344,10 @@ module.exports = data["data"];
 
 var stateTracker = require('./../model/stateTracker');
 //var busServiceObserver = require('./../service/busServiceObserver');
-var busServiceNotifier = require('./../service/busServiceNotifier');
 var constants = require('./../constants/constants');
 var pebbleHelpers = require('./../pebbleHelpers.js');
 var messageSender = require('./../controller/messageSender');
+var hasBusArrived = require('./../service/hasBusArrived');
 
 function processAppMessage(event) {
 
@@ -1399,19 +1399,13 @@ function processAppMessage(event) {
             } else if (key === constants.APP_MESSAGE_KEYS.KEY_BUS_NOTIFICATION) {
                 stateTracker.lastAppMessageTime = Date.now();
 
-                // handle notification
-
-                // message format {set_or_cancel_notification}|{stop_id}|{service_no}
+                // message format {stop_id}|{service_no}
                 var splitDetails = value.split(constants.MESSAGE_DELIMITER);
-                var startNotification = parseInt(splitDetails[0]);  // parseint here so we can do a if (setorcancel)
-                var stopId = splitDetails[1];
-                var serviceNo = splitDetails[2];
+                var stopId = splitDetails[0];
+                var serviceNo = splitDetails[1];
 
-                if (startNotification) {
-                    busServiceNotifier.startNotification(stopId, serviceNo);
-                } else {
-                    busServiceNotifier.stopNotification(stopId, serviceNo);
-                }
+                hasBusArrived(stopId, serviceNo);
+
             } else if (key == constants.APP_MESSAGE_KEYS.KEY_APP_ALIVE) {
                 // we dont save the last app message time because this is sent automatically by the watch as a service
                 if (value === 1) {
@@ -1431,7 +1425,7 @@ function processAppMessage(event) {
 module.exports = {
     processAppMessage: processAppMessage
 };
-},{"./../constants/constants":3,"./../controller/messageSender":6,"./../model/stateTracker":9,"./../pebbleHelpers.js":10,"./../service/busServiceNotifier":13}],6:[function(require,module,exports){
+},{"./../constants/constants":3,"./../controller/messageSender":6,"./../model/stateTracker":9,"./../pebbleHelpers.js":10,"./../service/hasBusArrived":13}],6:[function(require,module,exports){
 /**
  * Created by JiaHao on 18/6/15.
  */
@@ -1516,7 +1510,10 @@ function sendServicesList(stopId, callback) {
         if (error) {
             console.log('Error getting bus timings');
             sendErrorCode(constants.ERROR_CODES.NETWORK_ERROR);
-            callback(error);
+
+            if (callback) {
+                callback(error);
+            }
         } else {
 
             const serviceList = recordParser.parseForServicesList(record);
@@ -1530,6 +1527,9 @@ function sendServicesList(stopId, callback) {
                 );
             } else {
                 sendErrorCode(constants.ERROR_CODES.NO_SERVICES_OPERATIONAL);
+            }
+
+            if (callback) {
                 callback('No Services Operational');
             }
         }
@@ -1572,7 +1572,11 @@ function sendServiceDetails(stopId, serviceNo, callback) {
         if (error) {
             console.log('Error getting bus timings');
             sendErrorCode(constants.ERROR_CODES.NETWORK_ERROR);
-            callback(error);
+
+            if (callback) {
+                callback(error);
+            }
+
         } else {
             //console.log(JSON.stringify(record));
             const serviceDetails = recordParser.parseForServiceDetails(record, serviceNo);
@@ -1593,17 +1597,19 @@ function sendServiceDetails(stopId, serviceNo, callback) {
             } else {
                 messageString = 'Service details for service ' + serviceNo + ' not found!';
                 console.log(messageString);
-                callback(messageString);
             }
 
             var dictionaryMessage = {};
             dictionaryMessage[constants.APP_MESSAGE_KEYS.KEY_BUS_SERVICE_DETAILS_VALUE] = messageString;
 
             pebbleHelpers.sendMessage(dictionaryMessage, function (error) {
+                var errorString = null;
                 if (error) {
-                    console.log('Error sending message!' + error);
-                } else {
-                    // callback
+                    errorString = 'Error sending message!' + error;
+                    console.log(errorString);
+                }
+                if (callback) {
+                    callback(errorString);
                 }
             });
         }
@@ -1611,16 +1617,14 @@ function sendServiceDetails(stopId, serviceNo, callback) {
 }
 
 /**
- *
- * @param {boolean} started
+ * Sends an app message saying that the current notification has been triggered
+ * so that the watch can stop the app timer
  * @param {string} stopId
  * @param {string} serviceNo
  */
-function sendNotificationStatus(started, stopId, serviceNo) {
+function sendNotificationStatus(stopId, serviceNo) {
 
-    const startedString = started ? '1' : '0';
-    var concatenatedMessage = startedString + constants.MESSAGE_DELIMITER +
-        stopId + constants.MESSAGE_DELIMITER +
+    var concatenatedMessage = stopId + constants.MESSAGE_DELIMITER +
         serviceNo;
 
     var dictionaryMessage = {};
@@ -2424,119 +2428,49 @@ module.exports = {
 };
 },{"./../constants/constants":3}],13:[function(require,module,exports){
 /**
- * Created by JiaHao on 18/6/15.
+ * Created by JiaHao on 2/7/15.
  */
+
 
 var recordCache = require('./../model/recordCache');
 var recordParser = require('./../process_data/recordParser');
 var pebbleHelpers = require('./../pebbleHelpers');
-var messageSender = require('./../controller/messageSender');
 var constants = require('./../constants/constants');
+var messageSender = require('./../controller/messageSender');
 
-const SLOW_UPDATE_INTERVAL = 60 * 1000;
-const FAST_UPDATE_THRESHOLD = 3 * 60 * 1000;
-const FAST_UPDATE_INTERVAL = 30 * 1000;
-
-// threshold for the notification to be sent
 const ARRIVAL_THRESHOLD = 60 * 1000; // 1 min
 
-function nextIntervalTime(currentTime) {
-    if (currentTime < FAST_UPDATE_THRESHOLD) {
-        return FAST_UPDATE_INTERVAL;
-    } else {
-        return SLOW_UPDATE_INTERVAL;
-    }
-}
+/**
+ * Sends a notification to the watch if the bus has arrived
+ * @param stopId
+ * @param serviceNo
+ */
+function hasBusArrived(stopId, serviceNo) {
+    console.log("Checking for _" + stopId +"_" + serviceNo + "_");
+    recordCache.getBusTimings(stopId, serviceNo, false, function (error, record) {
+        if (error) {
+            console.log('Error getting bus timings');
+        } else {
+            var serviceDetails = recordParser.parseForServiceDetails(record, serviceNo, true);
 
-var busNotificationStore = {
+            var timeToNextBusArrival = serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival];
 
-    store: [],
-
-    startNotification: function(stopId, serviceNo) {
-        console.log("Starting notification for " + stopId + "|" + serviceNo);
-        var notification = this.findNotification(stopId, serviceNo);
-
-        if (!notification) {
-            notification = new BusNotification(stopId, serviceNo);
-
-            this.store.push(notification);
-        }
-
-        notification.start();
-    },
-
-    stopNotification: function(stopId, serviceNo) {
-        console.log("Stopping notification for " + stopId + "|" + serviceNo);
-        var notification = this.findNotification(stopId, serviceNo);
-
-        if (notification) {
-            notification.stop();
-        }
-    },
-
-    findNotification: function (stopId, serviceNo) {
-        var store = this.store;
-
-        for (var i = 0; i < store.length; i++) {
-            var notification = store[i];
-
-            if (notification.stopId === stopId && notification.serviceNo === serviceNo) {
-                return notification;
-            }
-        }
-        return null;
-    }
-};
-
-function BusNotification(stopId, serviceNo) {
-    this.stopId = stopId;
-    this.serviceNo = serviceNo;
-    this.notificationId = null;
-}
-
-BusNotification.prototype = {
-    constructor: BusNotification,
-    start: function () {
-        var instance = this;
-        instance.update();
-        messageSender.sendNotificationStatus(true, instance.stopId, instance.serviceNo);
-    },
-
-    update: function () {
-        var instance = this;
-        if (instance.notificationId) {
-            clearInterval(instance.notificationId);
-        }
-
-        recordCache.getBusTimings(instance.stopId, instance.serviceNo, false, function (error, record) {
-            if (error) {
-                console.log('Error getting bus timings');
+            if (!timeToNextBusArrival) {
+                // if the timeToNextBusArrival is null, no data is available and we want to cancel the app timer
+                messageSender.sendNotificationStatus(stopId, serviceNo);
             } else {
-                var serviceDetails = recordParser.parseForServiceDetails(record, instance.serviceNo, true);
 
-                var timeToNextBusArrival = serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival];
+                // check if the time is within the threshold
                 if (timeToNextBusArrival < ARRIVAL_THRESHOLD) {
-                    pebbleHelpers.sendNotification('Bus Time', 'Bus ' + instance.serviceNo + " is arriving!");
-                    messageSender.sendNotificationStatus(false, instance.stopId, instance.serviceNo);
-
-                } else {
-                    instance.notificationId = setTimeout(function() {
-                        instance.update();
-                    }, nextIntervalTime(timeToNextBusArrival))
+                    // send the notification and cancel the app message
+                    pebbleHelpers.sendNotification('Bus Time', 'Bus ' + serviceNo + " is arriving!");
+                    messageSender.sendNotificationStatus(stopId, serviceNo);
                 }
             }
-        });
-    },
 
-    stop: function() {
-        var instance = this;
-        var notificationId = instance.notificationId;
-        if (notificationId) {
-            clearTimeout(notificationId);
         }
-        messageSender.sendNotificationStatus(false, instance.stopId, instance.serviceNo);
-    }
-};
+    });
+}
 
-module.exports = busNotificationStore;
+module.exports = hasBusArrived;
 },{"./../constants/constants":3,"./../controller/messageSender":6,"./../model/recordCache":8,"./../pebbleHelpers":10,"./../process_data/recordParser":12}]},{},[7]);
