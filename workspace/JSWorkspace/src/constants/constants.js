@@ -31,9 +31,7 @@ const APP_MESSAGE_KEYS = {
 
     KEY_ERROR: 'KEY_ERROR',
 
-    KEY_BUS_NOTIFICATION: 'KEY_BUS_NOTIFICATION',
-
-    KEY_APP_ALIVE: 'KEY_APP_ALIVE'
+    KEY_BUS_NOTIFICATION: 'KEY_BUS_NOTIFICATION'
 };
 
 // misc keys to access received appmessage

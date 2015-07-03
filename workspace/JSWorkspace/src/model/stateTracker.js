@@ -7,6 +7,5 @@ var lastAppMessageTime;
 
 
 module.exports = {
-    lastStopID: lastStopID,
-    lastAppMessageTime: lastAppMessageTime
+    lastStopID: lastStopID
 };

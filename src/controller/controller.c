@@ -76,24 +76,17 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 break;
 
             case KEY_BUS_NOTIFICATION:
-
                 // cancel the app timer for the notification
                 cancel_notification_timer_from_message(t->value->cstring);
-
 
                 // at the same time, refresh the current service details
                 if (watchingWhichWindow() == DETAILS_WINDOW) {
                     watch_last_bus_service_details();
                 }
-
                 break;
 
             case KEY_ERROR:
                 handleError(t->value->int32);
-                break;
-
-            case KEY_APP_ALIVE:
-                save_last_app_alive_message_time();
                 break;
 
             default:
@@ -110,8 +103,7 @@ static void inbox_dropped_callback(AppMessageResult reason, void *context) {
 }
 
 static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
-    APP_LOG(APP_LOG_LEVEL_ERROR, "%i", reason);
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed! REASON: %i", reason);
 }
 
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
@@ -133,7 +125,6 @@ bool controller_init() {
         bluetooth_connection_service_subscribe(bluetooth_event_callback);
         APP_LOG(APP_LOG_LEVEL_DEBUG, "Watch inbox opened and callbacks registered");
 
-        // psleep(400);  // we need to sleep before messages can be sent, as outbox takes some time to open
         return true;
     }
 }
