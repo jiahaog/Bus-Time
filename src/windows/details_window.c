@@ -22,6 +22,7 @@
 static Window *s_details_window;
 static TextLayer *s_time_text_layer;
 static TextLayer *s_details_text_layers[NO_OF_DETAILS_TEXT_LAYERS];
+static Layer *s_knob_graphic_layer;
 static char *s_current_service;
 static bool content_loaded = false;
 
@@ -76,7 +77,7 @@ static void details_layers_load(GRect content_bounds) {
     GFont service_no_font = fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK);
     int16_t service_no_height = get_font_height(s_details_window, service_no_font);
 
-    GRect service_no_bounds = GRect(0, 16, content_bounds.size.w, service_no_height);
+    GRect service_no_bounds = GRect(0, 19, content_bounds.size.w, service_no_height);
     s_details_text_layers[0] = text_layer_create(service_no_bounds);
 
     text_layer_set_text(s_details_text_layers[0], details_list[1]);
@@ -97,9 +98,9 @@ static void details_layers_load(GRect content_bounds) {
     text_layer_set_text_alignment(s_details_text_layers[1], GTextAlignmentCenter);
 
     // SUB BUS EST TIME
-    GFont sub_bus_time_font = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
+    GFont sub_bus_time_font = fonts_get_system_font(FONT_KEY_GOTHIC_18);
     int16_t sub_bus_time_height = get_font_height(s_details_window, sub_bus_time_font);
-    GRect sub_bus_time_bounds = GRect(0, 149, content_bounds.size.w, sub_bus_time_height);
+    GRect sub_bus_time_bounds = GRect(0, 142, content_bounds.size.w, sub_bus_time_height);
     s_details_text_layers[2] = text_layer_create(sub_bus_time_bounds);
     text_layer_set_text(s_details_text_layers[2], details_list[4]);
     text_layer_set_font(s_details_text_layers[2], sub_bus_time_font);
@@ -133,6 +134,20 @@ static void details_layers_load(GRect content_bounds) {
     bitmap_layer_set_alignment(s_layer_bus_icon, GAlignTopLeft);
     layer_add_child(window_layer, bitmap_layer_get_layer(s_layer_bus_icon));
 
+}
+static void knob_graphic_update_callback(Layer *layer, GContext *ctx) {
+    
+    graphics_context_set_fill_color(ctx, GColorBlack);
+    GPoint circle_center = GPoint(16, 16);
+    graphics_fill_circle(ctx, circle_center, 16);
+}
+
+static void draw_circle() {
+
+    Layer *window_layer = window_get_root_layer(s_details_window);
+    s_knob_graphic_layer = layer_create(GRect(139, 68, 32, 32));
+    layer_set_update_proc(s_knob_graphic_layer, knob_graphic_update_callback);
+    layer_add_child(window_layer, s_knob_graphic_layer);
 }
 
 static void details_layers_unload() {
@@ -170,11 +185,14 @@ static void content_load() {
     // only allow the menu to be called when the details have been loaded
     window_set_click_config_provider(s_details_window, click_config_provider);
 
+    draw_circle();
+
     content_loaded = true;
 }
 
 static void content_unload() {
     details_layers_unload();
+    layer_destroy(s_knob_graphic_layer);
     content_loaded = false;
 }
 
@@ -197,6 +215,7 @@ static void window_load(Window *window) {
         status_bar_layer_set_up(s_status_bar);
         layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar));
     #endif
+
 }
 
 static void window_appear(Window *window) {
