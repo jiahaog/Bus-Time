@@ -1,3 +1,7 @@
-var a = parseInt('1');
 
-console.log(a == true);
+
+var a = 0*60*1000;
+
+if (!a) {
+    console.log('HELLo');
+}

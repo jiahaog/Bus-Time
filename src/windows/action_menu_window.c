@@ -10,10 +10,8 @@ static SimpleMenuSection s_menu_sections;
 static void menu_layer_select_click(int index, void *context) {
     // set up notification here
     if (index == 0) {
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "START");
         start_notification_service();
     } else {
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "STOP");
         cancel_notification_service();
     }
 

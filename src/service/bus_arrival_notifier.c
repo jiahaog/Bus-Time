@@ -97,8 +97,6 @@ void start_notification_service() {
         AppTimer *new_timer = app_timer_register(NOTIFICATION_POLL_INTERVAL, notification_list_callback, notification_callback_context);
         notification_store_add(stop_id, service_no, new_timer);
     }
-
-    print_notification_store();
 }
 
 void cancel_notification_service() {
@@ -106,5 +104,4 @@ void cancel_notification_service() {
     char *service_no = details_list[1];
 
     notification_store_remove(stop_id, service_no);
-    print_notification_store();
 }

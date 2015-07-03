@@ -26,7 +26,7 @@ function hasBusArrived(stopId, serviceNo) {
 
             var timeToNextBusArrival = serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival];
 
-            if (!timeToNextBusArrival) {
+            if (timeToNextBusArrival === null) {
                 // if the timeToNextBusArrival is null, no data is available and we want to cancel the app timer
                 messageSender.sendNotificationStatus(stopId, serviceNo);
             } else {
