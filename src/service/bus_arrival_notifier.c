@@ -1,7 +1,7 @@
 #include "bus_arrival_notifier.h"
 
 #define CAT_MESSAGE_DELIMITER "|\0"
-#define NOTIFICATION_POLL_INTERVAL 30000/4 // 30 sec
+#define NOTIFICATION_POLL_INTERVAL 30000 // 30 sec
 
 
 // Concatenates the stop_id and the service_no together with a delimiter
