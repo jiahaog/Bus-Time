@@ -11,4 +11,4 @@ void notification_store_add(char *stop_id, char *service_no, AppTimer *timer);
 void notification_store_remove(char *stop_id, char *service_no);
 AppTimer *notification_store_get(char *stop_id, char *service_no);
 void print_notification_store();
-void process_notification_app_message(char *message);
+void cancel_notification_timer_from_message(char *message);

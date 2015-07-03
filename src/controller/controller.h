@@ -8,7 +8,7 @@
 #include "../windows/bus_stops_window.h"
 #include "../windows/services_window.h"
 #include "../windows/error_window.h"
-
+#include "../service/observer.h"
 #include "../service/app_alive_service.h"
 
 #include "app_message_helper.h"

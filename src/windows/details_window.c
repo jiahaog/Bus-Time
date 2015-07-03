@@ -315,9 +315,7 @@ static void window_unload(Window *window) {
         status_bar_layer_destroy(s_status_bar);
         s_status_bar = NULL;
     #endif
-    // going back to the services list
-    // tell js that we are done with the service details
-    send_app_message_int(KEY_BUS_SERVICE_DETAILS_END, 1);
+        
 }
 
 void details_window_push(char *current_service) {

@@ -84,7 +84,7 @@ void print_notification_store() {
 }
 
 
-void process_notification_app_message(char *message) {
+void cancel_notification_timer_from_message(char *message) {
     // normal splitting of data by delimiter into a buffer 
     char splitted_buffer[NOTIFICATION_APP_MESSAGE_PARTS][NOTIFICATION_STORE_STRING_SIZE];
     memset(splitted_buffer, 0, sizeof splitted_buffer);  // SOMEHOW THIS IS THE SOLUTION TO RANDOM CHARACTERS APPEARING IN THE BUFFER

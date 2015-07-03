@@ -2464,7 +2464,6 @@ function hasBusArrived(stopId, serviceNo) {
                 // check if the time is within the threshold
                 if (timeToNextBusArrival < ARRIVAL_THRESHOLD) {
                     // send the notification and cancel the app message
-                    console.log("BUS IS ARRIVING");
                     pebbleHelpers.sendNotification('Bus Time', 'Bus ' + serviceNo + " is arriving!");
                     messageSender.sendNotificationStatus(stopId, serviceNo);
                 }

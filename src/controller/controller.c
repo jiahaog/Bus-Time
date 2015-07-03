@@ -76,8 +76,16 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 break;
 
             case KEY_BUS_NOTIFICATION:
-                process_notification_app_message(t->value->cstring);
-                // details_window_reload_details();
+
+                // cancel the app timer for the notification
+                cancel_notification_timer_from_message(t->value->cstring);
+
+
+                // at the same time, refresh the current service details
+                if (watchingWhichWindow() == DETAILS_WINDOW) {
+                    watch_last_bus_service_details();
+                }
+
                 break;
 
             case KEY_ERROR:
