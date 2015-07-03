@@ -2,7 +2,6 @@
 
 #include <pebble.h>
 
-// #include "../model/app_message_keys.c"
 #include "../model/store.h"
 
 #include "../windows/bus_stops_window.h"

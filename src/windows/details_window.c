@@ -2,10 +2,7 @@
 
 #define PLACEHOLDER_TIME_STRING "99:99"
 #define CONTENT_X_PADDING 5
-// #define DETAILS_LAYER_HEIGHT 30
 #define DETAILS_LAYER_FONT FONT_KEY_GOTHIC_14_BOLD   
-
-
 #define NO_OF_DETAILS_TEXT_LAYERS 3
 
 #ifdef PBL_COLOR
@@ -31,68 +28,6 @@ static bool content_loaded = false;
 BitmapLayer *s_layer_bus_icon;
 static GBitmap *s_bitmap_bus_icon;
 
-// static GBitmap *s_bitmap_alert_set;
-// static GBitmap *s_bitmap_alert_cancel;
-
-// static void set_action_bar_notification_icon(bool show_set_icon) {
-//     APP_LOG(APP_LOG_LEVEL_DEBUG, "SETTING NOTIFICAITON ICON %s", show_set_icon ? "SET" : "UNSET");
-//     if (show_set_icon) {
-//         #ifdef PBL_PLATFORM_APLITE
-//             action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_set);
-//         #else
-//             action_bar_layer_set_icon_animated(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_set, true);
-//         #endif
-//     } else {
-//         #ifdef PBL_PLATFORM_APLITE
-//             action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_cancel);
-//         #else
-//             action_bar_layer_set_icon_animated(s_action_bar, BUTTON_ID_SELECT, s_bitmap_alert_cancel, true);
-//         #endif
-//     }
-// }
-
-// static void register_or_cancel_notification(bool register_notification) {
-
-//     if (register_notification) {
-//         // send app message to register notification
-//     } else {
-//         // send app message to cancel notification
-//     }
-// }
-
-// static void toggle_notification_click_handler(ClickRecognizerRef recognizer, void *context) {
-//     // message format {set_or_cancel_notification}|{stop_id}|{service_no}
-    
-//     // size 1 because string elements are simply chars
-//     char delimiter_buffer[1] = {MESSAGE_DELIMITER};
-//     char set_notification_token[2];  // need size 2 here somehow because of string terminator when doing snprintf
-    
-//     bool current_notification_state = notification_list_get_status(details_list[0], details_list[1]);
-
-//     if (current_notification_state) {
-//         // notification is alreadyset
-//         // set token to 0
-//         snprintf(set_notification_token, sizeof(set_notification_token), "%c", '0');
-//     } else {
-//         // notification is not already set
-//         // set token to 1
-//         snprintf(set_notification_token, sizeof(set_notification_token), "%c", '1');
-//     }
-
-//     // gets these details from the store
-//     char *stop_id = details_list[0];
-//     char *service_no = details_list[1];
-
-//     // create a buffer and concatenate the details together
-//     char notification_message_buffer[NOTIFICATION_MESSAGE_BUFFER_SIZE]; 
-//     strcpy(notification_message_buffer, set_notification_token);
-//     strcat(notification_message_buffer, delimiter_buffer);
-//     strcat(notification_message_buffer, stop_id);
-//     strcat(notification_message_buffer, delimiter_buffer);
-//     strcat(notification_message_buffer, service_no);
-
-//     send_app_message_string(KEY_BUS_NOTIFICATION, notification_message_buffer);
-// }
 
 #ifdef PBL_COLOR
 static void set_text_layer_color_for_load(TextLayer *text_layer, char load_char) {
@@ -191,7 +126,6 @@ static void details_layers_load(GRect content_bounds) {
     static int16_t bus_icon_origin_y = 45;
     static int16_t bus_icon_size_w = 80;
     static int16_t bus_icon_size_h = 43;
-    // GRect bus_icon_bounds = GRect(content_bounds.origin.x + bus_icon_origin_x, content_bounds.origin.y + bus_icon_origin_y, bus_icon_size_w, bus_icon_size_h);
     GRect bus_icon_bounds = GRect(34, 61, 80, 43);
     s_layer_bus_icon = bitmap_layer_create(bus_icon_bounds);
     bitmap_layer_set_bitmap(s_layer_bus_icon, s_bitmap_bus_icon);
@@ -209,23 +143,6 @@ static void details_layers_unload() {
     gbitmap_destroy(s_bitmap_bus_icon);
     bitmap_layer_destroy(s_layer_bus_icon);
 }
-
-// static void action_bar_load() {
-    // s_action_bar = action_bar_layer_create();
-    // action_bar_layer_add_to_window(s_action_bar, s_details_window);
-    // action_bar_layer_set_click_config_provider(s_action_bar, action_bar_click_config_provider);
-
-    // #ifdef PBL_PLATFORM_BASALT
-    //     action_bar_layer_set_background_color(s_action_bar, COLOR_SECONDARY);
-    // #endif
-
-    // s_bitmap_alert_set = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_SET);
-    // s_bitmap_alert_cancel = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_CANCEL);
-// }
-
-// static void action_bar_click_config_provider(void *context) {
-//     window_single_click_subscribe(BUTTON_ID_SELECT, (ClickHandler) toggle_notification_click_handler);
-// }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
     action_menu_window_push();
@@ -248,8 +165,6 @@ static void content_load() {
         GRect content_bounds = window_bounds;
     #endif
 
-    // action_bar_load();
-    
     details_layers_load(content_bounds);
 
     // only allow the menu to be called when the details have been loaded
@@ -268,16 +183,11 @@ static void window_load(Window *window) {
     // TODO: check from js side to see if notification is on before setting
 
     window_set_up(window);
-    // Layer *window_layer = window_get_root_layer(window);
-    // GRect window_bounds = layer_get_bounds(window_layer);
-
+    
     #ifdef PBL_PLATFORM_APLITE
-        // GRect content_bounds = window_bounds;
         
     #else
         create_loading_animation(window);        
-        // GRect content_bounds = GRect(window_bounds.origin.x, window_bounds.origin.y, window_bounds.size.w - ACTION_BAR_WIDTH, window_bounds.size.h);
-
     #endif
 
 
@@ -297,12 +207,6 @@ static void window_unload(Window *window) {
     content_unload();
     window_destroy(window);
     s_details_window = NULL;
-
-    // action_bar_layer_destroy(s_action_bar);
-    // s_action_bar = NULL;
-
-    // gbitmap_destroy(s_bitmap_alert_set);
-    // gbitmap_destroy(s_bitmap_alert_cancel);
 
     #ifdef PBL_PLATFORM_APLITE
         // todo 
@@ -339,18 +243,11 @@ void details_window_reload_details() {
     #endif
 
     if (!content_loaded) {
-        // first load of content & action bar
-        // content will load together with action
-        // action_bar_load();
         content_load();
-
     } else {
         // not first load of content, so layers are initialized and we can execute functions on them
         for (int i = 0; i < NO_OF_DETAILS_TEXT_LAYERS; i++) {
             layer_mark_dirty(text_layer_get_layer(s_details_text_layers[i]));
         }        
     }
-
-    // bool current_notification_state = notification_list_get_status(details_list[0], details_list[1]);
-    // set_action_bar_notification_icon(!current_notification_state);
 }

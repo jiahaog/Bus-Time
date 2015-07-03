@@ -81,13 +81,8 @@ void start_notification_service() {
     
     char *stop_id = details_list[0];
     char *service_no = details_list[1];
-
     
     request_for_notification(stop_id, service_no);
-
-
-    // snprintf(callback_context[0], sizeof(callback_context[0]), "%s", stop_id);
-    // snprintf(callback_context[1], sizeof(callback_context[1]), "%s", service_no);
 
     AppTimer *timer = notification_store_get(stop_id, service_no);
 
