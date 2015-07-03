@@ -63,6 +63,7 @@ function processAppMessage(event) {
                 var splitDetails = value.split(constants.MESSAGE_DELIMITER);
                 var stopId = splitDetails[0];
                 var serviceNo = splitDetails[1];
+                console.log('RECEIVED NOTIFICATION MESSAGE _' + stopId + '_' + serviceNo + '_');
 
                 hasBusArrived(stopId, serviceNo);
 

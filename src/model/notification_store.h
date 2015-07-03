@@ -3,6 +3,7 @@
 
 #include "store.h"
 #define NOTIFICATION_STORE_STRING_SIZE 16
+#define NOTIFICATION_APP_MESSAGE_PARTS 2
 
 
 
