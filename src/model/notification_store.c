@@ -1,7 +1,6 @@
 #include "notification_store.h"
 
-#define NOTIFICATION_STORE_MAX_ELEMENTS 5
-#define NOTIFICATION_APP_MESSAGE_PARTS 2
+#define NOTIFICATION_STORE_MAX_ELEMENTS 4
 
 static char s_notification_store[NOTIFICATION_STORE_MAX_ELEMENTS][2][NOTIFICATION_STORE_STRING_SIZE];
 static AppTimer *s_notification_app_timer_store[NOTIFICATION_STORE_MAX_ELEMENTS];
@@ -9,6 +8,16 @@ static int s_notifications_counter = -1;
 
 
 void notification_store_add(char *stop_id, char *service_no, AppTimer *timer) {
+    for (int i = 0; i < NOTIFICATION_STORE_MAX_ELEMENTS; i++) {
+        char *current_stop_id = s_notification_store[i][0];
+        char *current_service_no = s_notification_store[i][1];
+
+        if (strcmp(stop_id, current_stop_id) == 0 && strcmp(service_no, current_service_no) == 0) {
+            s_notification_app_timer_store[i] = timer;
+            return;
+        }
+    }
+
 
 
     s_notifications_counter++; // counter starts at -1
@@ -33,6 +42,7 @@ void notification_store_add(char *stop_id, char *service_no, AppTimer *timer) {
 
 
 void notification_store_remove(char *stop_id, char *service_no) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Cancelling notification timer: %s, %s", stop_id, service_no);
     for (int i = 0; i < NOTIFICATION_STORE_MAX_ELEMENTS; i++) {
         char *current_stop_id = s_notification_store[i][0];
         char *current_service_no = s_notification_store[i][1];
@@ -112,3 +122,8 @@ void process_notification_app_message(char *message) {
 
     notification_store_remove(stop_id, service_no);
 }
+
+
+
+
+
