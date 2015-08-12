@@ -8,7 +8,7 @@ static void handleError(int code) {
     if (code == 1) {
         // network error
         window_stack_pop_all(false);
-        error_window_push((char*)"network failure");
+        error_window_push((char*)"Network failure");
     } else if (code == 2) {
         // no services available
         window_stack_pop(false); // only pop the current window, not all
