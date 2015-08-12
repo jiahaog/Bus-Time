@@ -40,6 +40,11 @@
         "file": "images/bus_icon.png"
       },
       {
+        "type": "png",
+        "name": "WARNING",
+        "file": "images/warning.png"
+      },
+      {
         "type": "raw",
         "name": "ANIMATION_LOADING",
         "file": "animation/loading.png"  ,
