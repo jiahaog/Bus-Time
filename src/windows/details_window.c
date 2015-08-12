@@ -160,7 +160,7 @@ static void details_layers_unload() {
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-    action_menu_window_push();
+    // action_menu_window_push();
 }
 
 static void click_config_provider(void *context) {
@@ -185,7 +185,7 @@ static void content_load() {
     // only allow the menu to be called when the details have been loaded
     window_set_click_config_provider(s_details_window, click_config_provider);
 
-    draw_circle();
+    // draw_circle();
 
     content_loaded = true;
 }
