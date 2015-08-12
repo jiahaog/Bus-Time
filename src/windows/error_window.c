@@ -5,7 +5,12 @@
 static Window *s_error_window;
 static TextLayer *s_error_text_layer;
 
+static BitmapLayer *s_warning_layer;
+static GBitmap *s_warning_bitmap;
+
+
 char s_error_message[ERROR_MESSAGE_SIZE] = "DEFAULT ERROR MESSAGE";
+
 
 // static void error_window_click_handler(ClickRecognizerRef recognizer, void *context) {
 //     // go back to previous window
@@ -25,10 +30,19 @@ static void window_load(Window *window) {
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
 
-    // Create and Add to layer hierarchy:
-    s_error_text_layer = text_layer_create(bounds);
-    text_layer_set_up(s_error_text_layer);
+    s_warning_bitmap = gbitmap_create_with_resource(RESOURCE_ID_WARNING);
+    GRect bitmap_bounds = gbitmap_get_bounds(s_warning_bitmap);
 
+    s_warning_layer = bitmap_layer_create(GRect(10, 10, bitmap_bounds.size.w, bitmap_bounds.size.h));
+    bitmap_layer_set_bitmap(s_warning_layer, s_warning_bitmap);
+    bitmap_layer_set_compositing_mode(s_warning_layer, GCompOpSet);
+    layer_add_child(window_layer, bitmap_layer_get_layer(s_warning_layer));
+
+    // Create and Add to layer hierarchy:
+    s_error_text_layer = text_layer_create(GRect(10, 10 + bitmap_bounds.size.h + 5, 124, 168 - (10 + bitmap_bounds.size.h + 10)));
+    text_layer_set_up(s_error_text_layer);
+    text_layer_set_font(s_error_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+    text_layer_set_text_alignment(s_error_text_layer, GTextAlignmentLeft);
     text_layer_set_text(s_error_text_layer, s_error_message);
 
     #ifdef PBL_COLOR
@@ -41,6 +55,8 @@ static void window_load(Window *window) {
 }
 
 static void window_unload(Window *window) {
+    bitmap_layer_destroy(s_warning_layer);
+    gbitmap_destroy(s_warning_bitmap);
     text_layer_destroy(s_error_text_layer);
     window_destroy(window);
 
