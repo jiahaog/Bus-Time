@@ -65,7 +65,14 @@ static void details_layers_load(GRect content_bounds) {
 
     // TODO: put bus stop name as well
 
-    // SERVICE NO
+    // somehow there is a need to offset all elements for Aplite
+    // Values without offset are the default values for Basalt
+    int16_t y_offset;
+    #ifdef PBL_PLATFORM_APLITE
+        y_offset = -19;
+    #else
+        y_offset = 0;
+    #endif
 
     GColor default_text_color;
     #ifdef PBL_COLOR
@@ -74,10 +81,11 @@ static void details_layers_load(GRect content_bounds) {
         default_text_color = NO_COLOR_TEXT;
     #endif
 
+    // SERVICE NO
     GFont service_no_font = fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK);
     int16_t service_no_height = get_font_height(s_details_window, service_no_font);
 
-    GRect service_no_bounds = GRect(0, 19, content_bounds.size.w, service_no_height);
+    GRect service_no_bounds = GRect(0, y_offset + 19, content_bounds.size.w, service_no_height);
     s_details_text_layers[0] = text_layer_create(service_no_bounds);
 
     text_layer_set_text(s_details_text_layers[0], details_list[1]);
@@ -91,18 +99,20 @@ static void details_layers_load(GRect content_bounds) {
     GFont next_bus_time_font = fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK);
 
     int16_t next_bus_time_height = get_font_height(s_details_window, next_bus_time_font);
-    GRect next_bus_time_bounds = GRect(0, 108, content_bounds.size.w, next_bus_time_height);
+    GRect next_bus_time_bounds = GRect(0, y_offset + 108, content_bounds.size.w, next_bus_time_height);
     s_details_text_layers[1] = text_layer_create(next_bus_time_bounds);
     text_layer_set_text(s_details_text_layers[1], details_list[2]);
+    text_layer_set_text_color(s_details_text_layers[1], default_text_color);
     text_layer_set_font(s_details_text_layers[1], next_bus_time_font);
     text_layer_set_text_alignment(s_details_text_layers[1], GTextAlignmentCenter);
 
     // SUB BUS EST TIME
     GFont sub_bus_time_font = fonts_get_system_font(FONT_KEY_GOTHIC_18);
     int16_t sub_bus_time_height = get_font_height(s_details_window, sub_bus_time_font);
-    GRect sub_bus_time_bounds = GRect(0, 142, content_bounds.size.w, sub_bus_time_height);
+    GRect sub_bus_time_bounds = GRect(0, y_offset + 142, content_bounds.size.w, sub_bus_time_height);
     s_details_text_layers[2] = text_layer_create(sub_bus_time_bounds);
     text_layer_set_text(s_details_text_layers[2], details_list[4]);
+    text_layer_set_text_color(s_details_text_layers[2], default_text_color);
     text_layer_set_font(s_details_text_layers[2], sub_bus_time_font);
     text_layer_set_text_alignment(s_details_text_layers[2], GTextAlignmentCenter);
     
@@ -123,11 +133,7 @@ static void details_layers_load(GRect content_bounds) {
     // Icon
 
     s_bitmap_bus_icon = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BUS_ICON);
-    static int16_t bus_icon_origin_x = 34;
-    static int16_t bus_icon_origin_y = 45;
-    static int16_t bus_icon_size_w = 80;
-    static int16_t bus_icon_size_h = 43;
-    GRect bus_icon_bounds = GRect(34, 61, 80, 43);
+    GRect bus_icon_bounds = GRect(34, y_offset + 61, 80, 43);
     s_layer_bus_icon = bitmap_layer_create(bus_icon_bounds);
     bitmap_layer_set_bitmap(s_layer_bus_icon, s_bitmap_bus_icon);
 
