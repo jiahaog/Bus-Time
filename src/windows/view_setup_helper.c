@@ -6,7 +6,7 @@ void menu_layer_set_up(MenuLayer* menu_layer) {
         menu_layer_set_normal_colors(menu_layer, COLOR_BACKGROUND, COLOR_TEXT);
         menu_layer_set_highlight_colors(menu_layer, COLOR_SECONDARY, COLOR_TEXT);
     #else
-        // applite?
+        
     #endif
 }
 
