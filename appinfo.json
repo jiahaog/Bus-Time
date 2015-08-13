@@ -5,7 +5,7 @@
   "companyName": "Hippo Design",
   "versionLabel": "0.3",
   "sdkVersion": "3",
-  "targetPlatforms": ["basalt"],
+  "targetPlatforms": ["aplite", "basalt"],
   "watchapp": {
     "watchface": false
   },
