@@ -9,7 +9,6 @@
 
 static Window *s_bus_stops_window;
 static MenuLayer *s_bus_stops_menu_layer;
-static TextLayer *s_loading_text_layer; 
 
 static int16_t s_cell_h1_height = 0;
 static int16_t s_cell_h2_height = 0;
@@ -103,10 +102,7 @@ static void window_load(Window *window) {
 
     // // Create and Add to layer hierarchy:
     #ifdef PBL_PLATFORM_APLITE
-        s_loading_text_layer = text_layer_create(bounds);
-        text_layer_set_up(s_loading_text_layer);
-        text_layer_set_text(s_loading_text_layer, "Loading...");
-        layer_add_child(window_layer, text_layer_get_layer(s_loading_text_layer));
+    
     #else
         create_loading_animation(window);
     #endif
