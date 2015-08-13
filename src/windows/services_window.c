@@ -11,7 +11,6 @@
 
 static Window *s_services_window;
 static MenuLayer *s_services_menu_layer;
-static TextLayer *s_loading_text_layer; 
 static char s_bus_stop_name[BUS_STOP_NAME_BUFFER_SIZE] = "<placehodler>";
 static char *s_bus_stop_id;
 
@@ -101,10 +100,7 @@ static void window_load(Window *window) {
     GRect bounds = layer_get_bounds(window_layer);
 
     #ifdef PBL_PLATFORM_APLITE
-        s_loading_text_layer = text_layer_create(bounds);
-        text_layer_set_up(s_loading_text_layer);
-        text_layer_set_text(s_loading_text_layer, "Loading...");
-        layer_add_child(window_layer, text_layer_get_layer(s_loading_text_layer));
+        
     #else
         create_loading_animation(window);
     #endif
