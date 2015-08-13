@@ -53,6 +53,7 @@ static void callback_menu_layer_draw_header(GContext *ctx, const Layer *cell_lay
     GRect cell_bounds = layer_get_bounds(cell_layer);
     int16_t cell_layer_width = cell_bounds.size.w - 2*SERVICES_CELL_X_PADDING;
     GRect header_bounds = GRect(cell_bounds.origin.x + SERVICES_CELL_X_PADDING, cell_bounds.origin.y, cell_layer_width, cell_bounds.size.h);
+    graphics_context_set_text_color(ctx, CELL_TEXT_COLOR);
     graphics_draw_text(ctx, s_bus_stop_name, fonts_get_system_font(MENU_LAYER_HEADER_FONT), header_bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 }
 
