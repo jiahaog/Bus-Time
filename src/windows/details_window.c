@@ -130,7 +130,14 @@ static void details_layers_load(GRect content_bounds) {
     GRect bus_icon_bounds = GRect(34, 61, 80, 43);
     s_layer_bus_icon = bitmap_layer_create(bus_icon_bounds);
     bitmap_layer_set_bitmap(s_layer_bus_icon, s_bitmap_bus_icon);
-    bitmap_layer_set_compositing_mode(s_layer_bus_icon, GCompOpSet);
+
+    // The icon for the black is simply the color one inverted, and doing GCompOpAssignInverted will invert it back to 
+    // the regular desired appearance
+    #ifdef PBL_PLATFORM_APLITE
+        bitmap_layer_set_compositing_mode(s_layer_bus_icon, GCompOpAssignInverted);
+    #else
+        bitmap_layer_set_compositing_mode(s_layer_bus_icon, GCompOpSet);
+    #endif
     bitmap_layer_set_alignment(s_layer_bus_icon, GAlignTopLeft);
     layer_add_child(window_layer, bitmap_layer_get_layer(s_layer_bus_icon));
 
