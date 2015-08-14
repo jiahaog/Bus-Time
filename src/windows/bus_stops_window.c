@@ -147,6 +147,14 @@ void bus_stops_window_push() {
 
 
 void bus_stops_window_reload_menu() {
+
+    // guard here to not do anything if the window is not loaded
+    // this prevents errors when switching between menus fast when the controller
+    // receives an app message to reload the menu while the window is already closed
+    if (!s_bus_stops_window) {
+        return;
+    }
+
     if (s_bus_stops_menu_layer) {
         menu_layer_reload_data(s_bus_stops_menu_layer);
     } else {

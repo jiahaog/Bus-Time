@@ -158,6 +158,14 @@ void services_window_push(char *bus_stop_name, char *bus_stop_id) {
 }
 
 void services_window_reload_menu() {
+    
+    // guard here to not do anything if the window is not loaded
+    // this prevents errors when switching between menus fast when the controller
+    // receives an app message to reload the menu while the window is already closed
+    if (!s_services_window) {
+        return;
+    }
+
     if (s_services_menu_layer) {
         menu_layer_reload_data(s_services_menu_layer);
     } else {

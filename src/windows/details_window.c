@@ -308,6 +308,14 @@ void details_window_push(char *current_stop_id, char *current_service) {
 }
 
 void details_window_reload_details() {
+
+    // guard here to not do anything if the window is not loaded
+    // this prevents errors when switching between menus fast when the controller
+    // receives an app message to reload the details while the window is already closed
+    if (!s_details_window) {
+        return;
+    }
+
     #ifdef PBL_PLATFORM_BASALT
         destroy_loading_animation();
     #endif
