@@ -90,7 +90,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 break;
 
             default:
-                APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
+                APP_LOG(APP_LOG_LEVEL_ERROR, "Message received KEY: %d not recognized!", (int)t->key);
                 break;
         }
 
