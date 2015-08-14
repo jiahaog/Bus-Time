@@ -174,10 +174,7 @@ static void click_config_provider(void *context) {
 }
 
 static void draw_alert() {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Drawing Alert!");
-
     if (!s_layer_alert_icon) {
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "Drawing!!!!!!");
         s_bitmap_alert_icon = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_SET);
         GRect alert_bounds = gbitmap_get_bounds(s_bitmap_alert_icon);
         s_layer_alert_icon = bitmap_layer_create(GRect(10, 10, alert_bounds.size.w, alert_bounds.size.h));
@@ -192,13 +189,12 @@ static void draw_alert() {
 }
 
 static void hide_alert() {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Hiding Alert!");
-
     if (s_layer_alert_icon) {
         layer_set_hidden(bitmap_layer_get_layer(s_layer_alert_icon), true);
     }
 }
 
+// helper method to draw the alert symbol depending on whether a notification exists
 static void manage_alert_display() {
     if (notification_exists(s_current_stop_id, s_current_service)) {
         draw_alert();
