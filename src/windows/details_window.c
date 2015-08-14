@@ -182,7 +182,12 @@ static void draw_alert_icon() {
         GRect alert_bounds = gbitmap_get_bounds(s_bitmap_alert_icon);
         s_layer_alert_icon = bitmap_layer_create(GRect(6, APLITE_Y_OFFSET + 21, alert_bounds.size.w, alert_bounds.size.h));
         bitmap_layer_set_bitmap(s_layer_alert_icon, s_bitmap_alert_icon);
-        bitmap_layer_set_compositing_mode(s_layer_alert_icon, GCompOpSet);
+
+        #ifdef PBL_PLATFORM_APLITE
+            bitmap_layer_set_compositing_mode(s_layer_alert_icon, GCompOpAssignInverted);
+        #else
+            bitmap_layer_set_compositing_mode(s_layer_alert_icon, GCompOpSet);
+        #endif
 
         layer_add_child(window_layer, bitmap_layer_get_layer(s_layer_alert_icon));
     } else {
