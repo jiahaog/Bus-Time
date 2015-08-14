@@ -2416,7 +2416,7 @@ function hasBusArrived(stopId, serviceNo) {
             var serviceDetails = recordParser.parseForServiceDetails(record, serviceNo, true);
 
             var timeToNextBusArrival = serviceDetails[constants.RESPONSE_KEYS.nextBus][constants.RESPONSE_KEYS.estimatedArrival];
-
+            console.log('TTA: ' + timeToNextBusArrival);
             if (timeToNextBusArrival === null) {
                 // if the timeToNextBusArrival is null, no data is available and we want to cancel the app timer
                 messageSender.sendNotificationStatus(stopId, serviceNo);
@@ -2425,6 +2425,7 @@ function hasBusArrived(stopId, serviceNo) {
                 // check if the time is within the threshold
                 if (timeToNextBusArrival < ARRIVAL_THRESHOLD) {
                     // send the notification and cancel the app message
+                    console.log('BUS NOTIFICATION SENT');
                     pebbleHelpers.sendNotification('Bus Time', 'Bus ' + serviceNo + " is arriving!");
                     messageSender.sendNotificationStatus(stopId, serviceNo);
                 }
