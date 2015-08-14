@@ -232,17 +232,18 @@ static void content_unload() {
     if (s_layer_alert_icon) {
         gbitmap_destroy(s_bitmap_alert_icon);
         bitmap_layer_destroy(s_layer_alert_icon);
+        
+        // have to set to null, because this file is not an object and the variables
+        // will stay the same even after the window is destroyed. Sigh. Will 
+        // cause double free exception
         s_layer_alert_icon = NULL;
         s_bitmap_alert_icon = NULL;
-        // s_layer_alert_icon = NULL;
     }
     
     content_loaded = false;
 }
 
 static void window_load(Window *window) {
-    // always initialise to false 
-    // TODO: check from js side to see if notification is on before setting
 
     window_set_up(window);
     
