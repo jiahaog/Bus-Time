@@ -70,6 +70,12 @@ AppTimer * notification_store_get(char *stop_id, char *service_no) {
     return NULL;
 }
 
+// Checks if there is a notification stored for the current bus stop and service no
+bool notification_exists(char *stop_id, char *service_no) {
+    AppTimer *notification = notification_store_get(stop_id, service_no);
+    return !!notification;
+}
+
 void print_notification_store() {
     for (int i = 0; i < NOTIFICATION_STORE_MAX_ELEMENTS; i++) {
         char *current_stop_id = s_notification_store[i][0];
