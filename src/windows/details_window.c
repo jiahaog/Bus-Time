@@ -173,7 +173,7 @@ static void click_config_provider(void *context) {
     window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
 }
 
-static void draw_alert() {
+static void draw_alert_icon() {
     if (!s_layer_alert_icon) {
         Layer *window_layer = window_get_root_layer(s_details_window);
         GRect window_bounds = layer_get_bounds(window_layer);
@@ -190,7 +190,10 @@ static void draw_alert() {
     }
 }
 
-static void hide_alert() {
+// hides the alert button
+// not a static method because we want this to be called by the controller when
+// notifications are cancelled
+void hide_alert_icon() {
     if (s_layer_alert_icon) {
         layer_set_hidden(bitmap_layer_get_layer(s_layer_alert_icon), true);
     }
@@ -199,9 +202,9 @@ static void hide_alert() {
 // helper method to draw the alert symbol depending on whether a notification exists
 static void manage_alert_display() {
     if (notification_exists(s_current_stop_id, s_current_service)) {
-        draw_alert();
+        draw_alert_icon();
     } else {
-        hide_alert();
+        hide_alert_icon();
     }
 }
 
