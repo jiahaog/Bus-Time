@@ -78,7 +78,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
             case KEY_BUS_NOTIFICATION:
                 // cancel the app timer for the notification
                 cancel_notification_timer_from_message(t->value->cstring);
-
+                hide_alert_icon();
                 // at the same time, refresh the current service details
                 if (watchingWhichWindow() == DETAILS_WINDOW) {
                     watch_last_bus_service_details();

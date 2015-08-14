@@ -11,3 +11,5 @@
 void details_window_push(char *stop_id, char *current_service);
 void details_window_set_text(char *message);
 void details_window_reload_details();
+void hide_alert_icon();
+
