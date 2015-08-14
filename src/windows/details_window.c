@@ -24,6 +24,7 @@ static TextLayer *s_time_text_layer;
 static TextLayer *s_details_text_layers[NO_OF_DETAILS_TEXT_LAYERS];
 static Layer *s_knob_graphic_layer;
 static char *s_current_service;
+static char *s_current_stop_id;
 static bool content_loaded = false;
 
 BitmapLayer *s_layer_bus_icon;
@@ -245,7 +246,8 @@ static void window_unload(Window *window) {
         
 }
 
-void details_window_push(char *current_service) {
+void details_window_push(char *current_stop_id, char *current_service) {
+    s_current_stop_id = current_stop_id;
     s_current_service = current_service;
 
     if (!s_details_window) {

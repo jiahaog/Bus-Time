@@ -64,7 +64,7 @@ static void callback_menu_layer_select_click(struct MenuLayer *menu_layer, MenuI
     if (get_service_list_count() > 0) {
         char *currentService = service_list[cell_index->row][0];
         send_app_message_string(KEY_BUS_SERVICE_DETAILS_START, currentService);
-        details_window_push(currentService);
+        details_window_push(s_bus_stop_id, currentService);
     }
 }
 
