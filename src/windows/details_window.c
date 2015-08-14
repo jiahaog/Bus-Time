@@ -175,13 +175,15 @@ static void click_config_provider(void *context) {
 
 static void draw_alert() {
     if (!s_layer_alert_icon) {
-        s_bitmap_alert_icon = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_SET);
+        Layer *window_layer = window_get_root_layer(s_details_window);
+        GRect window_bounds = layer_get_bounds(window_layer);
+
+        s_bitmap_alert_icon = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT);
         GRect alert_bounds = gbitmap_get_bounds(s_bitmap_alert_icon);
-        s_layer_alert_icon = bitmap_layer_create(GRect(10, 10, alert_bounds.size.w, alert_bounds.size.h));
+        s_layer_alert_icon = bitmap_layer_create(GRect(6, APLITE_Y_OFFSET + 21, alert_bounds.size.w, alert_bounds.size.h));
         bitmap_layer_set_bitmap(s_layer_alert_icon, s_bitmap_alert_icon);
         bitmap_layer_set_compositing_mode(s_layer_alert_icon, GCompOpSet);
 
-        Layer *window_layer = window_get_root_layer(s_details_window);
         layer_add_child(window_layer, bitmap_layer_get_layer(s_layer_alert_icon));
     } else {
         layer_set_hidden(bitmap_layer_get_layer(s_layer_alert_icon), false);
