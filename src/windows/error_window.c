@@ -35,7 +35,13 @@ static void window_load(Window *window) {
 
     s_warning_layer = bitmap_layer_create(GRect(10, 10, bitmap_bounds.size.w, bitmap_bounds.size.h));
     bitmap_layer_set_bitmap(s_warning_layer, s_warning_bitmap);
-    bitmap_layer_set_compositing_mode(s_warning_layer, GCompOpSet);
+
+    #ifdef PBL_PLATFORM_APLITE
+        bitmap_layer_set_compositing_mode(s_warning_layer, GCompOpAssignInverted);
+    #else
+        bitmap_layer_set_compositing_mode(s_warning_layer, GCompOpSet);
+    #endif
+
     layer_add_child(window_layer, bitmap_layer_get_layer(s_warning_layer));
 
     // Create and Add to layer hierarchy:
