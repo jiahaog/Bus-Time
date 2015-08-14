@@ -26,13 +26,8 @@
     "media": [
       {
         "type": "png",
-        "name": "IMAGE_ALERT_SET",
-        "file": "images/alert_set.png"
-      },
-      {
-        "type": "png",
-        "name": "IMAGE_ALERT_CANCEL",
-        "file": "images/alert_cancel.png"
+        "name": "IMAGE_ALERT",
+        "file": "images/alert.png"
       },
       {
         "type": "png",
