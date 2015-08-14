@@ -41,7 +41,7 @@
       },
       {
         "type": "png",
-        "name": "WARNING",
+        "name": "IMAGE_WARNING",
         "file": "images/warning.png"
       },
       {

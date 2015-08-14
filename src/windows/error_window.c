@@ -30,7 +30,7 @@ static void window_load(Window *window) {
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
 
-    s_warning_bitmap = gbitmap_create_with_resource(RESOURCE_ID_WARNING);
+    s_warning_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_WARNING);
     GRect bitmap_bounds = gbitmap_get_bounds(s_warning_bitmap);
 
     s_warning_layer = bitmap_layer_create(GRect(10, 10, bitmap_bounds.size.w, bitmap_bounds.size.h));
