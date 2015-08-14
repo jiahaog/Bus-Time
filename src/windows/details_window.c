@@ -194,6 +194,12 @@ static void draw_alert_icon() {
 // not a static method because we want this to be called by the controller when
 // notifications are cancelled
 void hide_alert_icon() {
+
+    // guard in case this is called when the window is not active
+    if (!s_details_window) {
+        return;
+    }
+
     if (s_layer_alert_icon) {
         layer_set_hidden(bitmap_layer_get_layer(s_layer_alert_icon), true);
     }
