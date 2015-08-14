@@ -3,7 +3,7 @@
   "shortName": "Bus Time",
   "longName": "Bus Time",
   "companyName": "Hippo Design",
-  "versionLabel": "1.0",
+  "versionLabel": "1.1",
   "sdkVersion": "3",
   "targetPlatforms": ["aplite", "basalt"],
   "watchapp": {
