@@ -14,9 +14,7 @@
 #endif
 
 #ifdef PBL_SDK_3
-
     static StatusBarLayer *s_status_bar;
-
 #endif
 
 static Window *s_details_window;
@@ -27,8 +25,11 @@ static char *s_current_service;
 static char *s_current_stop_id;
 static bool content_loaded = false;
 
-BitmapLayer *s_layer_bus_icon;
+static BitmapLayer *s_layer_bus_icon;
 static GBitmap *s_bitmap_bus_icon;
+
+static BitmapLayer *s_layer_alert_icon;
+static GBitmap *s_bitmap_alert_icon;
 
 
 #ifdef PBL_COLOR
@@ -172,6 +173,39 @@ static void click_config_provider(void *context) {
     window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
 }
 
+static void draw_alert() {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Drawing Alert!");
+
+    if (!s_layer_alert_icon) {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Drawing!!!!!!");
+        s_bitmap_alert_icon = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALERT_SET);
+        GRect alert_bounds = gbitmap_get_bounds(s_bitmap_alert_icon);
+        s_layer_alert_icon = bitmap_layer_create(GRect(10, 10, alert_bounds.size.w, alert_bounds.size.h));
+        bitmap_layer_set_bitmap(s_layer_alert_icon, s_bitmap_alert_icon);
+        bitmap_layer_set_compositing_mode(s_layer_alert_icon, GCompOpSet);
+
+        Layer *window_layer = window_get_root_layer(s_details_window);
+        layer_add_child(window_layer, bitmap_layer_get_layer(s_layer_alert_icon));
+    } else {
+        layer_set_hidden(bitmap_layer_get_layer(s_layer_alert_icon), false);
+    }
+}
+
+static void hide_alert() {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Hiding Alert!");
+
+    if (s_layer_alert_icon) {
+        layer_set_hidden(bitmap_layer_get_layer(s_layer_alert_icon), true);
+    }
+}
+
+static void manage_alert_display() {
+    if (notification_exists(s_current_stop_id, s_current_service)) {
+        draw_alert();
+    } else {
+        hide_alert();
+    }
+}
 
 static void content_load() {
 
@@ -191,13 +225,22 @@ static void content_load() {
     window_set_click_config_provider(s_details_window, click_config_provider);
 
     draw_circle();
-
+    manage_alert_display();
     content_loaded = true;
 }
 
 static void content_unload() {
     details_layers_unload();
     layer_destroy(s_knob_graphic_layer);
+    
+    if (s_layer_alert_icon) {
+        gbitmap_destroy(s_bitmap_alert_icon);
+        bitmap_layer_destroy(s_layer_alert_icon);
+        s_layer_alert_icon = NULL;
+        s_bitmap_alert_icon = NULL;
+        // s_layer_alert_icon = NULL;
+    }
+    
     content_loaded = false;
 }
 
@@ -213,24 +256,24 @@ static void window_load(Window *window) {
         create_loading_animation(window);        
     #endif
 
-
     #ifdef PBL_SDK_3
         Layer *window_layer = window_get_root_layer(s_details_window);
         s_status_bar = status_bar_layer_create();
         status_bar_layer_set_up(s_status_bar);
         layer_add_child(window_layer, status_bar_layer_get_layer(s_status_bar));
     #endif
-
 }
 
 static void window_appear(Window *window) {
     watch_bus_service_details(s_current_service);
+
+    if (content_loaded) {
+        manage_alert_display();
+    }
 }
 
 static void window_unload(Window *window) {
     content_unload();
-    window_destroy(window);
-    s_details_window = NULL;
 
     #ifdef PBL_PLATFORM_APLITE
         // todo 
@@ -244,6 +287,9 @@ static void window_unload(Window *window) {
         s_status_bar = NULL;
     #endif
         
+    window_destroy(window);
+    s_details_window = NULL;
+
 }
 
 void details_window_push(char *current_stop_id, char *current_service) {
