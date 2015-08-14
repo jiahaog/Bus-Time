@@ -30,4 +30,12 @@ void text_layer_set_up(TextLayer* text_layer);
     GRect window_with_status_bar_content_bounds(Layer *window_layer, StatusBarLayer *status_bar_layer);
 #endif
 
+// somehow there is a need to offset all elements for Aplite
+// Values without offset are the default values for Basalt
+#ifdef PBL_PLATFORM_APLITE
+    #define APLITE_Y_OFFSET -19
+#else
+    #define APLITE_Y_OFFSET 0
+#endif
+
 int16_t get_font_height(Window* window, GFont font);

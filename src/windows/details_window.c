@@ -65,15 +65,6 @@ static void details_layers_load(GRect content_bounds) {
 
     // TODO: put bus stop name as well
 
-    // somehow there is a need to offset all elements for Aplite
-    // Values without offset are the default values for Basalt
-    int16_t y_offset;
-    #ifdef PBL_PLATFORM_APLITE
-        y_offset = -19;
-    #else
-        y_offset = 0;
-    #endif
-
     GColor default_text_color;
     #ifdef PBL_COLOR
         default_text_color = COLOR_TEXT;
@@ -85,7 +76,7 @@ static void details_layers_load(GRect content_bounds) {
     GFont service_no_font = fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK);
     int16_t service_no_height = get_font_height(s_details_window, service_no_font);
 
-    GRect service_no_bounds = GRect(0, y_offset + 19, content_bounds.size.w, service_no_height);
+    GRect service_no_bounds = GRect(0, APLITE_Y_OFFSET + 19, content_bounds.size.w, service_no_height);
     s_details_text_layers[0] = text_layer_create(service_no_bounds);
 
     text_layer_set_text(s_details_text_layers[0], details_list[1]);
@@ -99,7 +90,7 @@ static void details_layers_load(GRect content_bounds) {
     GFont next_bus_time_font = fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK);
 
     int16_t next_bus_time_height = get_font_height(s_details_window, next_bus_time_font);
-    GRect next_bus_time_bounds = GRect(0, y_offset + 108, content_bounds.size.w, next_bus_time_height);
+    GRect next_bus_time_bounds = GRect(0, APLITE_Y_OFFSET + 108, content_bounds.size.w, next_bus_time_height);
     s_details_text_layers[1] = text_layer_create(next_bus_time_bounds);
     text_layer_set_text(s_details_text_layers[1], details_list[2]);
     text_layer_set_text_color(s_details_text_layers[1], default_text_color);
@@ -109,7 +100,7 @@ static void details_layers_load(GRect content_bounds) {
     // SUB BUS EST TIME
     GFont sub_bus_time_font = fonts_get_system_font(FONT_KEY_GOTHIC_18);
     int16_t sub_bus_time_height = get_font_height(s_details_window, sub_bus_time_font);
-    GRect sub_bus_time_bounds = GRect(0, y_offset + 142, content_bounds.size.w, sub_bus_time_height);
+    GRect sub_bus_time_bounds = GRect(0, APLITE_Y_OFFSET + 142, content_bounds.size.w, sub_bus_time_height);
     s_details_text_layers[2] = text_layer_create(sub_bus_time_bounds);
     text_layer_set_text(s_details_text_layers[2], details_list[4]);
     text_layer_set_text_color(s_details_text_layers[2], default_text_color);
@@ -133,7 +124,7 @@ static void details_layers_load(GRect content_bounds) {
     // Icon
 
     s_bitmap_bus_icon = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BUS_ICON);
-    GRect bus_icon_bounds = GRect(34, y_offset + 61, 80, 43);
+    GRect bus_icon_bounds = GRect(34, APLITE_Y_OFFSET + 61, 80, 43);
     s_layer_bus_icon = bitmap_layer_create(bus_icon_bounds);
     bitmap_layer_set_bitmap(s_layer_bus_icon, s_bitmap_bus_icon);
 
@@ -158,7 +149,7 @@ static void knob_graphic_update_callback(Layer *layer, GContext *ctx) {
 static void draw_circle() {
 
     Layer *window_layer = window_get_root_layer(s_details_window);
-    s_knob_graphic_layer = layer_create(GRect(139, 68, 32, 32));
+    s_knob_graphic_layer = layer_create(GRect(139, APLITE_Y_OFFSET + 68, 32, 32));
     layer_set_update_proc(s_knob_graphic_layer, knob_graphic_update_callback);
     layer_add_child(window_layer, s_knob_graphic_layer);
 }
