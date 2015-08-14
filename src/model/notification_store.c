@@ -6,8 +6,8 @@ static char s_notification_store[NOTIFICATION_STORE_MAX_ELEMENTS][2][NOTIFICATIO
 static AppTimer *s_notification_app_timer_store[NOTIFICATION_STORE_MAX_ELEMENTS];
 static int s_notifications_counter = -1;
 
-
 void notification_store_add(char *stop_id, char *service_no, AppTimer *timer) {
+    // check if an existing stop id and service no is in the array and set it to the timer
     for (int i = 0; i < NOTIFICATION_STORE_MAX_ELEMENTS; i++) {
         char *current_stop_id = s_notification_store[i][0];
         char *current_service_no = s_notification_store[i][1];
@@ -17,8 +17,6 @@ void notification_store_add(char *stop_id, char *service_no, AppTimer *timer) {
             return;
         }
     }
-
-
 
     s_notifications_counter++; // counter starts at -1
 
@@ -58,9 +56,7 @@ void notification_store_remove(char *stop_id, char *service_no) {
     }
 }
 
-
-
-AppTimer *notification_store_get(char *stop_id, char *service_no) {
+AppTimer * notification_store_get(char *stop_id, char *service_no) {
     for (int i = 0; i < NOTIFICATION_STORE_MAX_ELEMENTS; i++) {
         char *current_stop_id = s_notification_store[i][0];
         char *current_service_no = s_notification_store[i][1];
