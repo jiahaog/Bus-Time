@@ -166,7 +166,12 @@ static void details_layers_unload() {
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-    action_menu_window_push();
+
+    #ifdef PBL_PLATFORM_APLITE
+        action_menu_window_push();
+    #else
+        open_alert_action_menu();
+    #endif
 }
 
 static void click_config_provider(void *context) {
@@ -267,6 +272,7 @@ static void window_load(Window *window) {
         
     #else
         create_loading_animation(window);        
+        init_alert_action_menu();
     #endif
 
     #ifdef PBL_SDK_3
@@ -292,6 +298,7 @@ static void window_unload(Window *window) {
         // todo 
     #else
         details_list_reset();
+        unload_alert_action_menu();
         destroy_loading_animation();
     #endif
 
