@@ -1,12 +1,12 @@
 # Bus Time
 
-![Header](https://raw.githubusercontent.com/jiahaog/Bus-Time/master/workspace/Resources/MarketingHeader-color.png?token=AGyEPTM8xQ5ZouN-f07WwwJ7X-3t3sMVks5V1WMVwA%3D%3D)
+![Header](https://raw.githubusercontent.com/jiahaog/Bus-Time/master/workspace/Resources/MarketingHeader-color.png?token=AGyEPabwGm5sv2vZbO7PzKGcqCwmg1tHks5WwWd7wA%3D%3D)
 
 ## Introduction
 
-![Screenshot2](https://raw.githubusercontent.com/jiahaog/Bus-Time/master/workspace/Resources/screenshots/screenshot-2-color.png?token=AGyEPVk-8LAkrEpE4rAyrmWVYx1lcr1Lks5V1WMXwA%3D%3D)
+![Screenshot2](https://raw.githubusercontent.com/jiahaog/Bus-Time/master/workspace/Resources/screenshots/screenshot-2-color.png?token=AGyEPRPevx6IjPuuXfaA7m4wtq8DY8TBks5WwWeRwA%3D%3D)
 
-![Screenshot1](https://raw.githubusercontent.com/jiahaog/Bus-Time/master/workspace/Resources/screenshots/screenshot-1-color.png?token=AGyEPXViwQA9JtV96Y4MSO3ZLllIwFhVks5V1WMZwA%3D%3D)
+![Screenshot1](https://raw.githubusercontent.com/jiahaog/Bus-Time/master/workspace/Resources/screenshots/screenshot-1-color.png?token=AGyEPfWOyt6LR9GQXk9T1jFtnINjgb8uks5WwWeiwA%3D%3D)
 
 A [Pebble Time](http://getpebble.com) app to retrieve bus arrival timings from bus stops nearby.
 
